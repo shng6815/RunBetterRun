@@ -79,15 +79,12 @@ HRESULT RayCasting::Init(void)
     bmi.bmiHeader.biBitCount = 24;
     bmi.bmiHeader.biCompression = BI_RGB;
 
-    LoadTextureTiles(TEXT("Image/maptiles.bmp"));
+    LoadTexture(TEXT("Image/maptiles.bmp"), tile);
 
     renderScale = 1;
     currentFPS = 60;
     fpsCheckCounter = 0;
     fpsCheckTime = 0.0f;
-
-    changeScreen = FALSE;
-    //FillScreen(0, WINSIZE_X);
 
     queueMutex = CreateMutex(NULL, FALSE, NULL);
     colsPerThread = WINSIZE_X / THREAD_NUM;
@@ -123,7 +120,9 @@ void RayCasting::Release(void)
     while (!threadQueue.empty())
         threadQueue.pop();
 
-    textureData.clear();
+    tile.bmp.clear();
+    sprites.clear();
+    spritesTextureData.clear();
 }
 
 void RayCasting::Update(void)
@@ -140,6 +139,9 @@ void RayCasting::Update(void)
 
     if (rotate.x || rotate.y)
         RotateCamera(deltaTime);
+
+    if (!sprites.empty())
+        SortSpritesByDistance();
 
     fpsCheckCounter++;
     fpsCheckTime += deltaTime;
@@ -173,13 +175,12 @@ void RayCasting::Render(HDC hdc)
             if (!threadDatas[i].done)
             {
                 ready = FALSE;
-                for (auto& mutex : threadMutex)
-                    ReleaseMutex(mutex);
                 break;
             }
         }
         if (ready)
         {
+            RenderSprites();
             SetDIBitsToDevice(hdc, 0, 0, WINSIZE_X, WINSIZE_Y, 0, 0, 0,
                 WINSIZE_Y, pixelData, &bmi, DIB_RGB_COLORS);
             for (int i = 0; i < THREAD_NUM; ++i)
@@ -199,7 +200,7 @@ void RayCasting::FillScreen(DWORD start, DWORD end)
         depth[i] = ray.distance;
         ray.height = fabs(FLOAT(WINSIZE_Y) / ray.distance);
 
-        for (DWORD j = 0; j < renderScale && i + j < WINSIZE_X; ++j) {
+        for (DWORD j = 0; j < renderScale && i + j < end; ++j) {
             RenderWall(ray, i + j);
             if (ray.height < WINSIZE_Y)
                 //RenderCeilingFloor(ray, i + j, CEILING_COLOR, FLOOR_COLOR);
@@ -208,57 +209,72 @@ void RayCasting::FillScreen(DWORD start, DWORD end)
     }
 }
 
+void RayCasting::RenderSprites(void)
+{
+    float invDet = 1.0f / ((plane.x * cameraDir.y) - (plane.y * cameraDir.x));
+    for (auto& sprite : sprites)
+    {
+        if (sprite.distance > 0.1f)
+        {
+            FPOINT pos = { sprite.pos.x - cameraPos.x, sprite.pos.y - cameraPos.y };
+            FPOINT transform = {invDet * (cameraDir.y * pos.x - cameraDir.x * pos.y),
+                                invDet * (-plane.y * pos.x + plane.x * pos.y) };
+            int screen = INT((WINSIZE_X / 2) * (1.0f + transform.x / transform.y));
+            float size = fabs(WINSIZE_Y / transform.y);
+            FPOINT renderX = { INT(max(0, -size / 2.0f + screen)),
+                                INT(max(0, size / 2.0f + screen)) };
+            FPOINT renderY = { INT(max(0, -size / 2.0f + WINSIZE_Y / 2.0f)),
+                                INT(max(0, size / 2.0f + WINSIZE_Y / 2.0f)) };
+            float renderYOrg = renderY.x;
+            while (renderX.x < WINSIZE_X && renderX.x < renderX.y)
+            {
+                if (transform.y > 0 && transform.y < depth[INT(renderX.x)])
+                {
+                    renderY.x = renderYOrg;
+                    while (renderY.x < WINSIZE_Y && renderY.x < renderY.y)
+                    {
+                        RenderSpritePixel({},sprite);
+                        renderY.x++;
+                    }
+                }
+                ++renderX.x;
+            }
+        }
+    }
+}
+
 
 void RayCasting::KeyInput(void)
 {
     KeyManager* km = KeyManager::GetInstance();
-    changeScreen = FALSE;
 
     if (km->IsStayKeyDown('W'))
-    {
         move.x = 1;
-        changeScreen = TRUE;
-    }
     else
         move.x = 0;
 
     if (km->IsStayKeyDown('S'))
-    {
         move.y = 1;
-        changeScreen = TRUE;
-    }
     else
         move.y = 0;
 
     if (km->IsStayKeyDown('A'))
-    {
         x_move.x = 1;
-        changeScreen = TRUE;
-    }
     else
         x_move.x = 0;
 
     if (km->IsStayKeyDown('D'))
-    {
         x_move.y = 1;
-        changeScreen = TRUE;
-    }
     else
         x_move.y = 0;
 
     if (km->IsStayKeyDown('Q'))
-    {
         rotate.x = 1;
-        changeScreen = TRUE;
-    }
     else
         rotate.x = 0;
 
     if (km->IsStayKeyDown('E'))
-    {
         rotate.y = 1;
-        changeScreen = TRUE;
-    }
     else
         rotate.y = 0;
 }
@@ -476,7 +492,7 @@ COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float 
     texturePixel.x += colume * TILE_SIZE;
     texturePixel.y += row * TILE_SIZE;
 
-    COLORREF color = textureData[INT(texturePixel.y * tileWidth + texturePixel.x)];
+    COLORREF color = this->tile.bmp[INT(texturePixel.y * this->tile.bmpWidth + texturePixel.x)];
     if (divide <= 1.0f)
         return color;
     else
@@ -496,13 +512,20 @@ COLORREF RayCasting::GetDistanceShadeColor(COLORREF color, float distance)
             INT(GetBValue(color) / divide));
 }
 
-void RayCasting::LoadTextureTiles(LPCWCH path)
+HRESULT RayCasting::LoadTexture(LPCWCH path, Texture& texture)
 {
+    if (!texture.bmp.empty())
+        texture.bmp.clear();
+
     std::ifstream file(path, std::ios::binary);
 
-    if (!file.is_open()) {
-        std::wcerr << TEXT("Error opening file: ") << path << std::endl;
-        return;
+    if (!file.is_open())
+    {
+        wstring error = TEXT("Error opening file: ");
+        error += path;
+        MessageBox(g_hWnd,
+            error.c_str(), TEXT("Warning"), MB_OK);
+        return E_FAIL;
     }
 
     BITMAPFILEHEADER fileHeader;
@@ -511,33 +534,59 @@ void RayCasting::LoadTextureTiles(LPCWCH path)
     file.read(reinterpret_cast<LPCH>(&fileHeader), sizeof(fileHeader));
     file.read(reinterpret_cast<LPCH>(&infoHeader), sizeof(infoHeader));
 
-    if (fileHeader.bfType != 0x4D42) {
-        std::wcerr << TEXT("Not a valid BMP file!") << std::endl;
-        return;
+    if (fileHeader.bfType != 0x4D42)
+    {
+        wstring error = TEXT("Not a valid BMP file: ");
+        error += path;
+        MessageBox(g_hWnd,
+            error.c_str(), TEXT("Warning"), MB_OK);
+        return E_FAIL;
     }
 
-    tileWidth = infoHeader.biWidth;
-    tileHeight = infoHeader.biHeight;
+    texture.bmpWidth = infoHeader.biWidth;
+    texture.bmpHeight = infoHeader.biHeight;
     
-    if (infoHeader.biBitCount != 24) {
-        std::wcerr << TEXT("Only 24-bit BMP files are supported!") << std::endl;
-        return;
+    if (infoHeader.biBitCount != 24)
+    {
+        wstring error = TEXT("Only 24-bit BMP files are supported: ");
+        error += path;
+        MessageBox(g_hWnd,
+            error.c_str(), TEXT("Warning"), MB_OK);
+        return E_FAIL;
     }
 
-    tileRowSize = (tileWidth * 3 + 3) & ~3;
-    vector<BYTE>	tileData(tileRowSize * tileHeight);
+    DWORD bmpRowSize = (texture.bmpWidth * 3 + 3) & ~3;
+    vector<BYTE>	bmpData(bmpRowSize * texture.bmpHeight);
 
     file.seekg(fileHeader.bfOffBits, std::ios::beg);
-    file.read(reinterpret_cast<LPCH>(tileData.data()), tileData.size());
+    file.read(reinterpret_cast<LPCH>(bmpData.data()), bmpData.size());
     file.close();
 
-    textureData.resize(tileWidth * tileHeight);
-    for (DWORD i = 0; i < tileWidth * tileHeight; ++i)
+    texture.bmp.resize(texture.bmpWidth * texture.bmpHeight);
+    for (DWORD i = 0; i < texture.bmpWidth * texture.bmpHeight; ++i)
     {
-        DWORD index = (tileHeight - (i / tileWidth) - 1) * tileRowSize + (i % tileWidth) * 3;
-        textureData[i] = *reinterpret_cast<LPDWORD>(&tileData[index]);
+        DWORD index = (texture.bmpHeight - (i / texture.bmpWidth) - 1) * bmpRowSize + (i % texture.bmpWidth) * 3;
+        texture.bmp[i] = *reinterpret_cast<LPDWORD>(&bmpData[index]);
+    }
+    return S_OK;
+}
+
+void RayCasting::PutSprite(LPCWCH path, FPOINT pos)
+{
+    auto it = spritesTextureData.find(path);
+    if (it != spritesTextureData.end())
+        sprites.push_back(Sprite{pos, 0, &it->second});
+    else
+    {
+        spritesTextureData.insert(make_pair(path, Texture()));
+        Texture& sprite = spritesTextureData[path];
+        if (FAILED(LoadTexture(path, sprite)))
+            spritesTextureData.erase(path);
+        else
+            sprites.push_back(Sprite{ pos, 0, &sprite });
     }
 }
+
 
 int RayCasting::GetRenderScaleBasedOnFPS(void)
 {
@@ -546,6 +595,20 @@ int RayCasting::GetRenderScaleBasedOnFPS(void)
     else if (currentFPS < 40) return 2; 
     else return 1;                      
 }
+
+void RayCasting::SortSpritesByDistance(void)
+{
+    for (auto& sprite : sprites)
+    {
+        sprite.distance = fabs(
+            powf(cameraPos.x - sprite.pos.x, 2)
+            + powf(cameraPos.y - sprite.pos.y, 2));
+    }
+    sprites.sort([](Sprite& a, Sprite& b)->BOOL {
+        return a.distance > b.distance;
+        });
+}
+
 
 tagRay::tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX)
 {
