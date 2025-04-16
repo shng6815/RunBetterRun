@@ -1,54 +1,71 @@
 #pragma once
 #include "GameObject.h"
 #include <queue>
+#include <list>
 
-#define CEILING_COLOR 0x383838       // ÃµÀå »ö»ó
-#define FLOOR_COLOR 0x717171         // ¹Ù´Ú »ö»ó
+#define CEILING_COLOR 0x383838       // Ãµï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+#define FLOOR_COLOR 0x717171         // ï¿½Ù´ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-#define MAP_COLUME 24                // ¸Ê °¡·Î Å¸ÀÏ ¼ö
-#define MAP_ROW 24                   // ¸Ê ¼¼·Î Å¸ÀÏ ¼ö
-#define MOVE_SPEED 1.2f              // Ä«¸Þ¶ó ÀÌµ¿ ¼Óµµ
-#define ROTATE_SPEED 0.8f            // Ä«¸Þ¶ó È¸Àü ¼Óµµ
-#define SHADE_VALUE 1.5f             // °Å¸® °¨¼è ½¦ÀÌµù °è¼ö
+#define MAP_COLUME 24                // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½ ï¿½ï¿½
+#define MAP_ROW 24                   // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½ ï¿½ï¿½
+#define MOVE_SPEED 1.2f              // Ä«ï¿½Þ¶ï¿½ ï¿½Ìµï¿½ ï¿½Óµï¿½
+#define ROTATE_SPEED 0.8f            // Ä«ï¿½Þ¶ï¿½ È¸ï¿½ï¿½ ï¿½Óµï¿½
+#define SHADE_VALUE 1.5f             // ï¿½Å¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìµï¿½ ï¿½ï¿½ï¿½
 
-#define FLOAT(n) static_cast<float>(n)  // float Ä³½ºÆÃ ÇïÆÛ ¸ÅÅ©·Î
-#define INT(n) static_cast<int>(n)      // int Ä³½ºÆÃ ÇïÆÛ ¸ÅÅ©·Î
+#define FLOAT(n) static_cast<float>(n)  // float Ä³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½
+#define INT(n) static_cast<int>(n)      // int Ä³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½
 
-#define TILE_ROW_SIZE 20             // ÅØ½ºÃ³ Å¸ÀÏ Çà ¼ö
-#define TILE_COLUME_SIZE 9           // ÅØ½ºÃ³ Å¸ÀÏ ¿­ ¼ö
-#define TILE_SIZE 32                 // Å¸ÀÏ ÇÏ³ªÀÇ ÇÈ¼¿ Å©±â
+#define TILE_ROW_SIZE 20             // ï¿½Ø½ï¿½Ã³ Å¸ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½
+#define TILE_COLUME_SIZE 9           // ï¿½Ø½ï¿½Ã³ Å¸ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½
+#define TILE_SIZE 32                 // Å¸ï¿½ï¿½ ï¿½Ï³ï¿½ï¿½ï¿½ ï¿½È¼ï¿½ Å©ï¿½ï¿½
 
-#define THREAD_NUM 4                 // ·»´õ¸µ¿ë ½º·¹µå °³¼ö
+#define THREAD_NUM 4                 // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 class RayCasting;
 
-// ½º·¹µå °ü·Ã ±¸Á¶Ã¼
+
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã¼
+typedef struct tagTexture
+{
+	vector<COLORREF>	bmp;
+	DWORD				bmpWidth;
+	DWORD				bmpHeight;
+} Texture;
+
+typedef struct tagSprite
+{
+	FPOINT		pos;
+	double		distance;
+	Texture*	texture;
+} Sprite;
+
+
 typedef struct tagThreadData {
-	RayCasting* pThis;          // RayCasting ÀÎ½ºÅÏ½º Æ÷ÀÎÅÍ
-	BOOL			exit;           // ½º·¹µå Á¾·á ¿©ºÎ
-	BOOL			done;           // ½º·¹µå ¿Ï·á ¿©ºÎ
-	queue<POINT>* queue;          // ·»´õ¸µÇÒ ¿­ Á¤º¸ Å¥ ÁÖ¼Ò
-	LPHANDLE		threadMutex;    // ½º·¹µå µ¿±âÈ­¿ë ¹ÂÅØ½º
-	LPHANDLE		queueMutex;     // Å¥ µ¿±âÈ­¿ë ¹ÂÅØ½º
+	RayCasting* pThis;          // RayCasting ï¿½Î½ï¿½ï¿½Ï½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	BOOL			exit;           // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	BOOL			done;           // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï·ï¿½ ï¿½ï¿½ï¿½ï¿½
+	queue<POINT>* queue;          // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å¥ ï¿½Ö¼ï¿½
+	LPHANDLE		threadMutex;    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½Ø½ï¿½
+	LPHANDLE		queueMutex;     // Å¥ ï¿½ï¿½ï¿½ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½Ø½ï¿½
 } ThreadData;
 
-// Ray(±¤¼±) ±¸Á¶Ã¼
+// Ray(ï¿½ï¿½ï¿½ï¿½) ï¿½ï¿½ï¿½ï¿½Ã¼
 typedef struct tagRay
 {
-	int			column;         // ±¤¼±ÀÌ Åõ»çµÈ È­¸éÀÇ ¿­
-	int			row;            // ¸Ê ÁÂÇ¥
-	float		distance;       // Ãæµ¹ ÁöÁ¡±îÁöÀÇ °Å¸®
-	int			side;           // º®¸é ¹æÇâ (x ¶Ç´Â yÃà)
-	int			height;         // º® ³ôÀÌ
-	FPOINT		ray_pos;        // ±¤¼± ½ÃÀÛ À§Ä¡
-	FPOINT		ray_dir;        // ±¤¼± ¹æÇâ
-	FPOINT		map_pos;        // Å¸ÀÏ ÁÂÇ¥
-	FPOINT		side_dist;      // ´ÙÀ½ x, y °æ°è±îÁö °Å¸®
-	FPOINT		delta_dist;     // x, y ÀÌµ¿ ½Ã °Å¸® ÁõºÐ
-	FPOINT		step;           // ÀÌµ¿ ¹æÇâ
-	float		wall_x;         // º® Ãæµ¹ ÁöÁ¡ÀÇ x ÁÂÇ¥
-	FPOINT		floor_wall;     // ¹Ù´Ú °è»ê¿ë ÁÂÇ¥
-	FPOINT		c_floor;        // º¸°£¿ë ¹Ù´Ú ÁÂÇ¥
+	int			column;         // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ È­ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
+	int			row;            // ï¿½ï¿½ ï¿½ï¿½Ç¥
+	float		distance;       // ï¿½æµ¹ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½
+	int			side;           // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (x ï¿½Ç´ï¿½ yï¿½ï¿½)
+	int			height;         // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	FPOINT		ray_pos;        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡
+	FPOINT		ray_dir;        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	FPOINT		map_pos;        // Å¸ï¿½ï¿½ ï¿½ï¿½Ç¥
+	FPOINT		side_dist;      // ï¿½ï¿½ï¿½ï¿½ x, y ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½
+	FPOINT		delta_dist;     // x, y ï¿½Ìµï¿½ ï¿½ï¿½ ï¿½Å¸ï¿½ ï¿½ï¿½ï¿½ï¿½
+	FPOINT		step;           // ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½
+	float		wall_x;         // ï¿½ï¿½ ï¿½æµ¹ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ x ï¿½ï¿½Ç¥
+	FPOINT		floor_wall;     // ï¿½Ù´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥
+	FPOINT		c_floor;        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù´ï¿½ ï¿½ï¿½Ç¥
 
 	tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX);
 } Ray;
@@ -56,64 +73,62 @@ typedef struct tagRay
 
 class RayCasting: public GameObject
 {
-	// ¸ÖÆ¼½º·¹µù °ü·Ã
-	HANDLE			threads[THREAD_NUM];            // ½º·¹µå ÇÚµé
-	ThreadData		threadDatas[THREAD_NUM];        // °¢ ½º·¹µå¿ë µ¥ÀÌÅÍ
-	HANDLE			threadMutex[THREAD_NUM];        // ½º·¹µåº° ¹ÂÅØ½º
-	LONG			colsPerThread;                  // °¢ ½º·¹µå°¡ Ã³¸®ÇÒ ¿­ ¼ö
-	queue<POINT>	threadQueue;                    // ¿­ ÀÛ¾÷ Å¥
-	HANDLE			queueMutex;                     // Å¥ Á¢±Ù µ¿±âÈ­
 
-	// ·»´õ¸µ °ü·Ã
-	BITMAPINFO		bmi;                            // È­¸é Ãâ·Â¿ë ºñÆ®¸Ê Á¤º¸
-	BYTE			pixelData[WINSIZE_X * WINSIZE_Y * 3]; // ÇÈ¼¿ ¹öÆÛ (RGB)
+	map<LPCWCH, Texture>	spritesTextureData;
+	list<Sprite>			sprites;
 
-	vector<COLORREF>textureData;                    // Å¸ÀÏ ÅØ½ºÃ³ µ¥ÀÌÅÍ
-	DWORD			tileWidth, tileHeight;          // ÅØ½ºÃ³ÀÇ Æø°ú ³ôÀÌ
-	DWORD			tileRowSize;                    // ÅØ½ºÃ³ Çà °³¼ö
+	HANDLE			threads[THREAD_NUM];
+	ThreadData		threadDatas[THREAD_NUM];
+	HANDLE			threadMutex[THREAD_NUM];
+	LONG			colsPerThread;
+	queue<POINT>	threadQueue;
+	HANDLE			queueMutex;
 
-	BOOL			changeScreen;                   // È­¸é °»½Å ¿©ºÎ
+	BITMAPINFO		bmi;
+	BYTE			pixelData[WINSIZE_X * WINSIZE_Y * 3];
+	
+	Texture			tile;
 
-	// Ä«¸Þ¶ó ¹× ·»´õ¸µ
-	int     renderScale;               // ÇØ»óµµ ½ºÄÉÀÏ
-	int     currentFPS;                // FPS ÃßÀû
-	int     fpsCheckCounter;          // FPS °è»ê¿ë Ä«¿îÅÍ
-	float   fpsCheckTime;             // FPS ÃøÁ¤ ½Ã°£
 
-	float	fov;                      // ½Ã¾ß°¢(FOV)
-	float	rotateSpeed;             // È¸Àü ¼Óµµ
-	float	moveSpeed;               // ÀÌµ¿ ¼Óµµ
+	BOOL			changeScreen;                   // È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-	FPOINT	cameraPos;               // Ä«¸Þ¶ó À§Ä¡
-	FPOINT	cameraDir;               // Ä«¸Þ¶ó ¹æÇâ
-	FPOINT	cameraXDir;              // xÃà Ä«¸Þ¶ó ¹æÇâ
-	FPOINT	plane;                   // Ä«¸Þ¶ó Æò¸é (½Ã¾ß ¿µ¿ª °áÁ¤)
+	// Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int     renderScale;               // ï¿½Ø»ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int     currentFPS;                // FPS ï¿½ï¿½ï¿½ï¿½
+	int     fpsCheckCounter;          // FPS ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½ï¿½ï¿½ï¿½
+	float   fpsCheckTime;             // FPS ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½
 
-	FPOINT	move;                    // ÀüÁø/ÈÄÁø ÀÌµ¿ º¤ÅÍ
-	FPOINT	x_move;                  // ÁÂ¿ì ÀÌµ¿ º¤ÅÍ
-	FPOINT	rotate;                  // È¸Àü º¤ÅÍ
+	float	fov;                      // ï¿½Ã¾ß°ï¿½(FOV)
+	float	rotateSpeed;             // È¸ï¿½ï¿½ ï¿½Óµï¿½
+	float	moveSpeed;               // ï¿½Ìµï¿½ ï¿½Óµï¿½
 
-	static int map[MAP_ROW * MAP_COLUME];   // Á¤Àû ¸Ê µ¥ÀÌÅÍ
-	float	camera_x[WINSIZE_X];            // È­¸é ¿­¿¡ µû¸¥ Ä«¸Þ¶ó X ÁÂÇ¥
-	float	depth[WINSIZE_X];               // °Å¸® ¹öÆÛ (z-buffer)
-	float	sf_dist[WINSIZE_Y];             // ÃµÀå/¹Ù´Ú º¸°£ °Å¸®
- 
-	void KeyInput(void);                            // Å° ÀÔ·Â Ã³¸®
-	void MoveCamera(float deltaTime);               // ÀüÁø/ÈÄÁø ÀÌµ¿
-	void MoveSideCamera(float deltaTime);           // ÁÂ¿ì ÀÌµ¿
-	void RotateCamera(float deltaTime);             // Ä«¸Þ¶ó È¸Àü
+	FPOINT	cameraPos;               // Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½Ä¡
+	FPOINT	cameraDir;               // Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½ï¿½ï¿½
+	FPOINT	cameraXDir;              // xï¿½ï¿½ Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½ï¿½ï¿½
+	FPOINT	plane;                   // Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½ï¿½ (ï¿½Ã¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
 
-	Ray RayCast(int colume);                        // ÇÏ³ªÀÇ ¿­¿¡¼­ ±¤¼± ¹ß»ç
-	void RenderWall(Ray& ray, int colume);          // º® ·»´õ¸µ
-	void RenderCeilingFloor(Ray& ray, int colume);  // ÃµÀå/¹Ù´Ú ·»´õ¸µ
-	void RenderCeilingFloor(Ray& ray, int colume, COLORREF ceiling, COLORREF floor); // »ö»ó ÁöÁ¤ ÃµÀå/¹Ù´Ú ·»´õ¸µ
-	void RenderPixel(FPOINT pixel, int color);      // È­¸é ÇÈ¼¿ ±×¸®±â
+	FPOINT	move;                    // ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½
+	FPOINT	x_move;                  // ï¿½Â¿ï¿½ ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½
+	FPOINT	rotate;                  // È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance); // °Å¸® ±â¹Ý ½¦ÀÌµù (Å¸ÀÏ¿ë)
-	COLORREF GetDistanceShadeColor(COLORREF color, float distance);               // °Å¸® ±â¹Ý ½¦ÀÌµù (»ö»ó¸¸)
+	void KeyInput(void);
+	void MoveCamera(float deltaTime);
+	void MoveSideCamera(float deltaTime);
+	void RotateCamera(float deltaTime);
+	Ray RayCast(int colume);
+	void RenderWall(Ray& ray, int colume);
+	void RenderCeilingFloor(Ray& ray, int colume);
+	void RenderCeilingFloor(Ray& ray, int colume, COLORREF ceiling, COLORREF floor);
+	void RenderPixel(FPOINT pixel, int color);
+	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance);
+	COLORREF GetDistanceShadeColor(COLORREF color, float distance);
+	HRESULT LoadTexture(LPCWCH path, Texture& texture);
+	void PutSprite(LPCWCH path, FPOINT pos);
+	int GetRenderScaleBasedOnFPS(void);
+	void SortSpritesByDistance(void);
+	void RenderSprites(void);
+	void RenderSpritePixel(FPOINT pixel, Sprite& sprite);
 
-	void LoadTextureTiles(LPCWCH path);             // ÅØ½ºÃ³ ·Îµå
-	int GetRenderScaleBasedOnFPS(void);             // FPS ±â¹Ý ½ºÄÉÀÏ Á¶Á¤
 
 public:
 	virtual HRESULT Init(void) override;
@@ -121,7 +136,7 @@ public:
 	virtual void Update(void) override;
 	virtual void Render(HDC hdc) override;
 
-	// À¯Æ¿¸®Æ¼
-	void FillScreen(DWORD start, DWORD end); // Æ¯Á¤ ¹üÀ§ »ö»ó Ã¤¿ì±â
+	// ï¿½ï¿½Æ¿ï¿½ï¿½Æ¼
+	void FillScreen(DWORD start, DWORD end); // Æ¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã¤ï¿½ï¿½ï¿½
 };
 

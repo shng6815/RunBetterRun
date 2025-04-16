@@ -81,18 +81,17 @@ HRESULT RayCasting::Init(void) // RayCasting 클래스의 초기화 함수
     bmi.bmiHeader.biBitCount = 24; // 24비트 RGB
     bmi.bmiHeader.biCompression = BI_RGB; // 압축 없음
 
-    LoadTextureTiles(TEXT("Image/maptiles.bmp")); // 텍스처 이미지 로딩
+    LoadTexture(TEXT("Image/maptiles.bmp"), tile);
+    PutSprite(TEXT("Image/rocket.bmp"), {19, 12});
+    PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
+    renderScale = 1;
+    currentFPS = 60;
+    fpsCheckCounter = 0;
+    fpsCheckTime = 0.0f;
 
-    renderScale = 1; // 렌더 스케일 기본값
-    currentFPS = 60; // 기본 FPS 설정
-    fpsCheckCounter = 0; // FPS 카운터 초기화
-    fpsCheckTime = 0.0f; // FPS 측정 시간 초기화
+    queueMutex = CreateMutex(NULL, FALSE, NULL);
+    colsPerThread = WINSIZE_X / THREAD_NUM;
 
-    changeScreen = FALSE; // 화면 갱신 플래그 초기화
-
-    // 렌더링 쓰레드 관련 초기화
-    queueMutex = CreateMutex(NULL, FALSE, NULL); // 작업 큐 보호용 뮤텍스 생성
-    colsPerThread = WINSIZE_X / THREAD_NUM; // 쓰레드당 처리할 컬럼 수 계산
     for (DWORD i = 0; i < THREAD_NUM; ++i) {
         threadMutex[i] = CreateMutex(NULL, FALSE, NULL); // 각 쓰레드의 상태 보호용 뮤텍스 생성
         threadDatas[i] = {
@@ -131,9 +130,9 @@ void RayCasting::Release(void)
     // 남아 있는 작업 큐 비우기
     while (!threadQueue.empty())
         threadQueue.pop();
-
-    // 텍스처 데이터 제거
-    textureData.clear();
+    tile.bmp.clear();
+    sprites.clear();
+    spritesTextureData.clear();
 }
 
 void RayCasting::Update(void)
@@ -151,7 +150,9 @@ void RayCasting::Update(void)
     if (rotate.x || rotate.y)
         RotateCamera(deltaTime); // 회전 처리
 
-    // FPS 체크를 위한 프레임 카운트 누적
+    if (!sprites.empty())
+        SortSpritesByDistance();
+
     fpsCheckCounter++;
     fpsCheckTime += deltaTime;
 
@@ -184,15 +185,13 @@ void RayCasting::Render(HDC hdc)
             if (!threadDatas[i].done)
             {
                 ready = FALSE;
-                // 완료되지 않은 쓰레드가 있으면 뮤텍스 해제 후 루프 탈출
-                for (auto& mutex : threadMutex)
-                    ReleaseMutex(mutex);
                 break;
             }
         }
         if (ready)
         {
-            // 모든 쓰레드가 완료되었으면 화면에 출력
+
+            RenderSprites();
             SetDIBitsToDevice(hdc, 0, 0, WINSIZE_X, WINSIZE_Y, 0, 0, 0,
                 WINSIZE_Y, pixelData, &bmi, DIB_RGB_COLORS);
 
@@ -212,14 +211,62 @@ void RayCasting::FillScreen(DWORD start, DWORD end)
 {
     for (DWORD i = start; i < end; i += renderScale)
     {
-        Ray ray = RayCast(i); // 해당 컬럼에서 레이캐스팅 수행
-        depth[i] = ray.distance; // 거리 정보를 깊이 버퍼에 저장
-        ray.height = fabs(FLOAT(WINSIZE_Y) / ray.distance); // 거리 기반으로 벽 높이 계산
+        Ray ray = RayCast(i);
+        ray.height = fabs(FLOAT(WINSIZE_Y) / ray.distance);
 
-        for (DWORD j = 0; j < renderScale && i + j < WINSIZE_X; ++j) {
-            RenderWall(ray, i + j); // 벽 렌더링
+        for (DWORD j = 0; j < renderScale && i + j < end; ++j) {
+            depth[i + j] = ray.distance;
+            RenderWall(ray, i + j);
+
             if (ray.height < WINSIZE_Y)
                 RenderCeilingFloor(ray, i + j); // 천장 및 바닥 렌더링 (높이가 화면보다 작을 때만)
+        }
+    }
+}
+
+void RayCasting::RenderSprites(void)
+{
+    float invDet = 1.0f / ((plane.x * cameraDir.y) - (plane.y * cameraDir.x));
+    for (auto& sprite : sprites)
+    {
+        if (sprite.distance > 0.1f)
+        {
+            FPOINT pos = { sprite.pos.x - cameraPos.x, sprite.pos.y - cameraPos.y };
+            FPOINT transform = {invDet * (cameraDir.y * pos.x - cameraDir.x * pos.y),
+                                invDet * (-plane.y * pos.x + plane.x * pos.y) };
+            int screen = INT((WINSIZE_X / 2) * (1.0f + transform.x / transform.y));
+            float size = fabs(WINSIZE_Y / transform.y);
+            FPOINT renderX = { INT(max(0, -size / 2.0f + screen)),
+                                INT(max(0, size / 2.0f + screen)) };
+            FPOINT renderY = { INT(max(0, -size / 2.0f + WINSIZE_Y / 2.0f)),
+                                INT(max(0, size / 2.0f + WINSIZE_Y / 2.0f)) };
+            float renderYOrg = renderY.x;
+            while (renderX.x < WINSIZE_X && renderX.x < renderX.y)
+            {
+                if (transform.y > 0 && transform.y < depth[INT(renderX.x)])
+                {
+                    renderY.x = renderYOrg;
+                    while (renderY.x < WINSIZE_Y && renderY.x < renderY.y)
+                    {
+                        FPOINT pixel = {renderX.x, renderY.x};
+                        POINT texturePos = { INT(256 * ((INT(renderX.x) - (-size / 2.0f + screen)))
+                                * sprite.texture->bmpWidth / size) / 256, 0 };
+                        if (texturePos.x < sprite.texture->bmpWidth )
+                        {
+                            LONG fact = (INT(renderY.x) * 256.0f) - (WINSIZE_Y * 128.0f) + (size * 128.0f);
+                            texturePos.y = ((fact * sprite.texture->bmpHeight) / size) / 256.0f;
+                            if (texturePos.y < sprite.texture->bmpHeight)
+                            {
+                                COLORREF color = sprite.texture->bmp[texturePos.y * sprite.texture->bmpWidth + texturePos.x];
+                                if (color != 0xFF00FF)
+                                    RenderPixel(pixel, GetDistanceShadeColor(color, sprite.distance));
+                            }
+                        }
+                        ++renderY.x;
+                    }
+                }
+                ++renderX.x;
+            }
         }
     }
 }
@@ -229,53 +276,34 @@ void RayCasting::FillScreen(DWORD start, DWORD end)
 void RayCasting::KeyInput(void)
 {
     KeyManager* km = KeyManager::GetInstance();
-    changeScreen = FALSE;
 
     if (km->IsStayKeyDown('W'))
-    {
         move.x = 1;
-        changeScreen = TRUE;
-    }
     else
         move.x = 0;
 
     if (km->IsStayKeyDown('S'))
-    {
         move.y = 1;
-        changeScreen = TRUE;
-    }
     else
         move.y = 0;
 
     if (km->IsStayKeyDown('A'))
-    {
         x_move.x = 1;
-        changeScreen = TRUE;
-    }
     else
         x_move.x = 0;
 
     if (km->IsStayKeyDown('D'))
-    {
         x_move.y = 1;
-        changeScreen = TRUE;
-    }
     else
         x_move.y = 0;
 
     if (km->IsStayKeyDown('Q'))
-    {
         rotate.x = 1;
-        changeScreen = TRUE;
-    }
     else
         rotate.x = 0;
 
     if (km->IsStayKeyDown('E'))
-    {
         rotate.y = 1;
-        changeScreen = TRUE;
-    }
     else
         rotate.y = 0;
 }
@@ -513,7 +541,8 @@ COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float 
     texturePixel.x += colume * TILE_SIZE; // 텍스처 시트 내 타일 오프셋 적용
     texturePixel.y += row * TILE_SIZE;
 
-    COLORREF color = textureData[INT(texturePixel.y * tileWidth + texturePixel.x)]; // 픽셀 색상 추출
+    COLORREF color = this->tile.bmp[INT(texturePixel.y * this->tile.bmpWidth + texturePixel.x)];
+
     if (divide <= 1.0f)
         return color; // 가까우면 원래 색상
     else
@@ -533,13 +562,20 @@ COLORREF RayCasting::GetDistanceShadeColor(COLORREF color, float distance)
             INT(GetBValue(color) / divide));
 }
 
-void RayCasting::LoadTextureTiles(LPCWCH path)
+HRESULT RayCasting::LoadTexture(LPCWCH path, Texture& texture)
 {
+    if (!texture.bmp.empty())
+        texture.bmp.clear();
+
     std::ifstream file(path, std::ios::binary);
 
-    if (!file.is_open()) {
-        std::wcerr << TEXT("Error opening file: ") << path << std::endl;
-        return;
+    if (!file.is_open())
+    {
+        wstring error = TEXT("Error opening file: ");
+        error += path;
+        MessageBox(g_hWnd,
+            error.c_str(), TEXT("Warning"), MB_OK);
+        return E_FAIL;
     }
 
     BITMAPFILEHEADER fileHeader;
@@ -548,43 +584,84 @@ void RayCasting::LoadTextureTiles(LPCWCH path)
     file.read(reinterpret_cast<LPCH>(&fileHeader), sizeof(fileHeader)); // BMP 헤더 읽기
     file.read(reinterpret_cast<LPCH>(&infoHeader), sizeof(infoHeader));
 
-    if (fileHeader.bfType != 0x4D42) { // 'BMP' 확인
-        std::wcerr << TEXT("Not a valid BMP file!") << std::endl;
-        return;
+
+    if (fileHeader.bfType != 0x4D42)
+    {
+        wstring error = TEXT("Not a valid BMP file: ");
+        error += path;
+        MessageBox(g_hWnd,
+            error.c_str(), TEXT("Warning"), MB_OK);
+        return E_FAIL;
     }
 
-    tileWidth = infoHeader.biWidth;
-    tileHeight = infoHeader.biHeight;
-
-    if (infoHeader.biBitCount != 24) {
-        std::wcerr << TEXT("Only 24-bit BMP files are supported!") << std::endl;
-        return;
+    texture.bmpWidth = infoHeader.biWidth;
+    texture.bmpHeight = infoHeader.biHeight;
+    
+    if (infoHeader.biBitCount != 24)
+    {
+        wstring error = TEXT("Only 24-bit BMP files are supported: ");
+        error += path;
+        MessageBox(g_hWnd,
+            error.c_str(), TEXT("Warning"), MB_OK);
+        return E_FAIL;
     }
 
-    tileRowSize = (tileWidth * 3 + 3) & ~3; // row padding 계산
-    vector<BYTE> tileData(tileRowSize * tileHeight);
+    DWORD bmpRowSize = (texture.bmpWidth * 3 + 3) & ~3;
+    vector<BYTE>	bmpData(bmpRowSize * texture.bmpHeight);
 
-    file.seekg(fileHeader.bfOffBits, std::ios::beg); // 픽셀 시작 위치로 이동
-    file.read(reinterpret_cast<LPCH>(tileData.data()), tileData.size());
+    file.seekg(fileHeader.bfOffBits, std::ios::beg);
+    file.read(reinterpret_cast<LPCH>(bmpData.data()), bmpData.size());
     file.close();
 
-    textureData.resize(tileWidth * tileHeight);
-    for (DWORD i = 0; i < tileWidth * tileHeight; ++i)
+    texture.bmp.resize(texture.bmpWidth * texture.bmpHeight);
+    for (DWORD i = 0; i < texture.bmpWidth * texture.bmpHeight; ++i)
     {
-        DWORD index = (tileHeight - (i / tileWidth) - 1) * tileRowSize + (i % tileWidth) * 3; // BMP는 bottom-up 방식
-        // (tileHeight - (i / tileWidth) - 1) * tileRowSize -> y값
-        // (i % tileWidth) * 3; -> X 값
-        textureData[i] = *reinterpret_cast<LPDWORD>(&tileData[index]); // 픽셀 저장
+        DWORD index = (texture.bmpHeight - (i / texture.bmpWidth) - 1) * bmpRowSize + (i % texture.bmpWidth) * 3;
+        texture.bmp[i] = RGB(bmpData[index], bmpData[index + 1], bmpData[index + 2]);
+    }
+    return S_OK;
+}
+
+void RayCasting::PutSprite(LPCWCH path, FPOINT pos)
+{
+    auto it = spritesTextureData.find(path);
+    if (it != spritesTextureData.end())
+        sprites.push_back(Sprite{pos, 0, &it->second});
+    else
+    {
+        spritesTextureData.insert(make_pair(path, Texture()));
+        Texture& sprite = spritesTextureData[path];
+        if (FAILED(LoadTexture(path, sprite)))
+            spritesTextureData.erase(path);
+        else
+            sprites.push_back(Sprite{ pos, 0, &sprite });
+
     }
 }
+
 
 int RayCasting::GetRenderScaleBasedOnFPS(void)
 {
-    if (currentFPS < 15) return 8;      // 매우 낮은 FPS → 저해상도
-    else if (currentFPS < 25) return 4; // 낮음
-    else if (currentFPS < 40) return 2; // 보통
-    else return 1;                      // 충분한 FPS → 고해상도
+
+    if (currentFPS < 15) return 32;      
+    else if (currentFPS < 25) return 16; 
+    else if (currentFPS < 40) return 8; 
+    else return 4;                      
 }
+
+void RayCasting::SortSpritesByDistance(void)
+{
+    for (auto& sprite : sprites)
+    {
+        sprite.distance = sqrtf(fabs(
+            powf(cameraPos.x - sprite.pos.x, 2)
+            + powf(cameraPos.y - sprite.pos.y, 2)));
+    }
+    sprites.sort([](Sprite& a, Sprite& b)->BOOL {
+        return a.distance > b.distance;
+        });
+}
+
 
 tagRay::tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX)
 {
