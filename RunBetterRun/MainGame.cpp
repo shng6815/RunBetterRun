@@ -5,13 +5,14 @@
 #include "TilemapTool.h"
 #include "LoadingScene.h"
 #include "RayCasting.h"
+#include "SpriteManager.h"
 
 HRESULT MainGame::Init()
 {
 	ImageManager::GetInstance()->Init();
 	KeyManager::GetInstance()->Init();
 	SceneManager::GetInstance()->Init();
-
+	SpriteManager::GetInstance()->Init();
 	SceneManager::GetInstance()->AddScene("타일맵툴", new TilemapTool());
 	SceneManager::GetInstance()->AddLoadingScene("로딩_1", new LoadingScene());
 	SceneManager::GetInstance()->AddScene("RayCasting", new RayCasting());
@@ -41,6 +42,7 @@ void MainGame::Release()
 
 	ReleaseDC(g_hWnd, hdc);
 
+	SpriteManager::GetInstance()->Release();
 	SceneManager::GetInstance()->Release();
 	KeyManager::GetInstance()->Release();
 	ImageManager::GetInstance()->Release();
