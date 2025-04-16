@@ -3,28 +3,25 @@
 #include <queue>
 #include <list>
 
-#define CEILING_COLOR 0x383838       // õ�� ����
-#define FLOOR_COLOR 0x717171         // �ٴ� ����
+#define CEILING_COLOR 0x383838
+#define FLOOR_COLOR 0x717171
 
-#define MAP_COLUME 24                // �� ���� Ÿ�� ��
-#define MAP_ROW 24                   // �� ���� Ÿ�� ��
-#define MOVE_SPEED 1.2f              // ī�޶� �̵� �ӵ�
-#define ROTATE_SPEED 0.8f            // ī�޶� ȸ�� �ӵ�
-#define SHADE_VALUE 1.5f             // �Ÿ� ���� ���̵� ���
+#define MAP_COLUME 24
+#define MAP_ROW 24
+#define MOVE_SPEED 1.2f
+#define ROTATE_SPEED 0.8f
+#define SHADE_VALUE 1.5f
+#define FLOAT(n) static_cast<float>(n)
+#define INT(n) static_cast<int>(n)
 
-#define FLOAT(n) static_cast<float>(n)  // float ĳ���� ���� ��ũ��
-#define INT(n) static_cast<int>(n)      // int ĳ���� ���� ��ũ��
+#define TILE_ROW_SIZE	20
+#define TILE_COLUME_SIZE	9
+#define TILE_SIZE	32
 
-#define TILE_ROW_SIZE 20             // �ؽ�ó Ÿ�� �� ��
-#define TILE_COLUME_SIZE 9           // �ؽ�ó Ÿ�� �� ��
-#define TILE_SIZE 32                 // Ÿ�� �ϳ��� �ȼ� ũ��
-
-#define THREAD_NUM 4                 // �������� ������ ����
+#define THREAD_NUM 4
 
 class RayCasting;
 
-
-// ������ ���� ����ü
 typedef struct tagTexture
 {
 	vector<COLORREF>	bmp;
@@ -36,44 +33,40 @@ typedef struct tagSprite
 {
 	FPOINT		pos;
 	double		distance;
-	Texture*	texture;
+	Texture* texture;
 } Sprite;
 
-
 typedef struct tagThreadData {
-	RayCasting* pThis;          // RayCasting �ν��Ͻ� ������
-	BOOL			exit;           // ������ ���� ����
-	BOOL			done;           // ������ �Ϸ� ����
-	queue<POINT>* queue;          // �������� �� ���� ť �ּ�
-	LPHANDLE		threadMutex;    // ������ ����ȭ�� ���ؽ�
-	LPHANDLE		queueMutex;     // ť ����ȭ�� ���ؽ�
+	RayCasting* pThis;
+	BOOL			exit;
+	BOOL			done;
+	queue<POINT>* queue;
+	LPHANDLE		threadMutex;
+	LPHANDLE		queueMutex;
 } ThreadData;
 
-// Ray(����) ����ü
 typedef struct tagRay
 {
-	int			column;         // ������ ����� ȭ���� ��
-	int			row;            // �� ��ǥ
-	float		distance;       // �浹 ���������� �Ÿ�
-	int			side;           // ���� ���� (x �Ǵ� y��)
-	int			height;         // �� ����
-	FPOINT		ray_pos;        // ���� ���� ��ġ
-	FPOINT		ray_dir;        // ���� ����
-	FPOINT		map_pos;        // Ÿ�� ��ǥ
-	FPOINT		side_dist;      // ���� x, y ������ �Ÿ�
-	FPOINT		delta_dist;     // x, y �̵� �� �Ÿ� ����
-	FPOINT		step;           // �̵� ����
-	float		wall_x;         // �� �浹 ������ x ��ǥ
-	FPOINT		floor_wall;     // �ٴ� ���� ��ǥ
-	FPOINT		c_floor;        // ������ �ٴ� ��ǥ
+	int			column;
+	int			row;
+	float		distance;
+	int			side;
+	int			height;
+	FPOINT		ray_pos;
+	FPOINT		ray_dir;
+	FPOINT		map_pos;
+	FPOINT		side_dist;
+	FPOINT		delta_dist;
+	FPOINT		step;
+	float		wall_x;
+	FPOINT		floor_wall;
+	FPOINT		c_floor;
 
 	tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX);
 } Ray;
 
-
-class RayCasting: public GameObject
+class RayCasting : public GameObject
 {
-
 	map<LPCWCH, Texture>	spritesTextureData;
 	list<Sprite>			sprites;
 
@@ -86,30 +79,31 @@ class RayCasting: public GameObject
 
 	BITMAPINFO		bmi;
 	BYTE			pixelData[WINSIZE_X * WINSIZE_Y * 3];
-	
+
 	Texture			tile;
 
+	int     renderScale;
+	int     currentFPS;
+	int     fpsCheckCounter;
+	float   fpsCheckTime;
 
-	BOOL			changeScreen;                   // ȭ�� ���� ����
+	float	fov;
 
-	// ī�޶� �� ������
-	int     renderScale;               // �ػ� ������
-	int     currentFPS;                // FPS ����
-	int     fpsCheckCounter;          // FPS ���� ī����
-	float   fpsCheckTime;             // FPS ���� �ð�
+	float	rotateSpeed;
+	float	moveSpeed;
 
-	float	fov;                      // �þ߰�(FOV)
-	float	rotateSpeed;             // ȸ�� �ӵ�
-	float	moveSpeed;               // �̵� �ӵ�
+	FPOINT	cameraPos;
+	FPOINT	cameraDir;
+	FPOINT	cameraXDir;
+	FPOINT	plane;
 
-	FPOINT	cameraPos;               // ī�޶� ��ġ
-	FPOINT	cameraDir;               // ī�޶� ����
-	FPOINT	cameraXDir;              // x�� ī�޶� ����
-	FPOINT	plane;                   // ī�޶� ��� (�þ� ���� ����)
-
-	FPOINT	move;                    // ����/���� �̵� ����
-	FPOINT	x_move;                  // �¿� �̵� ����
-	FPOINT	rotate;                  // ȸ�� ����
+	FPOINT	move;
+	FPOINT	x_move;
+	FPOINT	rotate;
+	static int map[MAP_ROW * MAP_COLUME];
+	float	camera_x[WINSIZE_X];
+	float	depth[WINSIZE_X];
+	float	sf_dist[WINSIZE_Y];
 
 	void KeyInput(void);
 	void MoveCamera(float deltaTime);
@@ -129,14 +123,11 @@ class RayCasting: public GameObject
 	void RenderSprites(void);
 	void RenderSpritePixel(FPOINT pixel, Sprite& sprite);
 
-
 public:
 	virtual HRESULT Init(void) override;
 	virtual void Release(void) override;
 	virtual void Update(void) override;
 	virtual void Render(HDC hdc) override;
 
-	// ��ƿ��Ƽ
-	void FillScreen(DWORD start, DWORD end); // Ư�� ���� ���� ä���
+	void FillScreen(DWORD start, DWORD end);
 };
-
