@@ -1,6 +1,7 @@
 #include "RayCasting.h"
 #include "KeyManager.h"
 #include <fstream>
+#include <algorithm>
 
 int RayCasting::map[MAP_ROW * MAP_COLUME] =
 {
@@ -65,7 +66,7 @@ HRESULT RayCasting::Init(void)
         camera_x[i] = ((2.0f * FLOAT(i) / FLOAT(WINSIZE_X)) - 1.0f);
 
     for (int i = 0; i < WINSIZE_Y; ++i)
-        sf_dist[i] = FLOAT(WINSIZE_Y) / (2.0f * FLOAT(i) - FLOAT(WINSIZE_Y));
+        sf_dist[i] = FLOAT(WINSIZE_Y) / (2.f * FLOAT(i) - FLOAT(WINSIZE_Y));
 
     move = { 0, 0 };
     x_move = { 0, 0 };
@@ -103,6 +104,10 @@ HRESULT RayCasting::Init(void)
         };
         threads[i] = CreateThread(NULL, 0, RaycastThread, &threadDatas[i], 0, NULL);
     }
+
+    ShowCursor(FALSE);
+    isShowMouse = FALSE;
+
     return S_OK;
 }
 
@@ -129,6 +134,7 @@ void RayCasting::Release(void)
 void RayCasting::Update(void)
 {
     KeyInput();
+    MouseInput();
 
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
 
@@ -261,6 +267,52 @@ void RayCasting::KeyInput(void)
     }
     else
         rotate.y = 0;
+
+    if (km->IsOnceKeyDown(VK_ESCAPE))
+    {
+        if (isShowMouse)
+        {
+            ShowCursor(FALSE);
+            isShowMouse = FALSE;
+            SetCursorPos(WINSIZE_X / 2, WINSIZE_Y / 2);
+        }
+        else
+        {
+            ShowCursor(TRUE);
+            isShowMouse = TRUE;
+        }
+    }
+}
+
+void RayCasting::MouseInput(void)
+{
+    if (isShowMouse)
+        return;
+
+    POINT currentPos;
+    GetCursorPos(&currentPos);
+
+    int deltaX = currentPos.x - WINSIZE_X / 2;
+
+    if (deltaX < 0)
+    {
+        rotate.x = -deltaX;
+        rotate.y = 0;
+        changeScreen = TRUE;
+    }
+    else if (deltaX > 0)
+    {
+        rotate.x = 0;
+        rotate.y = deltaX;
+        changeScreen = TRUE;
+    }
+    else
+    {
+        rotate.x = 0;
+        rotate.y = 0;
+    }
+
+    SetCursorPos(WINSIZE_X / 2, WINSIZE_Y / 2);
 }
 
 void RayCasting::MoveCamera(float deltaTime)
@@ -314,17 +366,17 @@ void RayCasting::RotateCamera(float deltaTime)
     float rotateCos, rotateSin;
     if (rotate.x)
     {
-        rotateCos = cosf(-ROTATE_SPEED * deltaTime);
-        rotateSin = sinf(-ROTATE_SPEED * deltaTime);
+        rotateCos = cosf(rotate.x * (-ROTATE_SPEED) * deltaTime);
+        rotateSin = sinf(rotate.x * (-ROTATE_SPEED) * deltaTime);
     }
     else
     {
-        rotateCos = cosf(ROTATE_SPEED * deltaTime);
-        rotateSin = sinf(ROTATE_SPEED * deltaTime);
+        rotateCos = cosf(rotate.y * ROTATE_SPEED * deltaTime);
+        rotateSin = sinf(rotate.y * ROTATE_SPEED * deltaTime);
     }
 
     FPOINT old = cameraDir;
-    
+
     cameraDir.x = (cameraDir.x * rotateCos) - (cameraDir.y * rotateSin);
     cameraDir.y = (old.x * rotateSin) + (cameraDir.y * rotateCos);
 
@@ -410,7 +462,7 @@ void RayCasting::RenderWall(Ray& ray, int colume)
         for (int k = 0; k < renderScale && k + i < WINSIZE_Y; ++k)
         {
             pixel.y = k + i;
-            RenderPixel(pixel, GetDistanceShadeColor(tile, texture, ray.distance));
+            RenderPixel(pixel, GetDistanceShadeColor(tile, texture, ray.distance, ray.side));
         }
         j += renderScale;
         i += renderScale;
@@ -431,7 +483,8 @@ void RayCasting::RenderCeilingFloor(Ray& ray, int colume)
     FPOINT pixel = { colume, 0 };
     for (int i = INT(WINSIZE_Y / 2 + ray.height / 2.0f); i < WINSIZE_Y; i += renderScale)
     {
-        float weight = sf_dist[i] / ray.distance;
+        float weight = sf_dist[i] / (ray.distance);
+
         ray.c_floor = { weight * ray.floor_wall.x + (1.0f - weight) * cameraPos.x,
                        weight * ray.floor_wall.y + (1.0f - weight) * cameraPos.y };
         FPOINT texture = { INT(ray.c_floor.x * TILE_SIZE) % TILE_SIZE,
@@ -465,7 +518,7 @@ void RayCasting::RenderPixel(FPOINT pixel, int color)
     *reinterpret_cast<LPDWORD>(&pixelData[pixelPos]) = color;
 }
 
-COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance)
+COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance, bool isSide)
 {
     float divide = distance / SHADE_VALUE;
 
@@ -477,6 +530,15 @@ COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float 
     texturePixel.y += row * TILE_SIZE;
 
     COLORREF color = textureData[INT(texturePixel.y * tileWidth + texturePixel.x)];
+
+	if (isSide)
+	{
+		color = RGB(
+			INT(GetRValue(color) * 0.7f),
+			INT(GetGValue(color) * 0.7f),
+			INT(GetBValue(color) * 0.7f));
+	}
+
     if (divide <= 1.0f)
         return color;
     else

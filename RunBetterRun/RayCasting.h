@@ -92,7 +92,10 @@ class RayCasting: public GameObject
 	float	depth[WINSIZE_X];
 	float	sf_dist[WINSIZE_Y];
 
+	bool isShowMouse;
+
 	void KeyInput(void);
+	void MouseInput(void);
 	void MoveCamera(float deltaTime);
 	void MoveSideCamera(float deltaTime);
 	void RotateCamera(float deltaTime);
@@ -101,7 +104,7 @@ class RayCasting: public GameObject
 	void RenderCeilingFloor(Ray& ray, int colume);
 	void RenderCeilingFloor(Ray& ray, int colume, COLORREF ceiling, COLORREF floor);
 	void RenderPixel(FPOINT pixel, int color);
-	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance);
+	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance, bool isSide = false);
 	COLORREF GetDistanceShadeColor(COLORREF color, float distance);
 	void LoadTextureTiles(LPCWCH path);
 	int GetRenderScaleBasedOnFPS(void);
