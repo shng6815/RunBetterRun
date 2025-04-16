@@ -80,6 +80,7 @@ HRESULT RayCasting::Init(void)
     bmi.bmiHeader.biCompression = BI_RGB;
 
     LoadTexture(TEXT("Image/maptiles.bmp"), tile);
+    PutSprite(TEXT("Image/rocket.bmp"), {19, 12});
 
     renderScale = 1;
     currentFPS = 60;
@@ -233,8 +234,21 @@ void RayCasting::RenderSprites(void)
                     renderY.x = renderYOrg;
                     while (renderY.x < WINSIZE_Y && renderY.x < renderY.y)
                     {
-                        RenderSpritePixel({},sprite);
-                        renderY.x++;
+                        FPOINT pixel = {renderX.x, renderY.x};
+                        POINT texturePos = { INT(256 * ((INT(renderX.x) - (-size / 2.0f + screen)))
+                                * sprite.texture->bmpWidth / size) / 256, 0 };
+                        if (texturePos.x < sprite.texture->bmpWidth )
+                        {
+                            LONG fact = (INT(renderY.x) * 256.0f) - (WINSIZE_Y * 128.0f) + (size * 128.0f);
+                            texturePos.y = ((fact * sprite.texture->bmpHeight) / size) / 256.0f;
+                            if (texturePos.y < sprite.texture->bmpHeight)
+                            {
+                                COLORREF color = sprite.texture->bmp[texturePos.y * sprite.texture->bmpWidth + texturePos.x];
+                                if (color != 0xFF00FF)
+                                    RenderPixel(pixel, GetDistanceShadeColor(color, sprite.distance));
+                            }
+                        }
+                        ++renderY.x;
                     }
                 }
                 ++renderX.x;
@@ -566,7 +580,7 @@ HRESULT RayCasting::LoadTexture(LPCWCH path, Texture& texture)
     for (DWORD i = 0; i < texture.bmpWidth * texture.bmpHeight; ++i)
     {
         DWORD index = (texture.bmpHeight - (i / texture.bmpWidth) - 1) * bmpRowSize + (i % texture.bmpWidth) * 3;
-        texture.bmp[i] = *reinterpret_cast<LPDWORD>(&bmpData[index]);
+        texture.bmp[i] = RGB(bmpData[index], bmpData[index + 1], bmpData[index + 2]);
     }
     return S_OK;
 }
@@ -590,10 +604,10 @@ void RayCasting::PutSprite(LPCWCH path, FPOINT pos)
 
 int RayCasting::GetRenderScaleBasedOnFPS(void)
 {
-    if (currentFPS < 15) return 8;      
-    else if (currentFPS < 25) return 4; 
-    else if (currentFPS < 40) return 2; 
-    else return 1;                      
+    if (currentFPS < 15) return 32;      
+    else if (currentFPS < 25) return 16; 
+    else if (currentFPS < 40) return 8; 
+    else return 4;                      
 }
 
 void RayCasting::SortSpritesByDistance(void)
@@ -605,7 +619,7 @@ void RayCasting::SortSpritesByDistance(void)
             + powf(cameraPos.y - sprite.pos.y, 2));
     }
     sprites.sort([](Sprite& a, Sprite& b)->BOOL {
-        return a.distance > b.distance;
+        return a.distance < b.distance;
         });
 }
 

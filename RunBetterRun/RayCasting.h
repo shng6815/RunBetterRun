@@ -121,6 +121,7 @@ class RayCasting: public GameObject
 	int GetRenderScaleBasedOnFPS(void);
 	void SortSpritesByDistance(void);
 	void RenderSprites(void);
+	void RenderSpritePixel(FPOINT pixel, Sprite& sprite);
 
 public:
 	virtual HRESULT Init(void) override;
