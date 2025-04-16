@@ -1,7 +1,6 @@
 #pragma once
 #include "GameObject.h"
 #include <queue>
-#include <list>
 
 #define CEILING_COLOR 0x383838
 #define FLOOR_COLOR 0x717171
@@ -21,20 +20,6 @@
 #define THREAD_NUM 4
 
 class RayCasting;
-
-typedef struct tagTexture
-{
-	vector<COLORREF>	bmp;
-	DWORD				bmpWidth;
-	DWORD				bmpHeight;
-} Texture;
-
-typedef struct tagSprite
-{
-	FPOINT		pos;
-	double		distance;
-	Texture*	texture;
-} Sprite;
 
 typedef struct tagThreadData {
 	RayCasting*		pThis;
@@ -67,9 +52,6 @@ typedef struct tagRay
 
 class RayCasting: public GameObject
 {
-	map<LPCWCH, Texture>	spritesTextureData;
-	list<Sprite>			sprites;
-
 	HANDLE			threads[THREAD_NUM];
 	ThreadData		threadDatas[THREAD_NUM];
 	HANDLE			threadMutex[THREAD_NUM];
@@ -80,7 +62,12 @@ class RayCasting: public GameObject
 	BITMAPINFO		bmi;
 	BYTE			pixelData[WINSIZE_X * WINSIZE_Y * 3];
 	
-	Texture			tile;
+	vector<COLORREF>textureData;
+	DWORD			tileWidth;
+	DWORD			tileHeight;
+	DWORD			tileRowSize;
+
+	BOOL	changeScreen;
 
 	int     renderScale;
 	int     currentFPS;
@@ -119,12 +106,8 @@ class RayCasting: public GameObject
 	void RenderPixel(FPOINT pixel, int color);
 	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance, bool isSide = false);
 	COLORREF GetDistanceShadeColor(COLORREF color, float distance);
-	HRESULT LoadTexture(LPCWCH path, Texture& texture);
-	void PutSprite(LPCWCH path, FPOINT pos);
+	void LoadTextureTiles(LPCWCH path);
 	int GetRenderScaleBasedOnFPS(void);
-	void SortSpritesByDistance(void);
-	void RenderSprites(void);
-	void RenderSpritePixel(FPOINT pixel, Sprite& sprite);
 
 public:
 	virtual HRESULT Init(void) override;
