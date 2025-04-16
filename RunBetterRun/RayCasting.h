@@ -27,7 +27,7 @@ typedef struct tagThreadData {
 	RayCasting* pThis;          // RayCasting 인스턴스 포인터
 	BOOL			exit;           // 스레드 종료 여부
 	BOOL			done;           // 스레드 완료 여부
-	queue<POINT>* queue;          // 렌더링할 열 정보 큐
+	queue<POINT>* queue;          // 렌더링할 열 정보 큐 주소
 	LPHANDLE		threadMutex;    // 스레드 동기화용 뮤텍스
 	LPHANDLE		queueMutex;     // 큐 동기화용 뮤텍스
 } ThreadData;
@@ -75,7 +75,7 @@ class RayCasting: public GameObject
 	BOOL			changeScreen;                   // 화면 갱신 여부
 
 	// 카메라 및 렌더링
-	int     renderScale;               // 해상도 스케
+	int     renderScale;               // 해상도 스케일
 	int     currentFPS;                // FPS 추적
 	int     fpsCheckCounter;          // FPS 계산용 카운터
 	float   fpsCheckTime;             // FPS 측정 시간
