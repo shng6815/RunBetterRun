@@ -81,7 +81,7 @@ HRESULT RayCasting::Init(void)
 
     LoadTexture(TEXT("Image/maptiles.bmp"), tile);
     PutSprite(TEXT("Image/rocket.bmp"), {19, 12});
-
+    PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
     renderScale = 1;
     currentFPS = 60;
     fpsCheckCounter = 0;
@@ -153,7 +153,6 @@ void RayCasting::Update(void)
         fpsCheckTime = 0.0f;
         renderScale = GetRenderScaleBasedOnFPS();
     }
-
 }
 
 
@@ -198,10 +197,10 @@ void RayCasting::FillScreen(DWORD start, DWORD end)
     for (DWORD i = start; i < end; i += renderScale)
     {
         Ray ray = RayCast(i);
-        depth[i] = ray.distance;
         ray.height = fabs(FLOAT(WINSIZE_Y) / ray.distance);
 
         for (DWORD j = 0; j < renderScale && i + j < end; ++j) {
+            depth[i + j] = ray.distance;
             RenderWall(ray, i + j);
             if (ray.height < WINSIZE_Y)
                 //RenderCeilingFloor(ray, i + j, CEILING_COLOR, FLOOR_COLOR);
@@ -614,12 +613,12 @@ void RayCasting::SortSpritesByDistance(void)
 {
     for (auto& sprite : sprites)
     {
-        sprite.distance = fabs(
+        sprite.distance = sqrtf(fabs(
             powf(cameraPos.x - sprite.pos.x, 2)
-            + powf(cameraPos.y - sprite.pos.y, 2));
+            + powf(cameraPos.y - sprite.pos.y, 2)));
     }
     sprites.sort([](Sprite& a, Sprite& b)->BOOL {
-        return a.distance < b.distance;
+        return a.distance > b.distance;
         });
 }
 
