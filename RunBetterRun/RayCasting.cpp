@@ -58,7 +58,7 @@ HRESULT RayCasting::Init(void) // RayCasting 클래스의 초기화 함수
     cameraPos = { 22, 12 }; // 카메라(플레이어) 위치 초기화
     cameraDir = { -1, 0 }; // 카메라(플레이어) 방향 초기화
     cameraXDir = { cameraDir.y, -cameraDir.x }; // X축 방향 벡터 (직교 방향)
-    plane = { 0, -2.0f }; // 뷰포트 거리 (카메라 방향에 수직)
+    plane = { 0, -0.66f }; // 뷰포트 거리 (카메라 방향에 수직)
 
     // 각 화면 컬럼에 대응하는 카메라 X 좌표 미리 계산
     for (int i = 0; i < WINSIZE_X; ++i)
