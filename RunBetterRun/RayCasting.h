@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "structs.h"
 #include <queue>
 #include <list>
 
@@ -21,52 +22,21 @@
 #define THREAD_NUM 4
 
 class RayCasting;
+struct ThreadData;
 
-typedef struct tagTexture
+class RayCasting : public GameObject
 {
-	vector<COLORREF>	bmp;
-	DWORD				bmpWidth;
-	DWORD				bmpHeight;
-} Texture;
+public:
+	typedef struct tagThreadData {
+		RayCasting* pThis;
+		BOOL			exit;
+		BOOL			done;
+		queue<POINT>* queue;
+		LPHANDLE		threadMutex;
+		LPHANDLE		queueMutex;
+	} ThreadData;
 
-typedef struct tagSprite
-{
-	FPOINT		pos;
-	double		distance;
-	Texture*	texture;
-} Sprite;
-
-typedef struct tagThreadData {
-	RayCasting*		pThis;
-	BOOL			exit;
-	BOOL			done;
-	queue<POINT>*	queue;
-	LPHANDLE		threadMutex;
-	LPHANDLE		queueMutex;
-} ThreadData;
-
-typedef struct tagRay
-{
-	int			column;
-	int			row;
-	float		distance;
-	int			side;
-	int			height;
-	FPOINT		ray_pos;
-	FPOINT		ray_dir;
-	FPOINT		map_pos;
-	FPOINT		side_dist;
-	FPOINT		delta_dist;
-	FPOINT		step;
-	float		wall_x;
-	FPOINT		floor_wall;
-	FPOINT		c_floor;
-
-	tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX);
-} Ray;
-
-class RayCasting: public GameObject
-{
+private:
 	map<LPCWCH, Texture>	spritesTextureData;
 	list<Sprite>			sprites;
 
@@ -79,7 +49,7 @@ class RayCasting: public GameObject
 
 	BITMAPINFO		bmi;
 	BYTE			pixelData[WINSIZE_X * WINSIZE_Y * 3];
-	
+
 	Texture			tile;
 
 	int     renderScale;
@@ -120,8 +90,8 @@ class RayCasting: public GameObject
 	void PutSprite(LPCWCH path, FPOINT pos);
 	int GetRenderScaleBasedOnFPS(void);
 	void SortSpritesByDistance(void);
-	void RenderSprites(void);
-	void RenderSpritePixel(FPOINT pixel, Sprite& sprite);
+	void RenderSprites(DWORD start, DWORD end);
+	void RenderSprite(Sprite& sprite, POINT renderX, POINT renderY, FPOINT transform);
 
 public:
 	virtual HRESULT Init(void) override;
@@ -131,4 +101,3 @@ public:
 
 	void FillScreen(DWORD start, DWORD end);
 };
-

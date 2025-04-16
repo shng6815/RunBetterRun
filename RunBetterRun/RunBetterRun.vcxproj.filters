@@ -101,5 +101,8 @@
     <ClInclude Include="TimerManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="structs.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
