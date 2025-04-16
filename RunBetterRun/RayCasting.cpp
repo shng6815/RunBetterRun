@@ -101,6 +101,9 @@ HRESULT RayCasting::Init(void)
         };
         threads[i] = CreateThread(NULL, 0, RaycastThread, &threadDatas[i], 0, NULL);
     }
+
+    ShowCursor(FALSE);
+    isShowMouse = FALSE;
     return S_OK;
 }
 
@@ -129,6 +132,7 @@ void RayCasting::Release(void)
 void RayCasting::Update(void)
 {
     KeyInput();
+    MouseInput();
 
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
 
@@ -290,7 +294,52 @@ void RayCasting::KeyInput(void)
         rotate.y = 1;
     else
         rotate.y = 0;
+
+    if (km->IsOnceKeyDown(VK_ESCAPE))
+    {
+        if (isShowMouse)
+        {
+            ShowCursor(FALSE);
+            isShowMouse = FALSE;
+            SetCursorPos(WINSIZE_X / 2, WINSIZE_Y / 2);
+        }
+        else
+        {
+            ShowCursor(TRUE);
+            isShowMouse = TRUE;
+        }
+    }
 }
+
+void RayCasting::MouseInput(void)
+{
+    if (isShowMouse)
+        return;
+
+    POINT currentPos;
+    GetCursorPos(&currentPos);
+
+    int deltaX = currentPos.x - WINSIZE_X / 2;
+
+    if (deltaX < 0)
+    {
+        rotate.x = -deltaX;
+        rotate.y = 0;
+    }
+    else if (deltaX > 0)
+    {
+        rotate.x = 0;
+        rotate.y = deltaX;
+    }
+    else
+    {
+        rotate.x = 0;
+        rotate.y = 0;
+    }
+
+    SetCursorPos(WINSIZE_X / 2, WINSIZE_Y / 2);
+}
+
 
 void RayCasting::MoveCamera(float deltaTime)
 {
@@ -343,17 +392,17 @@ void RayCasting::RotateCamera(float deltaTime)
     float rotateCos, rotateSin;
     if (rotate.x)
     {
-        rotateCos = cosf(-ROTATE_SPEED * deltaTime);
-        rotateSin = sinf(-ROTATE_SPEED * deltaTime);
+        rotateCos = cosf(rotate.x * (-ROTATE_SPEED) * deltaTime);
+        rotateSin = sinf(rotate.x * (-ROTATE_SPEED) * deltaTime);
     }
     else
     {
-        rotateCos = cosf(ROTATE_SPEED * deltaTime);
-        rotateSin = sinf(ROTATE_SPEED * deltaTime);
+        rotateCos = cosf(rotate.y * ROTATE_SPEED * deltaTime);
+        rotateSin = sinf(rotate.y * ROTATE_SPEED * deltaTime);
     }
 
     FPOINT old = cameraDir;
-    
+
     cameraDir.x = (cameraDir.x * rotateCos) - (cameraDir.y * rotateSin);
     cameraDir.y = (old.x * rotateSin) + (cameraDir.y * rotateCos);
 
@@ -439,7 +488,7 @@ void RayCasting::RenderWall(Ray& ray, int colume)
         for (int k = 0; k < renderScale && k + i < WINSIZE_Y; ++k)
         {
             pixel.y = k + i;
-            RenderPixel(pixel, GetDistanceShadeColor(tile, texture, ray.distance));
+            RenderPixel(pixel, GetDistanceShadeColor(tile, texture, ray.distance,ray.side));
         }
         j += renderScale;
         i += renderScale;
@@ -494,7 +543,7 @@ void RayCasting::RenderPixel(FPOINT pixel, int color)
     *reinterpret_cast<LPDWORD>(&pixelData[pixelPos]) = color;
 }
 
-COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance)
+COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance, bool isSide)
 {
     float divide = distance / SHADE_VALUE;
 
@@ -506,6 +555,15 @@ COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float 
     texturePixel.y += row * TILE_SIZE;
 
     COLORREF color = this->tile.bmp[INT(texturePixel.y * this->tile.bmpWidth + texturePixel.x)];
+
+    if (isSide)
+    {
+        color = RGB(
+            INT(GetRValue(color) * 0.7f),
+            INT(GetGValue(color) * 0.7f),
+            INT(GetBValue(color) * 0.7f));
+    }
+
     if (divide <= 1.0f)
         return color;
     else
@@ -517,6 +575,7 @@ COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float 
 COLORREF RayCasting::GetDistanceShadeColor(COLORREF color, float distance)
 {
     float divide = distance / SHADE_VALUE;
+
     if (divide <= 1.0f)
         return color;
     else
