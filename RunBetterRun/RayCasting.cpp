@@ -212,7 +212,7 @@ void RayCasting::FillScreen(DWORD start, DWORD end)
 
 void RayCasting::RenderSprites(void)
 {
-    const std::list<Sprite>& sprites = SpriteManager::GetInstance()->GetSprites();
+    const list<Sprite>& sprites = SpriteManager::GetInstance()->GetSprites();
 
     float invDet = 1.0f / ((plane.x * cameraDir.y) - (plane.y * cameraDir.x));
     for (auto& sprite : sprites)

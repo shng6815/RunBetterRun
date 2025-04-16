@@ -7,11 +7,10 @@
 class SpriteManager : public Singleton<SpriteManager>
 {
 private:
-    std::map<LPCWCH, Texture> spritesTextureData;
-    std::list<Sprite> sprites;
+    map<LPCWCH, Texture> spritesTextureData;
+    list<Sprite> sprites;
     Texture mapTileTexture;
     FPOINT playerPos;
-    Texture	mapTile;
 
 public:
     HRESULT Init();
@@ -26,7 +25,7 @@ public:
     HRESULT LoadMapTileTexture(LPCWCH path);
 
     // 접근자 함수
-    const std::list<Sprite>& GetSprites() const { return sprites; }
+    const list<Sprite>& GetSprites() const { return sprites; }
     Texture* GetMapTileTexture() { return &mapTileTexture; }
     Texture* GetTexture(LPCWCH path);
 };
