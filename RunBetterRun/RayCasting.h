@@ -74,6 +74,10 @@ class RayCasting: public GameObject
 
 	float	rotateSpeed;
 	float	moveSpeed;
+	
+	const int* mapData;
+	int mapWidth;
+	int mapHeight;
 
 	FPOINT	cameraPos;
 	FPOINT	cameraDir;
@@ -110,5 +114,6 @@ public:
 	virtual void Render(HDC hdc) override;
 
 	void FillScreen(DWORD start, DWORD end);
+	void ReloadMapData();
 };
 

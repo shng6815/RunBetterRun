@@ -1,6 +1,7 @@
 #include "RayCasting.h"
 #include "KeyManager.h"
 #include "SpriteManager.h"
+#include "MapManager.h"
 #include <fstream>
 
 int RayCasting::map[MAP_ROW * MAP_COLUME] =
@@ -79,6 +80,8 @@ HRESULT RayCasting::Init(void)
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 24;
     bmi.bmiHeader.biCompression = BI_RGB;
+
+    ReloadMapData();
 
     SpriteManager::GetInstance()->LoadMapTileTexture(TEXT("Image/maptiles.bmp"));
     mapTile = SpriteManager::GetInstance()->GetMapTileTexture();
@@ -207,6 +210,23 @@ void RayCasting::FillScreen(DWORD start, DWORD end)
                 //RenderCeilingFloor(ray, i + j, CEILING_COLOR, FLOOR_COLOR);
                 RenderCeilingFloor(ray, i + j);
         }
+    }
+}
+
+void RayCasting::ReloadMapData()
+{
+    MapManager* mapManager = MapManager::GetInstance();
+    MapData* currentMap = mapManager->GetCurrMapData();
+
+    if (currentMap) {
+        mapData = currentMap->tiles.data();
+        mapWidth = currentMap->width;
+        mapHeight = currentMap->height;
+    }
+    else {
+        mapData = nullptr;
+        mapWidth = MAP_COLUME;
+        mapHeight = MAP_ROW;
     }
 }
 

@@ -5,41 +5,42 @@
 #include <vector>
 #include <map>
 
-// 맵 정보를 저장하는 구조체
 typedef struct tagMapData
 {
-    string name;           
-    int width;                 
-    int height;                
-    vector<int> tiles;     
-    map<LPCWCH, Texture> textureMap; // 맵 텍스처 맵
+    string name;
+    int width;
+    int height;
+    vector<int> tiles;
+    map<LPCWCH, Texture> textureMap;
 } MapData;
 
 class MapManager : public Singleton<MapManager>
 {
 private:
-    map<string, MapData> mapDataList;  // 다양한 맵을 저장
-    string currentMapName;                 // 현재 활성화된 맵 이름
-
+    map<string, MapData> mapDataList;
+    string currMapName;
 public:
     HRESULT Init();
     void Release();
 
-    // 맵 로드/저장 함수
-    bool LoadMapFromFile(const std::string& mapName, const wchar_t* filePath);
-    bool SaveMapToFile(const std::string& mapName, const wchar_t* filePath);
+    bool LoadMap(const string& mapName, const wchar_t* filePath);
+    bool SaveMap(const string& mapName, const wchar_t* filePath);
+    bool CreateEmptyMap(const string& mapName, int width, int height);
+    bool SetCurrentMap(const string& mapName);
 
-    // 맵 생성 함수
-    bool CreateEmptyMap(const std::string& mapName, int width, int height);
-    bool SetCurrentMap(const std::string& mapName);
+    MapData* GetMapData(const string& mapName);
+    MapData* GetCurrMapData();
+    const int* GetMapTiles(const string& mapName) const;
+    string GetCurrMapName() const { return currMapName; }
 
-    // 맵 접근 함수
-    const MapData* GetMapData(const std::string& mapName) const;
-    const MapData* GetCurrentMapData() const;
-    int* GetMapTiles(const std::string& mapName); // RayCasting과의 호환성 위한 함수
-    std::string GetCurrentMapName() const { return currentMapName; }
+    // 타일 조작
+    bool SetTile(int x, int y, int tileValue);
+    bool SetTile(const string& mapName, int x, int y, int tileValue);
+    bool FillTiles(int tileValue);
+    bool FillTiles(const string& mapName, int tileValue);
+    bool SetMapTiles(const vector<int>& newTiles);
+    bool SetMapTiles(const string& mapName, const vector<int>& newTiles);
 
-    // 맵 속성 접근 함수
-    int GetMapWidth(const std::string& mapName) const;
-    int GetMapHeight(const std::string& mapName) const;
+    int GetMapWidth(const string& mapName) const;
+    int GetMapHeight(const string& mapName) const;
 };
