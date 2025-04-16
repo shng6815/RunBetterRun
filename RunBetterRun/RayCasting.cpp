@@ -603,10 +603,10 @@ void RayCasting::LoadTextureTiles(LPCWCH path)
 
 int RayCasting::GetRenderScaleBasedOnFPS(void)
 {
-    if (currentFPS < 15) return 8;      
-    else if (currentFPS < 25) return 4; 
-    else if (currentFPS < 40) return 2; 
-    else return 1;                      
+    if (currentFPS < 15) return 10;      
+    else if (currentFPS < 25) return 12; 
+    else if (currentFPS < 40) return 8; 
+    else return 4;                      
 }
 
 tagRay::tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX)
