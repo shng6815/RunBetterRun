@@ -21,8 +21,10 @@ public:
 	bool LoadMap(const LPCWCH filePath); 
 	bool SaveMap(const LPCWCH filePath);
 	
-	bool CreateMazeMap(int width, int height); //미로 맵 생성
 	bool CreateNewMap(int width, int height); //새로운 맵 생성
+	bool CreateMazeMap(int width, int height); //미로 맵 생성
+	bool CreateSimpleMazeMap(int width, int height);
+	bool CreateFpsStyleMap(int width, int height);  // FPS 스타일 맵 생성
 	void SetTile(int x, int y, RoomType tileType, int index); //특정타입의 타일 설정
 
 	MapData* GetMapData();
