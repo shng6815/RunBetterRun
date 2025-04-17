@@ -57,8 +57,6 @@ static DWORD WINAPI RaycastThread(LPVOID lpParam) {
 
 HRESULT RayCast::Init(void)
 {
-    Player::GetInstance()->Init();
-
     for (int i = 0; i < WINSIZE_X; ++i)
         screenWidthPixelUnitPos[i] = ((2.0f * FLOAT(i) / FLOAT(WINSIZE_X)) - 1.0f);
 
@@ -118,14 +116,11 @@ void RayCast::Release(void)
 
     mapTile = nullptr;
     SpriteManager::GetInstance()->ClearSprites();
-    Player::GetInstance()->Release();
 }
 
 void RayCast::Update(void)
 {
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
-
-    Player::GetInstance()->Update();
 
     SpriteManager::GetInstance()->UpdatePlayerPosition(Player::GetInstance()->GetCameraPos());
     SpriteManager::GetInstance()->SortSpritesByDistance();

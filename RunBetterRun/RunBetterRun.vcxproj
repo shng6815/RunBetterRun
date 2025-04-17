@@ -135,11 +135,13 @@
     <ClCompile Include="LoadingScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainGame.cpp" />
+    <ClCompile Include="MainGameScene.cpp" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="MapManager.cpp" />
     <ClCompile Include="RayCast.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="ShakeGenerator.cpp" />
     <ClCompile Include="SpriteManager.cpp" />
     <ClCompile Include="TilemapTool.cpp" />
     <ClCompile Include="Timer.cpp" />
@@ -155,11 +157,13 @@
     <ClInclude Include="KeyManager.h" />
     <ClInclude Include="LoadingScene.h" />
     <ClInclude Include="MainGame.h" />
+    <ClInclude Include="MainGameScene.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="MapManager.h" />
     <ClInclude Include="RayCast.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="ShakeGenerator.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="structs.h" />
     <ClInclude Include="SpriteManager.h" />
