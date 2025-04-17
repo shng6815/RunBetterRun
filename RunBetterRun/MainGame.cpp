@@ -22,7 +22,6 @@ HRESULT MainGame::Init()
 		MapManager::GetInstance()->CreateEmptyMap("defaultMap", MAP_COLUME, MAP_ROW);
 
 		// 여기서 기본 맵 데이터를 설정할 수 있습니다
-		// 예시: 테스트 맵 구성
 		for (int y = 0; y < MAP_ROW; y++) {
 			for (int x = 0; x < MAP_COLUME; x++) {
 				// 가장자리에 벽 배치
