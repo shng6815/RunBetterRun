@@ -3,11 +3,18 @@
 #include <vector>
 
 class Sprite;
-class Monster : public GameObject
+
+enum class ItemType
+{
+	NONE,
+	ITEM
+};
+
+class Item : public GameObject
 {
 private:
-	Sprite* monsterSprite;
-	// 더 추가할거?
+	Sprite* itemSprite;
+	ItemType itemType;
 
 public:
 	virtual HRESULT Init();		// 멤버 변수의 초기화, 메모리 할당
