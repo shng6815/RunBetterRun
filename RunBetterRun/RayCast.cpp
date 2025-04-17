@@ -73,8 +73,8 @@ HRESULT RayCast::Init(void)
 
     SpriteManager::GetInstance()->LoadMapTileTexture(TEXT("Image/maptiles.bmp"));
     mapTile = SpriteManager::GetInstance()->GetMapTileTexture();
-    SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
-    SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
+    SpriteManager::GetInstance()->PutSprite(TEXT("Image/boss.bmp"), { 19, 12 });
+    SpriteManager::GetInstance()->PutSprite(TEXT("Image/boss.bmp"), { 16, 12 });
 
     renderScale = SCALE;
     currentFPS = 60;
