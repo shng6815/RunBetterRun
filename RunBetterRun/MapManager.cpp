@@ -7,9 +7,9 @@ HRESULT MapManager::Init()
 	mapData.width = 24;
 	mapData.tiles.resize(mapData.height * mapData.width);
 
-	for (int i = 0; i < 24; i++)
+	for (int i = 0; i < mapData.height; i++)
 	{
-		for (int j = 0; j < 24; j++)
+		for (int j = 0; j < mapData.width; j++)
 		{
 			if (i == 0 || i == 23 || j == 0 || j == 23)
 			{
@@ -21,7 +21,10 @@ HRESULT MapManager::Init()
 			}
 			else
 			{
-				SetTile(i, j, RoomType::FLOOR,10);
+				if ((j + i) % 2)
+					SetTile(i, j, RoomType::FLOOR, 110);
+				else
+					SetTile(i, j, RoomType::FLOOR, 10);
 			}
 		}
 	}

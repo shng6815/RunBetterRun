@@ -358,13 +358,16 @@ void RayCast::RenderCeilingFloor(Ray& ray, int colume)
         float weight = screenHeightPixelDepths[y] / ray.distance;
         FPOINT currentFloor = { weight * floorTextureStartPos.x + (1.0f - weight) * Player::GetInstance()->GetCameraPos().x,
                        weight * floorTextureStartPos.y + (1.0f - weight) * Player::GetInstance()->GetCameraPos().y };
+        MapData* md = MapManager::GetInstance()->GetMapData();
+        DWORD index = min(md->width * md->height - 1, INT(currentFloor.y) * md->width + INT(currentFloor.x));
+        DWORD tile = md->tiles[index].tilePos;
         FPOINT texture = { INT(currentFloor.x * TILE_SIZE) % TILE_SIZE,
-            INT(currentFloor.y * TILE_SIZE) % TILE_SIZE };
+            INT(max(currentFloor.y, 0) * TILE_SIZE) % TILE_SIZE };
         int endY = min(y + renderScale, WINSIZE_Y);
         while (y < endY)
         {
             pixel.y = y;
-            RenderPixel(pixel, GetDistanceShadeColor(8, texture, screenHeightPixelDepths[y]));
+            RenderPixel(pixel, GetDistanceShadeColor(tile, texture, screenHeightPixelDepths[y]));
             RenderPixel({ pixel.x, WINSIZE_Y - (pixel.y + 1) }, GetDistanceShadeColor(9, texture, screenHeightPixelDepths[y++]));
         }
     }
@@ -399,7 +402,6 @@ COLORREF RayCast::GetDistanceShadeColor(int tile, FPOINT texturePixel, float dis
 {
     float divide = distance / SHADE_VALUE;
 
-    //--tile;
     int row = tile / TILE_ROW_SIZE;
     int colume = tile % TILE_ROW_SIZE;
 
