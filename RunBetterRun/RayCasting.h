@@ -17,8 +17,9 @@
 #define TILE_ROW_SIZE	20
 #define TILE_COLUME_SIZE	9
 #define TILE_SIZE	32
-
-#define THREAD_NUM 4
+#define EPSILON 1e-6f
+#define THREAD_NUM 5
+#define SCALE 4
 
 class RayCasting;
 struct ThreadData;

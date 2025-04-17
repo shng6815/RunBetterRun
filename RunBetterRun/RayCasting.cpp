@@ -59,7 +59,7 @@ HRESULT RayCasting::Init(void)
     fov = 0.66f;
 
     cameraPos = { 22, 12 };
-    cameraDir = { -1, 0 };
+    cameraDir = { -0.98, 0.02 };
     cameraXDir = { cameraDir.y, -cameraDir.x };
     plane = { 0, -fov };
 
@@ -87,7 +87,7 @@ HRESULT RayCasting::Init(void)
     mapTile = SpriteManager::GetInstance()->GetMapTileTexture();
     SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
     SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
-    renderScale = 4;
+    renderScale = SCALE;
     currentFPS = 60;
     fpsCheckCounter = 0;
     fpsCheckTime = 0.0f;
@@ -499,13 +499,14 @@ Ray RayCasting::RayCast(int colume)
     float pos;
     if (ray.side)
     {
-        pos = (ray.map_pos.y - cameraPos.y + (1.0f - ray.step.y) / 2.0f);
-        ray.distance = fabs(pos / ray.ray_dir.y);
+        pos = ray.map_pos.y - cameraPos.y + (1.0f - ray.step.y) / 2.0f;
+        ray.distance = (pos / ray.ray_dir.y);
+        
     }
     else
     {
-        pos = (ray.map_pos.x - cameraPos.x + (1.0f - ray.step.x) / 2.0f);
-        ray.distance = fabs(pos / ray.ray_dir.x);
+        pos = ray.map_pos.x - cameraPos.x + (1.0f - ray.step.x) / 2.0f;
+        ray.distance = (pos / ray.ray_dir.x);
     }
     return ray;
 }
@@ -517,13 +518,11 @@ void RayCasting::RenderWall(Ray& ray, int colume)
 
     if (ray.side)
         ray.wall_x = ray.ray_pos.x
-        + ((ray.map_pos.y - ray.ray_pos.y
-            + (1. - ray.step.y) / 2.) / ray.ray_dir.y)
+        + ray.distance
         * ray.ray_dir.x;
     else
         ray.wall_x = ray.ray_pos.y
-        + ((ray.map_pos.x - ray.ray_pos.x
-            + (1. - ray.step.x) / 2.) / ray.ray_dir.x)
+        + ray.distance
         * ray.ray_dir.y;
     ray.wall_x -= INT(ray.wall_x);
 
@@ -550,11 +549,11 @@ void RayCasting::RenderWall(Ray& ray, int colume)
 
 void RayCasting::RenderCeilingFloor(Ray& ray, int colume)
 {
-    if (ray.side == 0 && ray.ray_dir.x > 0)
+    if (ray.side == 0 && ray.ray_dir.x >= 0)
         ray.floor_wall = { ray.map_pos.x, ray.map_pos.y + ray.wall_x };
     else if (ray.side == 0 && ray.ray_dir.x < 0)
         ray.floor_wall = { ray.map_pos.x + 1, ray.map_pos.y + ray.wall_x };
-    else if (ray.side && ray.ray_dir.y > 0)
+    else if (ray.side && ray.ray_dir.y >= 0)
         ray.floor_wall = { ray.map_pos.x + ray.wall_x, ray.map_pos.y };
     else if (ray.side && ray.ray_dir.y < 0)
         ray.floor_wall = { ray.map_pos.x + ray.wall_x, ray.map_pos.y + 1 };
@@ -597,7 +596,10 @@ void RayCasting::RenderCeilingFloor(Ray& ray, int colume, COLORREF ceiling, COLO
 void RayCasting::RenderPixel(FPOINT pixel, int color)
 {
     int pixelPos = (WINSIZE_X * INT(pixel.y) + INT(pixel.x)) * 3;
-    *reinterpret_cast<LPDWORD>(&pixelData[pixelPos]) = color;
+    //*reinterpret_cast<LPDWORD>(&pixelData[pixelPos]) += color;
+    pixelData[pixelPos] = GetRValue(color);
+    pixelData[pixelPos + 1] = GetGValue(color);
+    pixelData[pixelPos + 2] = GetBValue(color);
 }
 
 COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance, bool isSide)
@@ -643,10 +645,10 @@ COLORREF RayCasting::GetDistanceShadeColor(COLORREF color, float distance)
 
 int RayCasting::GetRenderScaleBasedOnFPS(void)
 {
-    if (currentFPS < 15) return 32;
-    else if (currentFPS < 25) return 16;
-    else if (currentFPS < 40) return 8;
-    else return 4;
+    if (currentFPS < 15) return SCALE << 3;
+    else if (currentFPS < 25) return SCALE << 2;
+    else if (currentFPS < 40) return SCALE << 1;
+    else return SCALE;
 }
 
 
@@ -669,5 +671,5 @@ Ray::tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX)
     if (ray_dir.y < 0)
         side_dist.y = (ray_pos.y - map_pos.y) * delta_dist.y;
     else
-        side_dist.y = (map_pos.y + 1 - ray_pos.y) * delta_dist.y;
+        side_dist.y = (map_pos.y + 1.0f - ray_pos.y) * delta_dist.y;
 }
