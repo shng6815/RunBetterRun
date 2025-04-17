@@ -1,6 +1,6 @@
 #include "Player.h"
 
-HRESULT Player::Init()
+HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 {
 	fov = 0.66f;
 
@@ -21,6 +21,9 @@ HRESULT Player::Init()
     runSpeed = defaultSpeed * 2;
 
 	rotateSpeed = 0.8f;
+
+	// 카메라 흔들기
+	this->shakeFunc = shakeFunc;
 
 	return S_OK;
 }
@@ -62,6 +65,9 @@ void Player::KeyInput(void)
     if (km->IsStayKeyDown('D'))
         moveInput.y = 1;
 
+    if (km->IsStayKeyDown('T'))
+        shakeFunc(10,0.2f,true);
+    
     if (km->IsOnceKeyDown(VK_SHIFT))
         moveSpeed = runSpeed;
 

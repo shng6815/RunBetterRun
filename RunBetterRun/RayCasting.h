@@ -18,14 +18,14 @@
 
 #define THREAD_NUM 4
 
-class RayCasting;
+class RayCast;
 struct ThreadData;
 
-class RayCasting : public GameObject
+class RayCast : public GameObject
 {
 public:
 	typedef struct tagThreadData {
-		RayCasting* pThis;
+		RayCast* pThis;
 		BOOL			exit;
 		BOOL			done;
 		queue<POINT>* queue;
@@ -60,7 +60,7 @@ private:
 	float	depth[WINSIZE_X];
 	float	sf_dist[WINSIZE_Y];
 
-	Ray RayCast(int colume);
+	Ray RayCasting(int colume);
 	void RenderWall(Ray& ray, int colume);
 	void RenderCeilingFloor(Ray& ray, int colume);
 	void RenderCeilingFloor(Ray& ray, int colume, COLORREF ceiling, COLORREF floor);
