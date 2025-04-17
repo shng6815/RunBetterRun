@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "MapManager.h"
 
 HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 {
@@ -121,13 +122,11 @@ void Player::MoveCamera(float deltaTime)
     int x = INT(pos.x);
     int y = INT(pos.y);
 
-    //if ((0 <= x && x < MAP_COLUME && 0 <= y && y < MAP_ROW)
-    //    && map[MAP_COLUME * y + x] == 0)
-    //{
-    //    cameraPos = pos;
-    //}
-
-    cameraPos = pos;
+    if ((0 <= x && x < MAP_COLUME && 0 <= y && y < MAP_ROW)
+        && MapManager::GetInstance()->GetMapData()->tiles[MAP_COLUME * y + x].roomType == RoomType::FLOOR)
+    {
+        cameraPos = pos;
+    }
 }
 
 void Player::RotateCamera(float deltaTime)
