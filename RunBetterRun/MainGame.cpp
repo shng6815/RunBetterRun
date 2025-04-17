@@ -4,25 +4,30 @@
 #include "Timer.h"
 #include "TilemapTool.h"
 #include "LoadingScene.h"
-#include "RayCasting.h"
+#include "RayCast.h"
+#include "SpriteManager.h"
+#include "MapManager.h"
+#include "MainGameScene.h"
 
 HRESULT MainGame::Init()
 {
 	ImageManager::GetInstance()->Init();
 	KeyManager::GetInstance()->Init();
 	SceneManager::GetInstance()->Init();
+	SpriteManager::GetInstance()->Init();
+	MapManager::GetInstance()->Init();
 
 	SceneManager::GetInstance()->AddScene("타일맵툴", new TilemapTool());
 	SceneManager::GetInstance()->AddLoadingScene("로딩_1", new LoadingScene());
-	SceneManager::GetInstance()->AddScene("RayCasting", new RayCasting());
-	SceneManager::GetInstance()->ChangeScene("RayCasting");
+	SceneManager::GetInstance()->AddScene("MainGameScene", new MainGameScene());
+	SceneManager::GetInstance()->ChangeScene("MainGameScene");
 
 	hdc = GetDC(g_hWnd);
 
 	backBuffer = new Image();
 	if (FAILED(backBuffer->Init(TILEMAPTOOL_X, TILEMAPTOOL_Y)))
 	{
-		MessageBox(g_hWnd, 
+		MessageBox(g_hWnd,
 			TEXT("백버퍼 생성 실패"), TEXT("경고"), MB_OK);
 		return E_FAIL;
 	}
@@ -41,9 +46,11 @@ void MainGame::Release()
 
 	ReleaseDC(g_hWnd, hdc);
 
+	SpriteManager::GetInstance()->Release();
 	SceneManager::GetInstance()->Release();
 	KeyManager::GetInstance()->Release();
 	ImageManager::GetInstance()->Release();
+	MapManager::GetInstance()->Release();
 }
 
 void MainGame::Update()

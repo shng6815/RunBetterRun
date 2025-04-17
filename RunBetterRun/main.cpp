@@ -5,7 +5,7 @@
 
 HINSTANCE g_hInstance;	// 프로그램 인스턴스 핸들
 HWND g_hWnd;
-LPCWSTR g_lpszClassName = (LPCWSTR)TEXT("RayCasting");
+LPCWSTR g_lpszClassName = (LPCWSTR)TEXT("RayCast");
 MainGame g_mainGame;
 POINT g_ptMouse;	// 마우스 좌표
 
