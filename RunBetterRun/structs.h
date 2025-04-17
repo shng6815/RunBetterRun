@@ -50,3 +50,11 @@ typedef struct tagRay
 
 	tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX);
 } Ray;
+
+typedef struct tagMapData
+{
+	int width;
+	int height;
+	vector<Room> tiles;
+	Texture* texture;
+} MapData;

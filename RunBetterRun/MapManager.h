@@ -1,38 +1,29 @@
 #pragma once
 #include "Singleton.h"
 #include "structs.h"
-#include <string>
-#include <vector>
-#include <map>
-#include "structs.h"
+#include <stack>
+#include <algorithm>
 
 #define MAP_COLUME 24
 #define MAP_ROW 24
-
-typedef struct tagMapData
-{
-	int width;
-	int height;
-	vector<Room> tiles;
-	Texture* texture;
-} MapData;
 
 class MapManager : public Singleton<MapManager>
 {
 private:
 	MapData mapData;
-
+	void GenerateMaze(int startX, int startY, int width, int height); //미로 생성할때 쓸 함수
+	void ShuffleDirections(int directions[4]);
 public:
-	HRESULT Init();
-	HRESULT Init(LPCWCH filePath);
+	HRESULT Init();					//기본	   맵 생성
+	HRESULT Init(LPCWCH filePath);  //파일경로 맵 로드
 	void Release();
 
-	bool LoadMap(const LPCWCH filePath);
+	bool LoadMap(const LPCWCH filePath); 
 	bool SaveMap(const LPCWCH filePath);
-	bool CreateEmptyMap(int width, int height);
+	
+	bool CreateMazeMap(int width, int height); //미로 맵 생성
+	bool CreateNewMap(int width, int height); //새로운 맵 생성
+	void SetTile(int x, int y, RoomType tileType, int index); //특정타입의 타일 설정
 
 	MapData* GetMapData();
-
-	// 타일 조작
-	void SetTile(int x, int y, RoomType tileType, int index);
 };
