@@ -140,7 +140,6 @@
     <ClCompile Include="MainGameScene.cpp" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="MonsterManager.cpp" />
-    <ClCompile Include="RayCasting.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="MapManager.cpp" />
     <ClCompile Include="RayCast.cpp" />
@@ -166,7 +165,6 @@
     <ClInclude Include="MainGameScene.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="MonsterManager.h" />
-    <ClInclude Include="RayCasting.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="MapManager.h" />
     <ClInclude Include="RayCast.h" />

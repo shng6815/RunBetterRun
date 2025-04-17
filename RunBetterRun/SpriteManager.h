@@ -12,6 +12,7 @@ private:
     list<Sprite> sprites;
     Texture mapTileTexture;
     FPOINT playerPos;
+    FPOINT monsterPos;
 
 public:
     HRESULT Init();
@@ -21,6 +22,7 @@ public:
     void ClearSprites();
     void SortSpritesByDistance();
     void UpdatePlayerPosition(FPOINT pos) { playerPos = pos; }
+    void UpdateMonsterPosition(FPOINT pos) { monsterPos = pos;  }
 
     HRESULT LoadTexture(LPCWCH path, Texture& outTexture);
     HRESULT LoadMapTileTexture(LPCWCH path);
