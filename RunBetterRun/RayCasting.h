@@ -2,7 +2,6 @@
 #include "GameObject.h"
 #include "structs.h"
 #include <queue>
-#include <list>
 
 #define CEILING_COLOR 0x383838
 #define FLOOR_COLOR 0x717171
@@ -37,9 +36,6 @@ public:
 	} ThreadData;
 
 private:
-	map<LPCWCH, Texture>	spritesTextureData;
-	list<Sprite>			sprites;
-
 	HANDLE			threads[THREAD_NUM];
 	ThreadData		threadDatas[THREAD_NUM];
 	HANDLE			threadMutex[THREAD_NUM];
@@ -49,8 +45,8 @@ private:
 
 	BITMAPINFO		bmi;
 	BYTE			pixelData[WINSIZE_X * WINSIZE_Y * 3];
-
-	Texture			tile;
+	
+	Texture	*		mapTile;
 
 	int     renderScale;
 	int     currentFPS;
@@ -61,6 +57,10 @@ private:
 
 	float	rotateSpeed;
 	float	moveSpeed;
+	
+	const int* mapData;
+	int mapWidth;
+	int mapHeight;
 
 	FPOINT	cameraPos;
 	FPOINT	cameraDir;
@@ -89,12 +89,9 @@ private:
 	void RenderPixel(FPOINT pixel, int color);
 	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance, bool isSide = false);
 	COLORREF GetDistanceShadeColor(COLORREF color, float distance);
-	HRESULT LoadTexture(LPCWCH path, Texture& texture);
-	void PutSprite(LPCWCH path, FPOINT pos);
 	int GetRenderScaleBasedOnFPS(void);
-	void SortSpritesByDistance(void);
-	void RenderSprites(DWORD start, DWORD end);
-	void RenderSprite(Sprite& sprite, POINT renderX, POINT renderY, FPOINT transform);
+	void RenderSprites(void);
+	void RenderSpritePixel(FPOINT pixel, Sprite& sprite);
 
 public:
 	virtual HRESULT Init(void) override;
@@ -103,4 +100,5 @@ public:
 	virtual void Render(HDC hdc) override;
 
 	void FillScreen(DWORD start, DWORD end);
+	void ReloadMapData();
 };

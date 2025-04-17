@@ -1,5 +1,7 @@
 ﻿#include "RayCasting.h"
 #include "KeyManager.h"
+#include "SpriteManager.h"
+#include "MapManager.h"
 #include <fstream>
 
 int RayCasting::map[MAP_ROW * MAP_COLUME] =
@@ -79,9 +81,12 @@ HRESULT RayCasting::Init(void)
     bmi.bmiHeader.biBitCount = 24;
     bmi.bmiHeader.biCompression = BI_RGB;
 
-    LoadTexture(TEXT("Image/maptiles.bmp"), tile);
-    PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
-    PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
+    ReloadMapData();
+
+    SpriteManager::GetInstance()->LoadMapTileTexture(TEXT("Image/maptiles.bmp"));
+    mapTile = SpriteManager::GetInstance()->GetMapTileTexture();
+    SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
+    SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
     renderScale = 4;
     currentFPS = 60;
     fpsCheckCounter = 0;
@@ -124,9 +129,8 @@ void RayCasting::Release(void)
     while (!threadQueue.empty())
         threadQueue.pop();
 
-    tile.bmp.clear();
-    sprites.clear();
-    spritesTextureData.clear();
+    mapTile = nullptr;
+    SpriteManager::GetInstance()->ClearSprites();
 }
 
 void RayCasting::Update(void)
@@ -145,8 +149,8 @@ void RayCasting::Update(void)
     if (rotate.x || rotate.y)
         RotateCamera(deltaTime);
 
-    if (!sprites.empty())
-        SortSpritesByDistance();
+    SpriteManager::GetInstance()->UpdatePlayerPosition(cameraPos);
+    SpriteManager::GetInstance()->SortSpritesByDistance();
 
     fpsCheckCounter++;
     fpsCheckTime += deltaTime;
@@ -212,12 +216,31 @@ void RayCasting::FillScreen(DWORD start, DWORD end)
             ++x;
         }
     }
+}
+
+void RayCasting::ReloadMapData()
+{
+    MapManager* mapManager = MapManager::GetInstance();
+    MapData* currentMap = mapManager->GetCurrMapData();
+
+    if (currentMap) {
+        mapData = currentMap->tiles.data();
+        mapWidth = currentMap->width;
+        mapHeight = currentMap->height;
+    }
+    else {
+        mapData = nullptr;
+        mapWidth = MAP_COLUME;
+        mapHeight = MAP_ROW;
+    }
 
     RenderSprites(start, end);
 }
 
 void RayCasting::RenderSprites(DWORD start, DWORD end)
 {
+    const list<Sprite>& sprites = SpriteManager::GetInstance()->GetSprites();
+
     float invDet = 1.0f / ((plane.x * cameraDir.y) - (plane.y * cameraDir.x));
 
     for (auto& sprite : sprites)
@@ -589,7 +612,7 @@ COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float 
     texturePixel.x += colume * TILE_SIZE;
     texturePixel.y += row * TILE_SIZE;
 
-    COLORREF color = this->tile.bmp[INT(texturePixel.y * this->tile.bmpWidth + texturePixel.x)];
+    COLORREF color = this->mapTile->bmp[INT(texturePixel.y * this->mapTile->bmpWidth + texturePixel.x)];
 
     if (isSide)
     {
@@ -619,101 +642,12 @@ COLORREF RayCasting::GetDistanceShadeColor(COLORREF color, float distance)
             INT(GetBValue(color) / divide));
 }
 
-HRESULT RayCasting::LoadTexture(LPCWCH path, Texture& texture)
-{
-    if (!texture.bmp.empty())
-        texture.bmp.clear();
-
-    std::ifstream file(path, std::ios::binary);
-
-    if (!file.is_open())
-    {
-        wstring error = TEXT("Error opening file: ");
-        error += path;
-        MessageBox(g_hWnd,
-            error.c_str(), TEXT("Warning"), MB_OK);
-        return E_FAIL;
-    }
-
-    BITMAPFILEHEADER fileHeader;
-    BITMAPINFOHEADER infoHeader;
-
-    file.read(reinterpret_cast<LPCH>(&fileHeader), sizeof(fileHeader));
-    file.read(reinterpret_cast<LPCH>(&infoHeader), sizeof(infoHeader));
-
-    if (fileHeader.bfType != 0x4D42)
-    {
-        wstring error = TEXT("Not a valid BMP file: ");
-        error += path;
-        MessageBox(g_hWnd,
-            error.c_str(), TEXT("Warning"), MB_OK);
-        return E_FAIL;
-    }
-
-    texture.bmpWidth = infoHeader.biWidth;
-    texture.bmpHeight = infoHeader.biHeight;
-
-    if (infoHeader.biBitCount != 24)
-    {
-        wstring error = TEXT("Only 24-bit BMP files are supported: ");
-        error += path;
-        MessageBox(g_hWnd,
-            error.c_str(), TEXT("Warning"), MB_OK);
-        return E_FAIL;
-    }
-
-    DWORD bmpRowSize = (texture.bmpWidth * 3 + 3) & ~3;
-    vector<BYTE>	bmpData(bmpRowSize * texture.bmpHeight);
-
-    file.seekg(fileHeader.bfOffBits, std::ios::beg);
-    file.read(reinterpret_cast<LPCH>(bmpData.data()), bmpData.size());
-    file.close();
-
-    texture.bmp.resize(texture.bmpWidth * texture.bmpHeight);
-    for (DWORD i = 0; i < texture.bmpWidth * texture.bmpHeight; ++i)
-    {
-        DWORD index = (texture.bmpHeight - (i / texture.bmpWidth) - 1) * bmpRowSize + (i % texture.bmpWidth) * 3;
-        texture.bmp[i] = RGB(bmpData[index], bmpData[index + 1], bmpData[index + 2]);
-    }
-    return S_OK;
-}
-
-void RayCasting::PutSprite(LPCWCH path, FPOINT pos)
-{
-    auto it = spritesTextureData.find(path);
-    if (it != spritesTextureData.end())
-        sprites.push_back(Sprite{ pos, 0, &it->second });
-    else
-    {
-        spritesTextureData.insert(make_pair(path, Texture()));
-        Texture& sprite = spritesTextureData[path];
-        if (FAILED(LoadTexture(path, sprite)))
-            spritesTextureData.erase(path);
-        else
-            sprites.push_back(Sprite{ pos, 0, &sprite });
-    }
-}
-
-
 int RayCasting::GetRenderScaleBasedOnFPS(void)
 {
     if (currentFPS < 15) return 32;
     else if (currentFPS < 25) return 16;
     else if (currentFPS < 40) return 8;
     else return 4;
-}
-
-void RayCasting::SortSpritesByDistance(void)
-{
-    for (auto& sprite : sprites)
-    {
-        sprite.distance = sqrtf(fabs(
-            powf(cameraPos.x - sprite.pos.x, 2)
-            + powf(cameraPos.y - sprite.pos.y, 2)));
-    }
-    sprites.sort([](Sprite& a, Sprite& b)->BOOL {
-        return a.distance > b.distance;
-        });
 }
 
 
