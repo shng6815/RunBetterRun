@@ -138,7 +138,7 @@
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="MapManager.cpp" />
-    <ClCompile Include="RayCasting.cpp" />
+    <ClCompile Include="RayCast.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SpriteManager.cpp" />
     <ClCompile Include="TilemapTool.cpp" />
@@ -158,7 +158,7 @@
     <ClInclude Include="Monster.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="MapManager.h" />
-    <ClInclude Include="RayCasting.h" />
+    <ClInclude Include="RayCast.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="structs.h" />

@@ -8,6 +8,7 @@ typedef struct tagRoom
 {
 	RoomType	roomType;
 	DWORD		tilePos;
+	tagRoom() :roomType(RoomType::FLOOR), tilePos(1) {}
 } Room;
 
 typedef struct tagLevel
