@@ -1,5 +1,5 @@
 #include "MainGameScene.h"
-#include "RayCasting.h"
+#include "RayCast.h"
 #include "Player.h"
 
 HRESULT MainGameScene::Init()

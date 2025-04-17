@@ -323,7 +323,7 @@ void RayCast::RenderWall(Ray& ray, int colume)
         || (ray.side == 1 && ray.dir.y < 0.0f))
         texture.x = TILE_SIZE - texture.x - 1.0f;
 
-    int tile = MapManager::GetInstance()->GetMapData()->tiles[INT(ray.map_pos.y) * MAP_COLUME + INT(ray.map_pos.x)].tilePos;
+    int tile = MapManager::GetInstance()->GetMapData()->tiles[INT(ray.mapPos.y) * MAP_COLUME + INT(ray.mapPos.x)].tilePos;
     int y = max(0, INT(WINSIZE_Y / 2.0f - ray.height / 2.0f));
     int end = (WINSIZE_Y - y < ray.height ? WINSIZE_Y : y + ray.height);
     while (y < end)
