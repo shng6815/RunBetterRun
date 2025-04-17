@@ -1,11 +1,11 @@
-﻿#include "RayCasting.h"
+﻿#include "RayCast.h"
 #include "KeyManager.h"
 #include "SpriteManager.h"
 #include "MapManager.h"
 #include <fstream>
 #include "Player.h"
 
-int RayCasting::map[MAP_ROW * MAP_COLUME] =
+int RayCast::map[MAP_ROW * MAP_COLUME] =
 {
   1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,1,
   1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,
@@ -33,19 +33,19 @@ int RayCasting::map[MAP_ROW * MAP_COLUME] =
   1,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,53,52,51,50,49,48,47,1
 };
 
-DWORD WINAPI RaycastThread(LPVOID lpParam) {
-    RayCasting::ThreadData* data = static_cast<RayCasting::ThreadData*>(lpParam);
-    while (data && !data->exit)
+static DWORD WINAPI RaycastThread(LPVOID lpParam) {
+    RayCast::ThreadData* data = static_cast<RayCast::ThreadData*>(lpParam);
+    while (data && !(*data->exit))
     {
         WaitForSingleObject(*(data->queueMutex), INFINITE);
-        if (data->queue && !data->queue->empty() && !data->done)
+        if (data->queue && !data->queue->empty())
         {
             POINT colume = data->queue->front();
             data->queue->pop();
             ReleaseMutex(*(data->queueMutex));
             data->pThis->FillScreen(colume.x, colume.y);
             WaitForSingleObject(*(data->threadMutex), INFINITE);
-            data->done = TRUE;
+            *(data->done) += 1;
             ReleaseMutex(*(data->threadMutex));
         }
         else
@@ -55,15 +55,15 @@ DWORD WINAPI RaycastThread(LPVOID lpParam) {
 }
 
 
-HRESULT RayCasting::Init(void)
+HRESULT RayCast::Init(void)
 {
     Player::GetInstance()->Init();
 
     for (int i = 0; i < WINSIZE_X; ++i)
-        camera_x[i] = ((2.0f * FLOAT(i) / FLOAT(WINSIZE_X)) - 1.0f);
+        screenWidthPixelUnitPos[i] = ((2.0f * FLOAT(i) / FLOAT(WINSIZE_X)) - 1.0f);
 
     for (int i = 0; i < WINSIZE_Y; ++i)
-        sf_dist[i] = FLOAT(WINSIZE_Y) / (2.0f * FLOAT(i) - FLOAT(WINSIZE_Y));
+        screenHeightPixelDepths[i] = FLOAT(WINSIZE_Y) / (2.0f * FLOAT(i) - FLOAT(WINSIZE_Y));
 
     memset(&bmi, 0, sizeof(bmi));
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -79,21 +79,24 @@ HRESULT RayCasting::Init(void)
     mapTile = SpriteManager::GetInstance()->GetMapTileTexture();
     SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
     SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
+
     renderScale = SCALE;
     currentFPS = 60;
     fpsCheckCounter = 0;
     fpsCheckTime = 0.0f;
 
+    threadJobDone = 0;
+    threadTermination = FALSE;
     queueMutex = CreateMutex(NULL, FALSE, NULL);
+    threadMutex = CreateMutex(NULL, FALSE, NULL);
     colsPerThread = WINSIZE_X / THREAD_NUM;
     for (DWORD i = 0; i < THREAD_NUM; ++i) {
-        threadMutex[i] = CreateMutex(NULL, FALSE, NULL);
         threadDatas[i] = {
             this,
-            FALSE,
-            FALSE,
+            &threadTermination,
+            &threadJobDone,
             &threadQueue,
-            &threadMutex[i],
+            &threadMutex,
             &queueMutex
         };
         threads[i] = CreateThread(NULL, 0, RaycastThread, &threadDatas[i], 0, NULL);
@@ -102,18 +105,14 @@ HRESULT RayCasting::Init(void)
     return S_OK;
 }
 
-void RayCasting::Release(void)
+void RayCast::Release(void)
 {
-    for (int i = 0; i < THREAD_NUM; ++i)
-        threadDatas[i].exit = TRUE;
-
+    threadTermination = TRUE;
     WaitForMultipleObjects(THREAD_NUM, threads, TRUE, INFINITE);
+    for (auto& thread : threads)
+        CloseHandle(thread);
 
-    for (int i = 0; i < THREAD_NUM; ++i)
-    {
-        CloseHandle(threadMutex[i]);
-        CloseHandle(threads[i]);
-    }
+    CloseHandle(threadMutex);
     CloseHandle(queueMutex);
 
     while (!threadQueue.empty())
@@ -124,7 +123,7 @@ void RayCasting::Release(void)
     Player::GetInstance()->Release();
 }
 
-void RayCasting::Update(void)
+void RayCast::Update(void)
 {
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
 
@@ -145,7 +144,7 @@ void RayCasting::Update(void)
 }
 
 
-void RayCasting::Render(HDC hdc)
+void RayCast::Render(HDC hdc)
 {
     WaitForSingleObject(queueMutex, INFINITE);
     for (int i = 0; i < THREAD_NUM - 1; ++i)
@@ -157,39 +156,29 @@ void RayCasting::Render(HDC hdc)
     while (!print)
     {
         BOOL ready = TRUE;
-        WaitForMultipleObjects(THREAD_NUM, threadMutex, TRUE, INFINITE);
-        for (int i = 0; i < THREAD_NUM; ++i)
-        {
-            if (!threadDatas[i].done)
-            {
-                ready = FALSE;
-                break;
-            }
-        }
-        if (ready)
+        WaitForSingleObject(threadMutex, INFINITE);
+        if (threadJobDone == THREAD_NUM)
         {
             SetDIBitsToDevice(hdc, 0, 0, WINSIZE_X, WINSIZE_Y, 0, 0, 0,
                 WINSIZE_Y, pixelData, &bmi, DIB_RGB_COLORS);
-            for (int i = 0; i < THREAD_NUM; ++i)
-                threadDatas[i].done = FALSE;
+            threadJobDone = 0;
             print = TRUE;
         }
-        for (auto& mutex : threadMutex)
-            ReleaseMutex(mutex);
+        ReleaseMutex(threadMutex);
     }
 }
 
-void RayCasting::FillScreen(DWORD start, DWORD end)
+void RayCast::FillScreen(DWORD start, DWORD end)
 {
     DWORD x = start;
     while (x < end)
     {
-        Ray ray = RayCast(x);
+        Ray ray = RayCasting(x);
         ray.height = fabs(FLOAT(WINSIZE_Y) / ray.distance);
 
         DWORD endX = min(x + renderScale, end);
         while (x < endX) {
-            depth[x] = ray.distance;
+            screenWidthRayDistance[x] = ray.distance;
             RenderWall(ray, x);
             if (ray.height < WINSIZE_Y)
                 RenderCeilingFloor(ray, x);
@@ -199,7 +188,7 @@ void RayCasting::FillScreen(DWORD start, DWORD end)
     RenderSprites(start, end);
 }
 
-void RayCasting::ReloadMapData()
+void RayCast::ReloadMapData()
 {
     MapManager* mapManager = MapManager::GetInstance();
     MapData* currentMap = mapManager->GetCurrMapData();
@@ -217,7 +206,7 @@ void RayCasting::ReloadMapData()
 
 }
 
-void RayCasting::RenderSprites(DWORD start, DWORD end)
+void RayCast::RenderSprites(DWORD start, DWORD end)
 {
     const list<Sprite>& sprites = SpriteManager::GetInstance()->GetSprites();
     
@@ -230,7 +219,7 @@ void RayCasting::RenderSprites(DWORD start, DWORD end)
             FPOINT pos = { sprite.pos.x - Player::GetInstance()->GetCameraPos().x, sprite.pos.y - Player::GetInstance()->GetCameraPos().y };
             FPOINT transform = { invDet * (Player::GetInstance()->GetCameraVerDir().y * pos.x - Player::GetInstance()->GetCameraVerDir().x * pos.y),
                                 invDet * (-Player::GetInstance()->GetPlane().y * pos.x + Player::GetInstance()->GetPlane().x * pos.y) };
-            if (fabs(transform.y) < 1e-6f)
+            if (fabs(transform.y) < EPSILON)
                 continue;
             int screen = INT((WINSIZE_X / 2) * (1.0f + transform.x / transform.y));
             float size = fabs(WINSIZE_Y / transform.y);
@@ -251,7 +240,7 @@ void RayCasting::RenderSprites(DWORD start, DWORD end)
     }
 }
 
-void RayCasting::RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY, FPOINT transform)
+void RayCast::RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY, FPOINT transform)
 {
     float renderYOrg = renderY.x;
     int screen = INT((WINSIZE_X / 2) * (1.0f + transform.x / transform.y));
@@ -266,7 +255,7 @@ void RayCasting::RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY
         while (renderX.x < endX)
         {
             if (transform.y > 0
-                && transform.y < depth[renderX.x]
+                && transform.y < screenWidthRayDistance[renderX.x]
                 && texturePos.x < sprite.texture->bmpWidth)
             {
                 renderY.x = renderYOrg;
@@ -296,24 +285,27 @@ void RayCasting::RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY
     }
 }
 
-Ray RayCasting::RayCast(int colume)
+Ray RayCast::RayCasting(int colume)
 {
     bool    hit = false;
     bool    nextSide = false;
-    Ray     ray(Player::GetInstance()->GetCameraPos(), Player::GetInstance()->GetPlane(), Player::GetInstance()->GetCameraVerDir(), camera_x[colume]);
+    Ray     ray(Player::GetInstance()->GetCameraPos(),
+        Player::GetInstance()->GetPlane(),
+        Player::GetInstance()->GetCameraVerDir(),
+        screenWidthPixelUnitPos[colume]);
 
     while (!hit)
     {
-        nextSide = ray.side_dist.x < ray.side_dist.y;
-        ray.side_dist.x += nextSide * ray.delta_dist.x;
-        ray.map_pos.x += nextSide * ray.step.x;
-        ray.side_dist.y += (!nextSide) * ray.delta_dist.y;
-        ray.map_pos.y += (!nextSide) * ray.step.y;
+        nextSide = ray.sideDist.x < ray.sideDist.y;
+        ray.sideDist.x += nextSide * ray.deltaDist.x;
+        ray.mapPos.x += nextSide * ray.step.x;
+        ray.sideDist.y += (!nextSide) * ray.deltaDist.y;
+        ray.mapPos.y += (!nextSide) * ray.step.y;
 
         ray.side = !nextSide;
 
-        int x = INT(ray.map_pos.x);
-        int y = INT(ray.map_pos.y);
+        int x = INT(ray.mapPos.x);
+        int y = INT(ray.mapPos.y);
 
         if (x < 0 || MAP_COLUME <= x || y < 0 || MAP_ROW <= y)
             break;
@@ -325,38 +317,38 @@ Ray RayCasting::RayCast(int colume)
     float pos;
     if (ray.side)
     {
-        pos = (ray.map_pos.y - Player::GetInstance()->GetCameraPos().y + (1.0f - ray.step.y) / 2.0f);
-        ray.distance = fabs(pos / ray.ray_dir.y);
+        pos = (ray.mapPos.y - Player::GetInstance()->GetCameraPos().y + (1.0f - ray.step.y) / 2.0f);
+        ray.distance = fabs(pos / ray.dir.y);
     }
     else
     {
-        pos = (ray.map_pos.x - Player::GetInstance()->GetCameraPos().x + (1.0f - ray.step.x) / 2.0f);
-        ray.distance = fabs(pos / ray.ray_dir.x);
+        pos = (ray.mapPos.x - Player::GetInstance()->GetCameraPos().x + (1.0f - ray.step.x) / 2.0f);
+        ray.distance = fabs(pos / ray.dir.x);
     }
     return ray;
 }
 
 
-void RayCasting::RenderWall(Ray& ray, int colume)
+void RayCast::RenderWall(Ray& ray, int colume)
 {
     FPOINT pixel = { colume, max(0, WINSIZE_Y / 2.0f - (ray.height / 2.0f)) };
 
     if (ray.side)
-        ray.wall_x = ray.ray_pos.x
+        ray.wallTextureX = ray.pos.x
         + ray.distance
-        * ray.ray_dir.x;
+        * ray.dir.x;
     else
-        ray.wall_x = ray.ray_pos.y
+        ray.wallTextureX = ray.pos.y
         + ray.distance
-        * ray.ray_dir.y;
-    ray.wall_x -= INT(ray.wall_x);
+        * ray.dir.y;
+    ray.wallTextureX -= INT(ray.wallTextureX);
 
-    FPOINT texture = { INT(ray.wall_x * TILE_SIZE), 0.0f };
-    if ((ray.side == 0 && ray.ray_dir.x > 0.0f)
-        || (ray.side == 1 && ray.ray_dir.y < 0.0f))
+    FPOINT texture = { INT(ray.wallTextureX * TILE_SIZE), 0.0f };
+    if ((ray.side == 0 && ray.dir.x > 0.0f)
+        || (ray.side == 1 && ray.dir.y < 0.0f))
         texture.x = TILE_SIZE - texture.x - 1.0f;
 
-    int tile = map[INT(ray.map_pos.y) * MAP_COLUME + INT(ray.map_pos.x)];
+    int tile = map[INT(ray.mapPos.y) * MAP_COLUME + INT(ray.mapPos.x)];
     int y = max(0, INT(WINSIZE_Y / 2.0f - ray.height / 2.0f));
     int end = (WINSIZE_Y - y < ray.height ? WINSIZE_Y : y + ray.height);
     while (y < end)
@@ -372,37 +364,38 @@ void RayCasting::RenderWall(Ray& ray, int colume)
     }
 }
 
-void RayCasting::RenderCeilingFloor(Ray& ray, int colume)
+void RayCast::RenderCeilingFloor(Ray& ray, int colume)
 {
-    if (ray.side == 0 && ray.ray_dir.x >= 0)
-        ray.floor_wall = { ray.map_pos.x, ray.map_pos.y + ray.wall_x };
-    else if (ray.side == 0 && ray.ray_dir.x < 0)
-        ray.floor_wall = { ray.map_pos.x + 1, ray.map_pos.y + ray.wall_x };
-    else if (ray.side && ray.ray_dir.y >= 0)
-        ray.floor_wall = { ray.map_pos.x + ray.wall_x, ray.map_pos.y };
-    else if (ray.side && ray.ray_dir.y < 0)
-        ray.floor_wall = { ray.map_pos.x + ray.wall_x, ray.map_pos.y + 1 };
+    FPOINT floorTextureStartPos = { 0, 0 };
+    if (ray.side == 0 && ray.dir.x >= 0)
+        floorTextureStartPos = { ray.mapPos.x, ray.mapPos.y + ray.wallTextureX };
+    else if (ray.side == 0 && ray.dir.x < 0)
+        floorTextureStartPos = { ray.mapPos.x + 1, ray.mapPos.y + ray.wallTextureX };
+    else if (ray.side && ray.dir.y >= 0)
+        floorTextureStartPos = { ray.mapPos.x + ray.wallTextureX, ray.mapPos.y };
+    else if (ray.side && ray.dir.y < 0)
+        floorTextureStartPos = { ray.mapPos.x + ray.wallTextureX, ray.mapPos.y + 1 };
 
     FPOINT pixel = { colume, 0 };
     int y = INT(WINSIZE_Y / 2 + ray.height / 2.0f);
     while (y < WINSIZE_Y)
     {
-        float weight = sf_dist[y] / ray.distance;
-        ray.c_floor = { weight * ray.floor_wall.x + (1.0f - weight) * Player::GetInstance()->GetCameraPos().x,
-                       weight * ray.floor_wall.y + (1.0f - weight) * Player::GetInstance()->GetCameraPos().y };
-        FPOINT texture = { INT(ray.c_floor.x * TILE_SIZE) % TILE_SIZE,
-            INT(ray.c_floor.y * TILE_SIZE) % TILE_SIZE };
+        float weight = screenHeightPixelDepths[y] / ray.distance;
+        FPOINT currentFloor = { weight * floorTextureStartPos.x + (1.0f - weight) * Player::GetInstance()->GetCameraPos().x,
+                       weight * floorTextureStartPos.y + (1.0f - weight) * Player::GetInstance()->GetCameraPos().y };
+        FPOINT texture = { INT(currentFloor.x * TILE_SIZE) % TILE_SIZE,
+            INT(currentFloor.y * TILE_SIZE) % TILE_SIZE };
         int endY = min(y + renderScale, WINSIZE_Y);
         while (y < endY)
         {
             pixel.y = y;
-            RenderPixel(pixel, GetDistanceShadeColor(8, texture, sf_dist[y]));
-            RenderPixel({ pixel.x, WINSIZE_Y - (pixel.y + 1) }, GetDistanceShadeColor(9, texture, sf_dist[y++]));
+            RenderPixel(pixel, GetDistanceShadeColor(8, texture, screenHeightPixelDepths[y]));
+            RenderPixel({ pixel.x, WINSIZE_Y - (pixel.y + 1) }, GetDistanceShadeColor(9, texture, screenHeightPixelDepths[y++]));
         }
     }
 }
 
-void RayCasting::RenderCeilingFloor(Ray& ray, int colume, COLORREF ceiling, COLORREF floor)
+void RayCast::RenderCeilingFloor(Ray& ray, int colume, COLORREF ceiling, COLORREF floor)
 {
     FPOINT pixel = { colume, 0 };
     int y = INT(WINSIZE_Y / 2 + ray.height / 2.0f);
@@ -412,13 +405,13 @@ void RayCasting::RenderCeilingFloor(Ray& ray, int colume, COLORREF ceiling, COLO
         while (y < endY)
         {
             pixel.y = y;
-            RenderPixel(pixel, GetDistanceShadeColor(floor, sf_dist[y]));
-            RenderPixel({ pixel.x, WINSIZE_Y - (pixel.y + 1) }, GetDistanceShadeColor(ceiling, sf_dist[y]));
+            RenderPixel(pixel, GetDistanceShadeColor(floor, screenHeightPixelDepths[y]));
+            RenderPixel({ pixel.x, WINSIZE_Y - (pixel.y + 1) }, GetDistanceShadeColor(ceiling, screenHeightPixelDepths[y]));
         }
     }
 }
 
-void RayCasting::RenderPixel(FPOINT pixel, int color)
+void RayCast::RenderPixel(FPOINT pixel, int color)
 {
     int pixelPos = (WINSIZE_X * INT(pixel.y) + INT(pixel.x)) * 3;
     //*reinterpret_cast<LPDWORD>(&pixelData[pixelPos]) += color;
@@ -427,7 +420,7 @@ void RayCasting::RenderPixel(FPOINT pixel, int color)
     pixelData[pixelPos + 2] = GetBValue(color);
 }
 
-COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance, bool isSide)
+COLORREF RayCast::GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance, bool isSide)
 {
     float divide = distance / SHADE_VALUE;
 
@@ -456,7 +449,7 @@ COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float 
             INT(GetBValue(color) / divide));
 }
 
-COLORREF RayCasting::GetDistanceShadeColor(COLORREF color, float distance)
+COLORREF RayCast::GetDistanceShadeColor(COLORREF color, float distance)
 {
     float divide = distance / SHADE_VALUE;
 
@@ -468,7 +461,7 @@ COLORREF RayCasting::GetDistanceShadeColor(COLORREF color, float distance)
             INT(GetBValue(color) / divide));
 }
 
-int RayCasting::GetRenderScaleBasedOnFPS(void)
+int RayCast::GetRenderScaleBasedOnFPS(void)
 {
     if (currentFPS < 15) return SCALE << 3;
     else if (currentFPS < 25) return SCALE << 2;
@@ -479,22 +472,23 @@ int RayCasting::GetRenderScaleBasedOnFPS(void)
 
 Ray::tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX)
 {
-    ray_pos = pos;
-    map_pos = { FLOAT(INT(pos.x)), FLOAT(INT(pos.y)) };
-    ray_dir = { Player::GetInstance()->GetCameraVerDir().x + Player::GetInstance()->GetPlane().x * cameraX, Player::GetInstance()->GetCameraVerDir().y + Player::GetInstance()->GetPlane().y * cameraX };
-    delta_dist = { fabs(1.0f / ray_dir.x), fabs(1.0f / ray_dir.y) };
-    if (ray_dir.x < 0)
+    this->pos = pos;
+    mapPos = { FLOAT(INT(pos.x)), FLOAT(INT(pos.y)) };
+    dir = { Player::GetInstance()->GetCameraVerDir().x + Player::GetInstance()->GetPlane().x * cameraX,
+        Player::GetInstance()->GetCameraVerDir().y + Player::GetInstance()->GetPlane().y * cameraX };
+    deltaDist = { fabs(1.0f / dir.x), fabs(1.0f / dir.y) };
+    if (dir.x < 0)
     {
-        step = { -1.0f, (ray_dir.y < 0 ? -1.0f : 1.0f) };
-        side_dist.x = (ray_pos.x - map_pos.x) * delta_dist.x;
+        step = { -1.0f, (dir.y < 0 ? -1.0f : 1.0f) };
+        sideDist.x = (pos.x - mapPos.x) * deltaDist.x;
     }
     else
     {
-        step = { 1.0f, (ray_dir.y < 0 ? -1.0f : 1.0f) };
-        side_dist.x = (map_pos.x + 1.0f - ray_pos.x) * delta_dist.x;
+        step = { 1.0f, (dir.y < 0 ? -1.0f : 1.0f) };
+        sideDist.x = (mapPos.x + 1.0f - pos.x) * deltaDist.x;
     }
-    if (ray_dir.y < 0)
-        side_dist.y = (ray_pos.y - map_pos.y) * delta_dist.y;
+    if (dir.y < 0)
+        sideDist.y = (pos.y - mapPos.y) * deltaDist.y;
     else
-        side_dist.y = (map_pos.y + 1.0f - ray_pos.y) * delta_dist.y;
+        sideDist.y = (mapPos.y + 1.0f - pos.y) * deltaDist.y;
 }

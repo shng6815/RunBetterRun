@@ -39,15 +39,13 @@ typedef struct tagRay
 	float		distance;
 	int			side;
 	int			height;
-	FPOINT		ray_pos;
-	FPOINT		ray_dir;
-	FPOINT		map_pos;
-	FPOINT		side_dist;
-	FPOINT		delta_dist;
+	FPOINT		pos;
+	FPOINT		dir;
+	FPOINT		mapPos;
+	FPOINT		sideDist;
+	FPOINT		deltaDist;
 	FPOINT		step;
-	float		wall_x;
-	FPOINT		floor_wall;
-	FPOINT		c_floor;
+	float		wallTextureX;
 
 	tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX);
 } Ray;

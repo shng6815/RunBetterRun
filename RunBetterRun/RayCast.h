@@ -19,17 +19,14 @@
 #define THREAD_NUM 5
 #define SCALE 4
 
-class RayCasting;
-struct ThreadData;
-
-class RayCasting : public GameObject
+class RayCast : public GameObject
 {
 public:
 	typedef struct tagThreadData {
-		RayCasting* pThis;
-		BOOL			exit;
-		BOOL			done;
-		queue<POINT>* queue;
+		RayCast*		pThis;
+		LPBOOL			exit;
+		LPDWORD			done;
+		queue<POINT>*	queue;
 		LPHANDLE		threadMutex;
 		LPHANDLE		queueMutex;
 	} ThreadData;
@@ -37,8 +34,10 @@ public:
 private:
 	HANDLE			threads[THREAD_NUM];
 	ThreadData		threadDatas[THREAD_NUM];
-	HANDLE			threadMutex[THREAD_NUM];
+	DWORD			threadJobDone;
+	HANDLE			threadMutex;
 	LONG			colsPerThread;
+	BOOL			threadTermination;
 	queue<POINT>	threadQueue;
 	HANDLE			queueMutex;
 
@@ -57,21 +56,20 @@ private:
 	int mapHeight;
 
 	static int map[MAP_ROW * MAP_COLUME];
-	float	camera_x[WINSIZE_X];
-	float	depth[WINSIZE_X];
-	float	sf_dist[WINSIZE_Y];
+	float	screenWidthPixelUnitPos[WINSIZE_X];
+	float	screenWidthRayDistance[WINSIZE_X];
+	float	screenHeightPixelDepths[WINSIZE_Y];
 
-	Ray RayCast(int colume);
+	Ray RayCasting(int colume);
 	void RenderWall(Ray& ray, int colume);
 	void RenderCeilingFloor(Ray& ray, int colume);
 	void RenderCeilingFloor(Ray& ray, int colume, COLORREF ceiling, COLORREF floor);
 	void RenderPixel(FPOINT pixel, int color);
 	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance, bool isSide = false);
 	COLORREF GetDistanceShadeColor(COLORREF color, float distance);
-	int GetRenderScaleBasedOnFPS(void);
 	void RenderSprites(DWORD start, DWORD end);
 	void RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY, FPOINT transform);
-	void RenderSpritePixel(FPOINT pixel, Sprite& sprite);
+	int GetRenderScaleBasedOnFPS(void);
 
 public:
 	virtual HRESULT Init(void) override;

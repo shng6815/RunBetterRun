@@ -4,7 +4,7 @@
 #include "Timer.h"
 #include "TilemapTool.h"
 #include "LoadingScene.h"
-#include "RayCasting.h"
+#include "RayCast.h"
 #include "SpriteManager.h"
 #include "MapManager.h"
 
@@ -45,8 +45,8 @@ HRESULT MainGame::Init()
 	MapManager::GetInstance()->SetCurrentMap("defaultMap");
 	SceneManager::GetInstance()->AddScene("타일맵툴", new TilemapTool());
 	SceneManager::GetInstance()->AddLoadingScene("로딩_1", new LoadingScene());
-	SceneManager::GetInstance()->AddScene("RayCasting", new RayCasting());
-	SceneManager::GetInstance()->ChangeScene("RayCasting");
+	SceneManager::GetInstance()->AddScene("RayCast", new RayCast());
+	SceneManager::GetInstance()->ChangeScene("RayCast");
 
 	hdc = GetDC(g_hWnd);
 
