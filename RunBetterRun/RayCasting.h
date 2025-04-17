@@ -75,7 +75,10 @@ private:
 	float	depth[WINSIZE_X];
 	float	sf_dist[WINSIZE_Y];
 
+	bool isShowMouse;
+
 	void KeyInput(void);
+	void MouseInput(void);
 	void MoveCamera(float deltaTime);
 	void MoveSideCamera(float deltaTime);
 	void RotateCamera(float deltaTime);
@@ -84,7 +87,7 @@ private:
 	void RenderCeilingFloor(Ray& ray, int colume);
 	void RenderCeilingFloor(Ray& ray, int colume, COLORREF ceiling, COLORREF floor);
 	void RenderPixel(FPOINT pixel, int color);
-	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance);
+	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance, bool isSide = false);
 	COLORREF GetDistanceShadeColor(COLORREF color, float distance);
 	HRESULT LoadTexture(LPCWCH path, Texture& texture);
 	void PutSprite(LPCWCH path, FPOINT pos);
