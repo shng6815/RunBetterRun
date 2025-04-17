@@ -1,6 +1,6 @@
 #pragma once
 #include "Singleton.h"
-#include "CommonTypes.h"
+#include "structs.h"
 #include <string>
 #include <vector>
 #include <map>

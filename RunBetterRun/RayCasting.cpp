@@ -216,6 +216,7 @@ void RayCasting::FillScreen(DWORD start, DWORD end)
             ++x;
         }
     }
+    RenderSprites(start, end);
 }
 
 void RayCasting::ReloadMapData()
@@ -233,8 +234,6 @@ void RayCasting::ReloadMapData()
         mapWidth = MAP_COLUME;
         mapHeight = MAP_ROW;
     }
-
-    RenderSprites(start, end);
 }
 
 void RayCasting::RenderSprites(DWORD start, DWORD end)

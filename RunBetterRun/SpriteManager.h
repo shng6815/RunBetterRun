@@ -1,5 +1,5 @@
 #pragma once
-#include "CommonTypes.h"
+#include "structs.h"
 #include "Singleton.h"
 #include <list>
 #include <map>
