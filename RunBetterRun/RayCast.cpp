@@ -5,33 +5,33 @@
 #include <fstream>
 #include "Player.h"
 
-int RayCast::map[MAP_ROW * MAP_COLUME] =
-{
-  1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,1,
-  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,
-  90,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,25,
-  89,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,26,
-  88,0,0,0,0,0,2,2,2,2,2,0,0,0,0,3,0,3,0,3,0,0,0,27,
-  87,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,28,
-  86,0,0,0,0,0,2,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,29,
-  85,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,30,
-  84,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,31,
-  83,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,
-  82,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,
-  81,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,35,
-  80,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,
-  79,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,37,
-  78,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,38,
-  77,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,39,
-  76,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,
-  75,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,41,
-  74,4,0,0,0,0,5,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,42,
-  73,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43,
-  72,4,0,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,44,
-  71,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,45,
-  70,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,46,
-  1,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,53,52,51,50,49,48,47,1
-};
+//int RayCasting::map[MAP_ROW * MAP_COLUME] =
+//{
+//  1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,1,
+//  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,
+//  90,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,25,
+//  89,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,26,
+//  88,0,0,0,0,0,2,2,2,2,2,0,0,0,0,3,0,3,0,3,0,0,0,27,
+//  87,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,28,
+//  86,0,0,0,0,0,2,0,0,0,2,0,0,0,0,3,0,0,0,3,0,0,0,29,
+//  85,0,0,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,30,
+//  84,0,0,0,0,0,2,2,0,2,2,0,0,0,0,3,0,3,0,3,0,0,0,31,
+//  83,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,
+//  82,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,
+//  81,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,35,
+//  80,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,
+//  79,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,37,
+//  78,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,38,
+//  77,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,39,
+//  76,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,
+//  75,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,41,
+//  74,4,0,0,0,0,5,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,42,
+//  73,4,0,4,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43,
+//  72,4,0,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,44,
+//  71,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,45,
+//  70,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,46,
+//  1,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,53,52,51,50,49,48,47,1
+//};
 
 static DWORD WINAPI RaycastThread(LPVOID lpParam) {
     RayCast::ThreadData* data = static_cast<RayCast::ThreadData*>(lpParam);
@@ -72,8 +72,6 @@ HRESULT RayCast::Init(void)
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 24;
     bmi.bmiHeader.biCompression = BI_RGB;
-
-    ReloadMapData();
 
     SpriteManager::GetInstance()->LoadMapTileTexture(TEXT("Image/maptiles.bmp"));
     mapTile = SpriteManager::GetInstance()->GetMapTileTexture();
@@ -188,24 +186,6 @@ void RayCast::FillScreen(DWORD start, DWORD end)
     RenderSprites(start, end);
 }
 
-void RayCast::ReloadMapData()
-{
-    MapManager* mapManager = MapManager::GetInstance();
-    MapData* currentMap = mapManager->GetCurrMapData();
-
-    if (currentMap) {
-        mapData = currentMap->tiles.data();
-        mapWidth = currentMap->width;
-        mapHeight = currentMap->height;
-    }
-    else {
-        mapData = nullptr;
-        mapWidth = MAP_COLUME;
-        mapHeight = MAP_ROW;
-    }
-
-}
-
 void RayCast::RenderSprites(DWORD start, DWORD end)
 {
     const list<Sprite>& sprites = SpriteManager::GetInstance()->GetSprites();
@@ -310,7 +290,7 @@ Ray RayCast::RayCasting(int colume)
         if (x < 0 || MAP_COLUME <= x || y < 0 || MAP_ROW <= y)
             break;
         int map_index = y * MAP_COLUME + x;
-        if (map[map_index] > 0)
+        if (MapManager::GetInstance()->GetMapData()->tiles[MAP_COLUME * y + x].roomType != RoomType::FLOOR)
             hit = true;
     }
 
@@ -348,7 +328,7 @@ void RayCast::RenderWall(Ray& ray, int colume)
         || (ray.side == 1 && ray.dir.y < 0.0f))
         texture.x = TILE_SIZE - texture.x - 1.0f;
 
-    int tile = map[INT(ray.mapPos.y) * MAP_COLUME + INT(ray.mapPos.x)];
+    int tile = MapManager::GetInstance()->GetMapData()->tiles[INT(ray.map_pos.y) * MAP_COLUME + INT(ray.map_pos.x)].tilePos;
     int y = max(0, INT(WINSIZE_Y / 2.0f - ray.height / 2.0f));
     int end = (WINSIZE_Y - y < ray.height ? WINSIZE_Y : y + ray.height);
     while (y < end)
@@ -424,7 +404,7 @@ COLORREF RayCast::GetDistanceShadeColor(int tile, FPOINT texturePixel, float dis
 {
     float divide = distance / SHADE_VALUE;
 
-    --tile;
+    //--tile;
     int row = tile / TILE_ROW_SIZE;
     int colume = tile % TILE_ROW_SIZE;
 
