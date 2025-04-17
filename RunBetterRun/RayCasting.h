@@ -90,7 +90,8 @@ private:
 	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance, bool isSide = false);
 	COLORREF GetDistanceShadeColor(COLORREF color, float distance);
 	int GetRenderScaleBasedOnFPS(void);
-	void RenderSprites(void);
+	void RenderSprites(DWORD start, DWORD end);
+	void RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY, FPOINT transform);
 	void RenderSpritePixel(FPOINT pixel, Sprite& sprite);
 
 public:

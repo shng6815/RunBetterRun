@@ -166,7 +166,6 @@ void RayCasting::Update(void)
 
 void RayCasting::Render(HDC hdc)
 {
-    //FillScreen(0, WINSIZE_X);
     WaitForSingleObject(queueMutex, INFINITE);
     for (int i = 0; i < THREAD_NUM - 1; ++i)
         threadQueue.push({ i * colsPerThread,  (i + 1) * colsPerThread });
@@ -270,7 +269,7 @@ void RayCasting::RenderSprites(DWORD start, DWORD end)
     }
 }
 
-void RayCasting::RenderSprite(Sprite& sprite, POINT renderX, POINT renderY, FPOINT transform)
+void RayCasting::RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY, FPOINT transform)
 {
     float renderYOrg = renderY.x;
     int screen = INT((WINSIZE_X / 2) * (1.0f + transform.x / transform.y));
