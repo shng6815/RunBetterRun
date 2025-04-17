@@ -52,16 +52,16 @@ void Player::KeyInput(void)
 	moveInput = { 0, 0 };
 
     if (km->IsStayKeyDown('W'))
-        moveInput.x = 1;
+        moveInput.x = -1;
 
     if (km->IsStayKeyDown('S'))
-        moveInput.x = -1;
+        moveInput.x = 1;
 
     if (km->IsStayKeyDown('A'))
         moveInput.y = -1;
 
     if (km->IsStayKeyDown('D'))
-        moveInput.y = +1;
+        moveInput.y = 1;
 
     if (km->IsOnceKeyDown(VK_ESCAPE))
     {
@@ -88,13 +88,13 @@ void Player::MouseInput(void)
 	int deltaX = currentPos.x - WINSIZE_X / 2;
 	if (deltaX < 0)
 	{
-		rotate.x = -deltaX;
+		rotate.x = deltaX;
 		rotate.y = 0;
 	}
 	else if (deltaX > 0)
 	{
 		rotate.x = 0;
-		rotate.y = deltaX;
+		rotate.y = -deltaX;
 	}
 	else
 	{

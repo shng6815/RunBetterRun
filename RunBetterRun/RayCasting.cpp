@@ -3,6 +3,7 @@
 #include "SpriteManager.h"
 #include "MapManager.h"
 #include <fstream>
+#include "Player.h"
 
 int RayCasting::map[MAP_ROW * MAP_COLUME] =
 {
@@ -56,22 +57,13 @@ DWORD WINAPI RaycastThread(LPVOID lpParam) {
 
 HRESULT RayCasting::Init(void)
 {
-    fov = 0.66f;
-
-    cameraPos = { 22, 12 };
-    cameraDir = { -0.98, 0.02 };
-    cameraXDir = { cameraDir.y, -cameraDir.x };
-    plane = { 0, -fov };
+    Player::GetInstance()->Init();
 
     for (int i = 0; i < WINSIZE_X; ++i)
         camera_x[i] = ((2.0f * FLOAT(i) / FLOAT(WINSIZE_X)) - 1.0f);
 
     for (int i = 0; i < WINSIZE_Y; ++i)
         sf_dist[i] = FLOAT(WINSIZE_Y) / (2.0f * FLOAT(i) - FLOAT(WINSIZE_Y));
-
-    move = { 0, 0 };
-    x_move = { 0, 0 };
-    rotate = { 0, 0 };
 
     memset(&bmi, 0, sizeof(bmi));
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -107,8 +99,6 @@ HRESULT RayCasting::Init(void)
         threads[i] = CreateThread(NULL, 0, RaycastThread, &threadDatas[i], 0, NULL);
     }
 
-    ShowCursor(FALSE);
-    isShowMouse = FALSE;
     return S_OK;
 }
 
@@ -131,25 +121,16 @@ void RayCasting::Release(void)
 
     mapTile = nullptr;
     SpriteManager::GetInstance()->ClearSprites();
+    Player::GetInstance()->Release();
 }
 
 void RayCasting::Update(void)
 {
-    KeyInput();
-    MouseInput();
-
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
 
-    if (move.x || move.y)
-        MoveCamera(deltaTime);
+    Player::GetInstance()->Update();
 
-    if (x_move.x || x_move.y)
-        MoveSideCamera(deltaTime);
-
-    if (rotate.x || rotate.y)
-        RotateCamera(deltaTime);
-
-    SpriteManager::GetInstance()->UpdatePlayerPosition(cameraPos);
+    SpriteManager::GetInstance()->UpdatePlayerPosition(Player::GetInstance()->GetCameraPos());
     SpriteManager::GetInstance()->SortSpritesByDistance();
 
     fpsCheckCounter++;
@@ -239,16 +220,16 @@ void RayCasting::ReloadMapData()
 void RayCasting::RenderSprites(DWORD start, DWORD end)
 {
     const list<Sprite>& sprites = SpriteManager::GetInstance()->GetSprites();
-
-    float invDet = 1.0f / ((plane.x * cameraDir.y) - (plane.y * cameraDir.x));
+    
+    float invDet = 1.0f / ((Player::GetInstance()->GetPlane().x * Player::GetInstance()->GetCameraVerDir().y) - (Player::GetInstance()->GetPlane().y * Player::GetInstance()->GetCameraVerDir().x));
 
     for (auto& sprite : sprites)
     {
         if (sprite.distance > 0.1f)
         {
-            FPOINT pos = { sprite.pos.x - cameraPos.x, sprite.pos.y - cameraPos.y };
-            FPOINT transform = { invDet * (cameraDir.y * pos.x - cameraDir.x * pos.y),
-                                invDet * (-plane.y * pos.x + plane.x * pos.y) };
+            FPOINT pos = { sprite.pos.x - Player::GetInstance()->GetCameraPos().x, sprite.pos.y - Player::GetInstance()->GetCameraPos().y };
+            FPOINT transform = { invDet * (Player::GetInstance()->GetCameraVerDir().y * pos.x - Player::GetInstance()->GetCameraVerDir().x * pos.y),
+                                invDet * (-Player::GetInstance()->GetPlane().y * pos.x + Player::GetInstance()->GetPlane().x * pos.y) };
             if (fabs(transform.y) < 1e-6f)
                 continue;
             int screen = INT((WINSIZE_X / 2) * (1.0f + transform.x / transform.y));
@@ -315,167 +296,12 @@ void RayCasting::RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY
     }
 }
 
-
-void RayCasting::KeyInput(void)
-{
-    KeyManager* km = KeyManager::GetInstance();
-
-    if (km->IsStayKeyDown('W'))
-        move.x = 1;
-    else
-        move.x = 0;
-
-    if (km->IsStayKeyDown('S'))
-        move.y = 1;
-    else
-        move.y = 0;
-
-    if (km->IsStayKeyDown('A'))
-        x_move.x = 1;
-    else
-        x_move.x = 0;
-
-    if (km->IsStayKeyDown('D'))
-        x_move.y = 1;
-    else
-        x_move.y = 0;
-
-    if (km->IsStayKeyDown('Q'))
-        rotate.x = 1;
-    else
-        rotate.x = 0;
-
-    if (km->IsStayKeyDown('E'))
-        rotate.y = 1;
-    else
-        rotate.y = 0;
-
-    if (km->IsOnceKeyDown(VK_ESCAPE))
-    {
-        if (isShowMouse)
-        {
-            ShowCursor(FALSE);
-            isShowMouse = FALSE;
-            SetCursorPos(WINSIZE_X / 2, WINSIZE_Y / 2);
-        }
-        else
-        {
-            ShowCursor(TRUE);
-            isShowMouse = TRUE;
-        }
-    }
-}
-
-void RayCasting::MouseInput(void)
-{
-    if (isShowMouse)
-        return;
-
-    POINT currentPos;
-    GetCursorPos(&currentPos);
-
-    int deltaX = currentPos.x - WINSIZE_X / 2;
-
-    if (deltaX < 0)
-    {
-        rotate.x = -deltaX;
-        rotate.y = 0;
-    }
-    else if (deltaX > 0)
-    {
-        rotate.x = 0;
-        rotate.y = deltaX;
-    }
-    else
-    {
-        rotate.x = 0;
-        rotate.y = 0;
-    }
-
-    SetCursorPos(WINSIZE_X / 2, WINSIZE_Y / 2);
-}
-
-
-void RayCasting::MoveCamera(float deltaTime)
-{
-    bool direction = move.x ? false : true;
-
-    FPOINT pos = cameraPos;
-    pos.x += (direction ? -1 : 1) * (cameraDir.x * MOVE_SPEED * deltaTime);
-    int x = INT(pos.x);
-    int y = INT(pos.y);
-
-    if ((0 <= x && x < MAP_COLUME && 0 <= y && y < MAP_ROW)
-        && map[MAP_COLUME * y + x] == 0)
-        cameraPos = pos;
-
-    pos = cameraPos;
-    pos.y += (direction ? -1 : 1) * (cameraDir.y * MOVE_SPEED * deltaTime);
-    x = INT(pos.x);
-    y = INT(pos.y);
-
-    if ((0 <= x && x < MAP_COLUME && 0 <= y && y < MAP_ROW)
-        && map[MAP_COLUME * y + x] == 0)
-        cameraPos = pos;
-}
-
-void RayCasting::MoveSideCamera(float deltaTime)
-{
-    bool direction = x_move.x ? false : true;
-
-    FPOINT pos = cameraPos;
-    pos.x += (direction ? -1 : 1) * (cameraXDir.x * MOVE_SPEED * deltaTime) + 1e-6f;
-    int x = INT(pos.x);
-    int y = INT(pos.y);
-
-    if ((0 <= x && x < MAP_COLUME && 0 <= y && y < MAP_ROW)
-        && map[MAP_COLUME * y + x] == 0)
-        cameraPos = pos;
-
-    pos = cameraPos;
-    pos.y += (direction ? -1 : 1) * (cameraXDir.y * MOVE_SPEED * deltaTime) + 1e-6f;
-    x = INT(pos.x);
-    y = INT(pos.y);
-
-    if ((0 <= x && x < MAP_COLUME && 0 <= y && y < MAP_ROW)
-        && map[MAP_COLUME * y + x] == 0)
-        cameraPos = pos;
-}
-
-void RayCasting::RotateCamera(float deltaTime)
-{
-    float rotateCos, rotateSin;
-    if (rotate.x)
-    {
-        rotateCos = cosf(rotate.x * (-ROTATE_SPEED) * deltaTime);
-        rotateSin = sinf(rotate.x * (-ROTATE_SPEED) * deltaTime);
-    }
-    else
-    {
-        rotateCos = cosf(rotate.y * ROTATE_SPEED * deltaTime);
-        rotateSin = sinf(rotate.y * ROTATE_SPEED * deltaTime);
-    }
-
-    FPOINT old = cameraDir;
-
-    cameraDir.x = (cameraDir.x * rotateCos) - (cameraDir.y * rotateSin);
-    cameraDir.y = (old.x * rotateSin) + (cameraDir.y * rotateCos);
-
-    old = plane;
-    plane.x = (plane.x * rotateCos) - (plane.y * rotateSin);
-    plane.y = (old.x * rotateSin) + (plane.y * rotateCos);
-
-    old = cameraXDir;
-    cameraXDir.x = (cameraXDir.x * rotateCos) - (cameraXDir.y * rotateSin);
-    cameraXDir.y = (old.x * rotateSin) + (cameraXDir.y * rotateCos);
-}
-
 Ray RayCasting::RayCast(int colume)
 {
     bool    hit = false;
     bool    nextSide = false;
-    Ray     ray(cameraPos, plane, cameraDir, camera_x[colume]);
-    
+    Ray     ray(Player::GetInstance()->GetCameraPos(), Player::GetInstance()->GetPlane(), Player::GetInstance()->GetCameraVerDir(), camera_x[colume]);
+
     while (!hit)
     {
         nextSide = ray.side_dist.x < ray.side_dist.y;
@@ -499,14 +325,13 @@ Ray RayCasting::RayCast(int colume)
     float pos;
     if (ray.side)
     {
-        pos = ray.map_pos.y - cameraPos.y + (1.0f - ray.step.y) / 2.0f;
-        ray.distance = (pos / ray.ray_dir.y);
-        
+        pos = (ray.map_pos.y - Player::GetInstance()->GetCameraPos().y + (1.0f - ray.step.y) / 2.0f);
+        ray.distance = fabs(pos / ray.ray_dir.y);
     }
     else
     {
-        pos = ray.map_pos.x - cameraPos.x + (1.0f - ray.step.x) / 2.0f;
-        ray.distance = (pos / ray.ray_dir.x);
+        pos = (ray.map_pos.x - Player::GetInstance()->GetCameraPos().x + (1.0f - ray.step.x) / 2.0f);
+        ray.distance = fabs(pos / ray.ray_dir.x);
     }
     return ray;
 }
@@ -563,12 +388,12 @@ void RayCasting::RenderCeilingFloor(Ray& ray, int colume)
     while (y < WINSIZE_Y)
     {
         float weight = sf_dist[y] / ray.distance;
-        ray.c_floor = { weight * ray.floor_wall.x + (1.0f - weight) * cameraPos.x,
-                       weight * ray.floor_wall.y + (1.0f - weight) * cameraPos.y };
+        ray.c_floor = { weight * ray.floor_wall.x + (1.0f - weight) * Player::GetInstance()->GetCameraPos().x,
+                       weight * ray.floor_wall.y + (1.0f - weight) * Player::GetInstance()->GetCameraPos().y };
         FPOINT texture = { INT(ray.c_floor.x * TILE_SIZE) % TILE_SIZE,
             INT(ray.c_floor.y * TILE_SIZE) % TILE_SIZE };
         int endY = min(y + renderScale, WINSIZE_Y);
-        while(y < endY)
+        while (y < endY)
         {
             pixel.y = y;
             RenderPixel(pixel, GetDistanceShadeColor(8, texture, sf_dist[y]));
@@ -656,7 +481,7 @@ Ray::tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX)
 {
     ray_pos = pos;
     map_pos = { FLOAT(INT(pos.x)), FLOAT(INT(pos.y)) };
-    ray_dir = { cameraDir.x + plane.x * cameraX, cameraDir.y + plane.y * cameraX };
+    ray_dir = { Player::GetInstance()->GetCameraVerDir().x + Player::GetInstance()->GetPlane().x * cameraX, Player::GetInstance()->GetCameraVerDir().y + Player::GetInstance()->GetPlane().y * cameraX };
     delta_dist = { fabs(1.0f / ray_dir.x), fabs(1.0f / ray_dir.y) };
     if (ray_dir.x < 0)
     {

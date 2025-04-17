@@ -8,8 +8,6 @@
 
 #define MAP_COLUME 24
 #define MAP_ROW 24
-#define MOVE_SPEED 1.2f
-#define ROTATE_SPEED 0.8f
 #define SHADE_VALUE 1.5f
 #define FLOAT(n) static_cast<float>(n)
 #define INT(n) static_cast<int>(n)
@@ -53,36 +51,16 @@ private:
 	int     currentFPS;
 	int     fpsCheckCounter;
 	float   fpsCheckTime;
-
-	float	fov;
-
-	float	rotateSpeed;
-	float	moveSpeed;
 	
 	const int* mapData;
 	int mapWidth;
 	int mapHeight;
 
-	FPOINT	cameraPos;
-	FPOINT	cameraDir;
-	FPOINT	cameraXDir;
-	FPOINT	plane;
-
-	FPOINT	move;
-	FPOINT	x_move;
-	FPOINT	rotate;
 	static int map[MAP_ROW * MAP_COLUME];
 	float	camera_x[WINSIZE_X];
 	float	depth[WINSIZE_X];
 	float	sf_dist[WINSIZE_Y];
 
-	bool isShowMouse;
-
-	void KeyInput(void);
-	void MouseInput(void);
-	void MoveCamera(float deltaTime);
-	void MoveSideCamera(float deltaTime);
-	void RotateCamera(float deltaTime);
 	Ray RayCast(int colume);
 	void RenderWall(Ray& ray, int colume);
 	void RenderCeilingFloor(Ray& ray, int colume);
