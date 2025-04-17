@@ -1,4 +1,4 @@
-#include "RayCasting.h"
+﻿#include "RayCasting.h"
 #include "KeyManager.h"
 #include <fstream>
 
@@ -80,7 +80,7 @@ HRESULT RayCasting::Init(void)
     bmi.bmiHeader.biCompression = BI_RGB;
 
     LoadTexture(TEXT("Image/maptiles.bmp"), tile);
-    PutSprite(TEXT("Image/rocket.bmp"), {19, 12});
+    PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
     PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
     renderScale = 4;
     currentFPS = 60;
@@ -108,9 +108,9 @@ void RayCasting::Release(void)
 {
     for (int i = 0; i < THREAD_NUM; ++i)
         threadDatas[i].exit = TRUE;
-    
+
     WaitForMultipleObjects(THREAD_NUM, threads, TRUE, INFINITE);
-    
+
     for (int i = 0; i < THREAD_NUM; ++i)
     {
         CloseHandle(threadMutex[i]);
@@ -186,7 +186,7 @@ void RayCasting::Render(HDC hdc)
                 threadDatas[i].done = FALSE;
             print = TRUE;
         }
-        for (auto& mutex: threadMutex)
+        for (auto& mutex : threadMutex)
             ReleaseMutex(mutex);
     }
 }
@@ -221,7 +221,7 @@ void RayCasting::RenderSprites(DWORD start, DWORD end)
         if (sprite.distance > 0.1f)
         {
             FPOINT pos = { sprite.pos.x - cameraPos.x, sprite.pos.y - cameraPos.y };
-            FPOINT transform = {invDet * (cameraDir.y * pos.x - cameraDir.x * pos.y),
+            FPOINT transform = { invDet * (cameraDir.y * pos.x - cameraDir.x * pos.y),
                                 invDet * (-plane.y * pos.x + plane.x * pos.y) };
             if (fabs(transform.y) < 1e-6f)
                 continue;
@@ -386,7 +386,7 @@ void RayCasting::RotateCamera(float deltaTime)
     }
 
     FPOINT old = cameraDir;
-    
+
     cameraDir.x = (cameraDir.x * rotateCos) - (cameraDir.y * rotateSin);
     cameraDir.y = (old.x * rotateSin) + (cameraDir.y * rotateCos);
 
@@ -414,7 +414,7 @@ Ray RayCasting::RayCast(int colume)
         ray.map_pos.y += (!nextSide) * ray.step.y;
 
         ray.side = !nextSide;
-    
+
         int x = INT(ray.map_pos.x);
         int y = INT(ray.map_pos.y);
 
@@ -484,7 +484,7 @@ void RayCasting::RenderCeilingFloor(Ray& ray, int colume)
     else if (ray.side == 0 && ray.ray_dir.x < 0)
         ray.floor_wall = { ray.map_pos.x + 1, ray.map_pos.y + ray.wall_x };
     else if (ray.side && ray.ray_dir.y > 0)
-        ray.floor_wall = { ray.map_pos.x + ray.wall_x, ray.map_pos.y};
+        ray.floor_wall = { ray.map_pos.x + ray.wall_x, ray.map_pos.y };
     else if (ray.side && ray.ray_dir.y < 0)
         ray.floor_wall = { ray.map_pos.x + ray.wall_x, ray.map_pos.y + 1 };
 
@@ -545,8 +545,8 @@ COLORREF RayCasting::GetDistanceShadeColor(int tile, FPOINT texturePixel, float 
         return color;
     else
         return RGB(INT(GetRValue(color) / divide),
-                    INT(GetGValue(color) / divide),
-                    INT(GetBValue(color) / divide));
+            INT(GetGValue(color) / divide),
+            INT(GetBValue(color) / divide));
 }
 
 COLORREF RayCasting::GetDistanceShadeColor(COLORREF color, float distance)
@@ -593,7 +593,7 @@ HRESULT RayCasting::LoadTexture(LPCWCH path, Texture& texture)
 
     texture.bmpWidth = infoHeader.biWidth;
     texture.bmpHeight = infoHeader.biHeight;
-    
+
     if (infoHeader.biBitCount != 24)
     {
         wstring error = TEXT("Only 24-bit BMP files are supported: ");
@@ -623,7 +623,7 @@ void RayCasting::PutSprite(LPCWCH path, FPOINT pos)
 {
     auto it = spritesTextureData.find(path);
     if (it != spritesTextureData.end())
-        sprites.push_back(Sprite{pos, 0, &it->second});
+        sprites.push_back(Sprite{ pos, 0, &it->second });
     else
     {
         spritesTextureData.insert(make_pair(path, Texture()));
@@ -638,10 +638,10 @@ void RayCasting::PutSprite(LPCWCH path, FPOINT pos)
 
 int RayCasting::GetRenderScaleBasedOnFPS(void)
 {
-    if (currentFPS < 15) return 32;      
-    else if (currentFPS < 25) return 16; 
-    else if (currentFPS < 40) return 8; 
-    else return 4;                      
+    if (currentFPS < 15) return 32;
+    else if (currentFPS < 25) return 16;
+    else if (currentFPS < 40) return 8;
+    else return 4;
 }
 
 void RayCasting::SortSpritesByDistance(void)
