@@ -4,7 +4,7 @@ HRESULT MapManager::Init()
 {
 	// 기본 맵 생성
 	//return CreateNewMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
-    return CreateSimpleMazeMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
+    return CreateMazeMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
 }
 
 HRESULT MapManager::Init(LPCWCH filePath)
@@ -16,7 +16,7 @@ HRESULT MapManager::Init(LPCWCH filePath)
 
     // 로드 실패 시 기본 맵 생성
     //return CreateNewMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
-    return CreateSimpleMazeMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
+    return CreateMazeMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
 }
 
 void MapManager::Release()
@@ -90,6 +90,8 @@ bool MapManager::LoadMap(const LPCWCH filePath)
         return false;
     }
 
+    // 플레이어 위치 읽기
+
     CloseHandle(hFile);
     return true;  
 }
@@ -132,6 +134,9 @@ bool MapManager::SaveMap(const LPCWCH filePath)
 
     // 타일 데이터 저장
     WriteFile(hFile, mapData.tiles.data(), sizeof(Room) * tileCount, &bytesWritten, NULL);
+
+    // 플레이어 위치 저장
+    //WriteFile(hFile, &playerPos, sizeof(FPOINT), &bytesWritten, NULL);
 
     // 파일 핸들 닫기
     CloseHandle(hFile);
@@ -180,7 +185,7 @@ bool MapManager::CreateNewMap(int width, int height)
     return true;  
 }
 
-bool MapManager::CreateSimpleMazeMap(int width, int height) {
+bool MapManager::CreateMazeMap(int width, int height) {
     // 기본 맵 생성 (모든 타일을 바닥으로)
     CreateNewMap(width, height);
 
