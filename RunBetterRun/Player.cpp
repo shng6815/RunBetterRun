@@ -17,11 +17,10 @@ HRESULT Player::Init()
 	moveInput = { 0, 0 };
 	rotate = { 0, 0 };
 
-	moveSpeed = 1.2f;
-	rotateSpeed = 0.8f;
+    defaultSpeed = moveSpeed = 1.2f;
+    runSpeed = defaultSpeed * 2;
 
-	isShowMouse = false;
-    ShowCursor(FALSE);
+	rotateSpeed = 0.8f;
 
 	return S_OK;
 }
@@ -63,26 +62,15 @@ void Player::KeyInput(void)
     if (km->IsStayKeyDown('D'))
         moveInput.y = 1;
 
-    if (km->IsOnceKeyDown(VK_ESCAPE))
-    {
-        if (isShowMouse)
-        {
-            ShowCursor(FALSE);
-            isShowMouse = FALSE;
-            SetCursorPos(WINSIZE_X / 2, WINSIZE_Y / 2);
-        }
-        else
-        {
-            ShowCursor(TRUE);
-            isShowMouse = TRUE;
-        }
-    }
+    if (km->IsOnceKeyDown(VK_SHIFT))
+        moveSpeed = runSpeed;
+
+    if (km->IsOnceKeyUp(VK_SHIFT))
+        moveSpeed = defaultSpeed;
 }
 
 void Player::MouseInput(void)
 {
-	if (isShowMouse)
-		return;
 	POINT currentPos;
 	GetCursorPos(&currentPos);
 	int deltaX = currentPos.x - WINSIZE_X / 2;
@@ -158,6 +146,11 @@ void Player::RotateCamera(float deltaTime)
     cameraHorDir.x = cameraVerDir.y;
 	cameraHorDir.y = -cameraVerDir.x;
 
+    UpdateFOV();
+}
+
+void Player::UpdateFOV()
+{
     plane.x = cameraHorDir.x * fov;
     plane.y = cameraHorDir.y * fov;
 }
