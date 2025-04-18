@@ -102,11 +102,7 @@ void MainGameScene::ShakeScreen(float shakePower, float time, bool isStepShake)
 	this->isStepShake = isStepShake;
 	maxShakePower = shakePower;
 
-	if (isStepShake)
-	{
-		shakeY = shakePower;
-	}
-	else
+	if (!isStepShake)
 	{
 		shakeX = ((rand() % 3) - 1) * shakePower;
 		shakeY = ((rand() % 3) - 1) * shakePower;
@@ -146,9 +142,20 @@ void MainGameScene::AddShake(HDC hdc)
 
 			if (isStepShake)
 			{
-				// stepShake면 Y축만 흔들기
+				float halfTime = 0.5f;
+				if (progress < halfTime)
+				{
+					// 전반부: Y값 증가 (0 → max)
+					float ratio = progress / halfTime;  // 0 ~ 1
+					shakeY = maxShakePower * ratio;
+				}
+				else
+				{
+					// 후반부: Y값 감소 (max → 0)
+					float ratio = (1.0f - progress) / halfTime;  // 1 ~ 0
+					shakeY = maxShakePower * ratio;
+				}
 				shakeX = 0.0f;
-				shakeY = ((rand() % 3) - 1) * damping * maxShakePower;
 			}
 			else
 			{

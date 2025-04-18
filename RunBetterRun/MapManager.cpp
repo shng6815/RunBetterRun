@@ -15,9 +15,9 @@ HRESULT MapManager::Init()
 			{
 				SetTile(i, j, RoomType::WALL,4);
 			}
-			else if (i == 30)
+			else if (i == 10 && j == 10)
 			{
-				SetTile(i, j, RoomType::START, 3);
+				SetTile(i, j, RoomType::WALL, 3);
 			}
 			else
 			{

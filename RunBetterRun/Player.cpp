@@ -22,6 +22,9 @@ HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
     runSpeed = defaultSpeed * 2;
 
 	rotateSpeed = 0.8f;
+	stepElapsedTime = 0;
+	stepTime = 0.5f;
+	runTime = 0.3f;
 
 	// 카메라 흔들기
 	this->shakeFunc = shakeFunc;
@@ -65,9 +68,6 @@ void Player::KeyInput(void)
 
     if (km->IsStayKeyDown('D'))
         moveInput.y = 1;
-
-    if (km->IsStayKeyDown('T'))
-        shakeFunc(10,0.2f,true);
     
     if (km->IsOnceKeyDown(VK_SHIFT))
         moveSpeed = runSpeed;
@@ -81,26 +81,30 @@ void Player::MouseInput(void)
 	POINT currentPos;
 	GetCursorPos(&currentPos);
 	int deltaX = currentPos.x - WINSIZE_X / 2;
-	if (deltaX < 0)
-	{
-		rotate.x = deltaX;
-		rotate.y = 0;
-	}
-	else if (deltaX > 0)
-	{
-		rotate.x = 0;
-		rotate.y = -deltaX;
-	}
-	else
-	{
-		rotate.x = 0;
-		rotate.y = 0;
-	}
+
+    rotate.x = deltaX < 0 ? deltaX : 0;
+    rotate.y = deltaX > 0 ? -deltaX : 0;
+
 	SetCursorPos(WINSIZE_X / 2, WINSIZE_Y / 2);
 }
 
 void Player::MoveCamera(float deltaTime)
 {
+    if (!moveInput.x && !moveInput.y)
+    {
+		stepElapsedTime = 0;
+		return;
+    }
+
+	stepElapsedTime += deltaTime;
+
+    float interval = (runSpeed == moveSpeed ? runTime : stepTime);
+    if (stepElapsedTime > interval)
+    {
+        shakeFunc(moveSpeed * 10 + 3, 0.2f, true);
+        stepElapsedTime = 0;
+    }
+
     bool moveForward = moveInput.x > 0;
     bool moveBackward = moveInput.x < 0;
     bool moveLeft = moveInput.y < 0;

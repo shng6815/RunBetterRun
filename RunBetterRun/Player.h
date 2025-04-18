@@ -29,6 +29,10 @@ private:
 
 	FPOINT moveInput;                         // 카메라 이동 방향
 	FLOAT moveSpeed;                          // 카메라 이동 속도
+	FLOAT stepElapsedTime;                   // 카메라 이동 시간
+	FLOAT stepTime;                           // 카메라 이동 시간
+	FLOAT runTime;                           // 카메라 이동 시간
+
 	FLOAT runSpeed;
 	FLOAT defaultSpeed;
 
