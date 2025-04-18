@@ -4,7 +4,8 @@
 #include "MonsterManager.h"
 #include "SpriteManager.h"
 #include "ItemManager.h"
-
+#include "UIManager.h"
+#include "PhoneUI.h"
 
 HRESULT MainGameScene::Init()
 {
@@ -19,6 +20,12 @@ HRESULT MainGameScene::Init()
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	MonsterManager::GetInstance()->Init();
 	ItemManager::GetInstance()->Init();
+
+	UIManager::GetInstance()->Init();
+	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
+	PhoneUI* uiUnit = new PhoneUI();
+	uiUnit->Init(UIType::PLAYING, FPOINT{ 200, WINSIZE_Y - 200 }, FPOINT{ 150, 150 }, 0);
+	UIManager::GetInstance()->AddUIUnit("PhoneUI", uiUnit);
 
 	status = SceneStatus::IN_GAME;
 	ShowCursor(FALSE);
@@ -57,6 +64,8 @@ void MainGameScene::Release()
 	SpriteManager::GetInstance()->Release();
 	MapManager::GetInstance()->Release();
 
+	UIManager::GetInstance()->Release();
+
 	SelectObject(backBufferDC, oldBitmap);
 	DeleteObject(backBufferBitmap);
 	DeleteDC(backBufferDC);
@@ -71,6 +80,10 @@ void MainGameScene::Update()
 			ShowCursor(TRUE);
 			status = SceneStatus::PAUSE;
 		}
+
+		if (KeyManager::GetInstance()->IsOnceKeyDown('M')) {
+			UIManager::GetInstance()->ToggleActiveUIUnit("PhoneUI");
+		}
 		
 		Player::GetInstance()->Update();
 		if (rayCasting)
@@ -79,7 +92,6 @@ void MainGameScene::Update()
 		MonsterManager::GetInstance()->Update();
 		ItemManager::GetInstance()->Update();
 		//UIManager::GetInstance()->Update();
-
 		break;
 	case MainGameScene::SceneStatus::PAUSE:
 		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {
@@ -87,76 +99,35 @@ void MainGameScene::Update()
 			status = SceneStatus::IN_GAME;
 		}
 
-		//UIManager::GetInstance()->PauseUpdate();
-
 		break;
 	case MainGameScene::SceneStatus::QUIT:
 		break;
 	default:
 		break;
 	}
+
+	UIManager::GetInstance()->Update();
 }
 
 void MainGameScene::Render(HDC hdc)
 {
 	rayCasting->Render(backBufferDC);
 
-	AddShake(hdc);
+	ApplyShake(hdc);
+
+	// 3. UI ������
+	UIManager::GetInstance()->Render(hdc);
 }
 
 void MainGameScene::ShakeScreen(float shakePower, float time, bool isStepShake)
 {
-	this->isStepShake = isStepShake;
-	maxShakePower = shakePower;
-
-	if (isStepShake)
-	{
-		shakeY = shakePower;
-	}
-	else
-	{
-		shakeX = ((rand() % 3) - 1) * shakePower;
-		shakeY = ((rand() % 3) - 1) * shakePower;
-	}
-
-	shakeTime = time;
-	elapsedTime = 0.0f;
+	screenShake.Start(shakePower, time, isStepShake);
 }
 
-void MainGameScene::AddShake(HDC hdc)
+void MainGameScene::ApplyShake(HDC hdc)
 {
-	int offsetX = static_cast<int>(shakeX);
-	int offsetY = static_cast<int>(shakeY);
+	screenShake.Update(TimerManager::GetInstance()->GetDeltaTime());
+	POINT offset = screenShake.GetOffset();
 
-	BitBlt(hdc, offsetX, offsetY, WINSIZE_X, WINSIZE_Y, backBufferDC, 0, 0, SRCCOPY);
-
-	if (shakeTime > 0.0f)
-	{
-		float dt = TimerManager::GetInstance()->GetDeltaTime();
-		elapsedTime += dt;
-
-		if (elapsedTime >= shakeTime)
-		{
-			shakeX = 0.0f;
-			shakeY = 0.0f;
-			shakeTime = 0.0f;
-			elapsedTime = 0.0f;
-		}
-		else
-		{
-			float progress = elapsedTime / shakeTime;
-			float damping = 1.0f - progress;
-
-			if (isStepShake)
-			{
-				shakeX = 0.0f;
-				shakeY = ((rand() % 3) - 1) * damping * maxShakePower;
-			}
-			else
-			{
-				shakeX = ((rand() % 3) - 1) * damping * maxShakePower;
-				shakeY = ((rand() % 3) - 1) * damping * maxShakePower;
-			}
-		}
-	}
+	BitBlt(hdc, offset.x, offset.y, WINSIZE_X, WINSIZE_Y, backBufferDC, 0, 0, SRCCOPY);
 }

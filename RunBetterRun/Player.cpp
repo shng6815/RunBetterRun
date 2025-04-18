@@ -3,7 +3,8 @@
 
 HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 {
-	fov = 0.66f;
+    fov = 0.66f;
+    targetFOV = fov;
 
 	cameraPos = { 22, 12 };
 
@@ -22,8 +23,11 @@ HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
     runSpeed = defaultSpeed * 2;
 
 	rotateSpeed = 0.8f;
+	stepElapsedTime = 0;
+	stepTime = 0.5f;
+	runTime = 0.3f;
 
-	// Ä«¸Þ¶ó Èçµé±â
+	// Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½ï¿½ï¿½
 	this->shakeFunc = shakeFunc;
 
 	return S_OK;
@@ -42,6 +46,10 @@ void Player::Update()
 
 	MoveCamera(deltaTime);
 	RotateCamera(deltaTime);
+
+    fov += (targetFOV - fov) * deltaTime * fovLerpSpeed;
+    UpdateFOV(); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ fovï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
+
 }
 
 void Player::Render(HDC hdc)
@@ -65,16 +73,18 @@ void Player::KeyInput(void)
 
     if (km->IsStayKeyDown('D'))
         moveInput.y = 1;
-
-    if (km->IsStayKeyDown('T'))
-        shakeFunc(10,0.2f,true);
     
     if (km->IsOnceKeyDown(VK_SHIFT))
+    {
+        targetFOV = 0.5f;
         moveSpeed = runSpeed;
+    }
 
     if (km->IsOnceKeyUp(VK_SHIFT))
+    {
+        targetFOV = 0.66f;
         moveSpeed = defaultSpeed;
-
+    }
     if (km->IsOnceKeyDown('O'))
         Save();
 
@@ -87,26 +97,30 @@ void Player::MouseInput(void)
 	POINT currentPos;
 	GetCursorPos(&currentPos);
 	int deltaX = currentPos.x - WINSIZE_X / 2;
-	if (deltaX < 0)
-	{
-		rotate.x = deltaX;
-		rotate.y = 0;
-	}
-	else if (deltaX > 0)
-	{
-		rotate.x = 0;
-		rotate.y = -deltaX;
-	}
-	else
-	{
-		rotate.x = 0;
-		rotate.y = 0;
-	}
+
+    rotate.x = deltaX < 0 ? deltaX : 0;
+    rotate.y = deltaX > 0 ? -deltaX : 0;
+
 	SetCursorPos(WINSIZE_X / 2, WINSIZE_Y / 2);
 }
 
 void Player::MoveCamera(float deltaTime)
 {
+    if (!moveInput.x && !moveInput.y)
+    {
+		stepElapsedTime = 0;
+		return;
+    }
+
+	stepElapsedTime += deltaTime;
+
+    float interval = (runSpeed == moveSpeed ? runTime : stepTime);
+    if (stepElapsedTime > interval)
+    {
+        shakeFunc(moveSpeed * 10 + 3, 0.2f, true);
+        stepElapsedTime = 0;
+    }
+
     bool moveForward = moveInput.x > 0;
     bool moveBackward = moveInput.x < 0;
     bool moveLeft = moveInput.y < 0;
@@ -124,7 +138,7 @@ void Player::MoveCamera(float deltaTime)
         pos.y += (moveLeft ? -1 : 1) * (cameraHorDir.y * moveSpeed * deltaTime);
     }
 
-    // Ä«¸Þ¶ó°¡ ÀÌµ¿ÇÒ ¼ö ÀÖ´ÂÁö È®ÀÎ
+    // Ä«ï¿½Þ¶ï¿½ ï¿½Ìµï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ È®ï¿½ï¿½
     int x = INT(pos.x);
     int y = INT(pos.y);
     MapData* md = MapManager::GetInstance()->GetMapData();
@@ -157,13 +171,13 @@ void Player::RotateCamera(float deltaTime)
     cameraHorDir.x = cameraVerDir.y;
 	cameraHorDir.y = -cameraVerDir.x;
 
-    UpdateFOV();
+	UpdateFOV();
 }
 
 void Player::UpdateFOV()
 {
-    plane.x = cameraHorDir.x * fov;
-    plane.y = cameraHorDir.y * fov;
+	plane.x = cameraVerDir.y * this->fov;
+	plane.y = -cameraVerDir.x * this->fov;
 }
 
 void Player::Save()
@@ -172,26 +186,12 @@ void Player::Save()
 
     CreateDirectory(L"Map", NULL);
 
-    if (MapManager::GetInstance()->SaveMap(filePath))
-    {
-        MessageBox(g_hWnd, TEXT("¸ÊÀÌ ¼º°øÀûÀ¸·Î ÀúÀåµÇ¾ú½À´Ï´Ù."), TEXT("¾Ë¸²"), MB_OK);
-    }
-    else
-    {
-        MessageBox(g_hWnd, TEXT("¸Ê ÀúÀå¿¡ ½ÇÆÐÇß½À´Ï´Ù."), TEXT("°æ°í"), MB_OK);
-    }
+    MapManager::GetInstance()->SaveMap(filePath);
 }
 
 void Player::Load()
 {
     const LPCWCH filePath = L"Map/SavedMap.dat";
 
-    if (MapManager::GetInstance()->LoadMap(filePath))
-    {
-        MessageBox(g_hWnd, TEXT("¸ÊÀÌ ¼º°øÀûÀ¸·Î ·ÎµåµÇ¾ú½À´Ï´Ù."), TEXT("¾Ë¸²"), MB_OK);
-    }
-    else
-    {
-        MessageBox(g_hWnd, TEXT("¸Ê ·Îµå¿¡ ½ÇÆÐÇß½À´Ï´Ù."), TEXT("°æ°í"), MB_OK);
-    }
+    MapManager::GetInstance()->LoadMap(filePath);
 }

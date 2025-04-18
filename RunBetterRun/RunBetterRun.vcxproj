@@ -138,17 +138,19 @@
     <ClCompile Include="MainGame.cpp" />
     <ClCompile Include="MainGameScene.cpp" />
     <ClCompile Include="Monster.cpp" />
+    <ClCompile Include="PhoneUI.cpp" />
     <ClCompile Include="MonsterManager.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="MapManager.cpp" />
     <ClCompile Include="RayCast.cpp" />
     <ClCompile Include="SceneManager.cpp" />
-    <ClCompile Include="ShakeGenerator.cpp" />
     <ClCompile Include="SpriteManager.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="TilemapTool.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerManager.cpp" />
+    <ClCompile Include="UIManager.cpp" />
+    <ClCompile Include="UIUnit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h" />
@@ -164,11 +166,11 @@
     <ClInclude Include="MainGameScene.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="MonsterManager.h" />
+    <ClInclude Include="PhoneUI.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="MapManager.h" />
     <ClInclude Include="RayCast.h" />
     <ClInclude Include="SceneManager.h" />
-    <ClInclude Include="ShakeGenerator.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="structs.h" />
     <ClInclude Include="SpriteManager.h" />
@@ -176,6 +178,8 @@
     <ClInclude Include="TilemapTool.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerManager.h" />
+    <ClInclude Include="UIManager.h" />
+    <ClInclude Include="UIUnit.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
