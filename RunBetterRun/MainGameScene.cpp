@@ -10,7 +10,7 @@ HRESULT MainGameScene::Init()
 	rayCasting = new RayCast();
 	if (FAILED(rayCasting->Init()))
 	{
-		MessageBox(g_hWnd, TEXT("RayCasting �ʱ�ȭ ����"), TEXT("���"), MB_OK);
+		MessageBox(g_hWnd, TEXT("error"), TEXT("error"), MB_OK);
 		return E_FAIL;
 	}
 
@@ -31,8 +31,8 @@ HRESULT MainGameScene::Init()
 	oldBitmap = (HBITMAP)SelectObject(backBufferDC, backBufferBitmap);
 	ReleaseDC(g_hWnd, screenDC);
 
-	SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
-	SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
+	//SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
+	//SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
 
 	return S_OK;
 }
@@ -50,7 +50,7 @@ void MainGameScene::Release()
 		delete rayCasting;
 		rayCasting = nullptr;
 	}
-	//MonsterManager::GetInstance()->Release();
+	MonsterManager::GetInstance()->Release();
 	//ItemManaher::GetInstance()->Release();
 	Player::GetInstance()->Release();
 	SpriteManager::GetInstance()->Release();
@@ -98,10 +98,8 @@ void MainGameScene::Update()
 
 void MainGameScene::Render(HDC hdc)
 {
-	// 1. ��� �������� �� ���ۿ�
 	rayCasting->Render(backBufferDC);
 
-	// 2. ��鸲 �ݿ��Ͽ� �� ���۸� ���� hdc�� ���
 	AddShake(hdc);
 }
 

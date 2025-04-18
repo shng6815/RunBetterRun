@@ -8,7 +8,9 @@
 class SpriteManager : public Singleton<SpriteManager>
 {
 private:
+    map<LPCWCH, Texture> spritesTextureData;
     list<Sprite> sprites;
+    Texture mapTileTexture;
     FPOINT playerPos;
     FPOINT monsterPos;
 
@@ -17,6 +19,7 @@ public:
     void Release();
 
     void PutSprite(LPCWCH path, FPOINT pos);
+    void ClearMonsterSprites(LPCWCH path);
     void SortSpritesByDistance();
 
     void UpdatePlayerPosition(FPOINT pos) { playerPos = pos; }
@@ -25,5 +28,8 @@ public:
     HRESULT LoadTexture(LPCWCH path, Texture& outTexture);
     HRESULT LoadMapTileTexture(LPCWCH path);
 
+    Texture* GetTexture(LPCWCH path);
+
     const list<Sprite>& GetSprites() const { return sprites; }
+    const Texture& GetMapTileTexture() { return mapTileTexture; }
 };

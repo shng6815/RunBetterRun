@@ -46,7 +46,7 @@ HRESULT RayCast::Init(void)
     bmi.bmiHeader.biCompression = BI_RGB;
 
     SpriteManager::GetInstance()->LoadMapTileTexture(TEXT("Image/maptiles.bmp"));
-    mapTile = SpriteManager::GetInstance()->GetMapTileTexture();
+    //mapTile = SpriteManager::GetInstance()->GetMapTileTexture();
 
     SpriteManager::GetInstance()->PutSprite(TEXT("Image/boss.bmp"), { 19, 12 });
     SpriteManager::GetInstance()->PutSprite(TEXT("Image/boss.bmp"), { 16, 12 });

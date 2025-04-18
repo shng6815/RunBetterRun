@@ -27,6 +27,23 @@ void SpriteManager::PutSprite(LPCWCH path, FPOINT pos)
         sprites.push_back(Sprite{ pos, 0, texture });
 }
 
+void SpriteManager::ClearMonsterSprites(LPCWCH path)
+{
+    Texture* texture = TextureManager::GetInstance()->GetTexture(path);
+    if (!texture) return;
+
+    // 해당 텍스처를 가진 모든 스프라이트 제거
+    auto it = sprites.begin();
+    while (it != sprites.end()) {
+        if (it->texture == texture) {
+            it = sprites.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+}
+
 void SpriteManager::SortSpritesByDistance()
 {
     playerPos = Player::GetInstance()->GetCameraPos();
