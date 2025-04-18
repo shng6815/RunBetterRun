@@ -8,7 +8,7 @@ class Monster : public GameObject
 private:
 	
 	// 더 추가할거?
-	FPOINT position;
+	Sprite sprite;
 	float speed;
 	bool isActive;
 	FPOINT targetPosition;
@@ -20,8 +20,9 @@ public:
 	virtual void Update();		// 프레임 단위로 게임 로직 실행(데이터 계산)
 	virtual void Render(HDC hdc);	// 프레임 단위로 출력(이미지, 텍스트 등)
 
-	FPOINT GetPostion() { return position; }
-	void SetPosition(FPOINT pos) { this->position = pos; }
+	Sprite& GetSprite() { return sprite; }
+	FPOINT GetPostion() { return sprite.pos; }
+	void SetPosition(FPOINT pos) { sprite.pos = pos; }
 	bool GetIsActive() { return isActive; }
 	void SetActive(bool active) { active = isActive; }
 	float GetSpeed() { return speed; }

@@ -8,27 +8,19 @@
 class SpriteManager : public Singleton<SpriteManager>
 {
 private:
-    map<LPCWCH, Texture> spritesTextureData;
-    list<Sprite> sprites;
-    Texture mapTileTexture;
+    list<Sprite*> sprites;
     FPOINT playerPos;
-    FPOINT monsterPos;
 
 public:
     HRESULT Init();
     void Release();
 
-    void PutSprite(LPCWCH path, FPOINT pos);
+    void AddSprite(Sprite& sprite);
+    void DeleteSprite(Sprite& sprite);
+
     void ClearMonsterSprites(LPCWCH path);
     void SortSpritesByDistance();
     void UpdatePlayerPosition(FPOINT pos) { playerPos = pos; }
     void UpdateMonsterPosition(LPCWCH path, FPOINT newPos);
-
-    HRESULT LoadTexture(LPCWCH path, Texture& outTexture);
-    HRESULT LoadMapTileTexture(LPCWCH path);
-
-    // 접근자 함수
-    const list<Sprite>& GetSprites() const { return sprites; }
-    Texture* GetTexture(LPCWCH path);
-    Texture* GetMapTileTexture() { return &mapTileTexture; }
+    const list<Sprite*>& GetSprites() const { return sprites; }
 };

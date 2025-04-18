@@ -23,7 +23,7 @@ private:
 
 private:
 	FPOINT playerPos;
-	vector<Monster*> monsters;
+	vector<Monster> monsters;
 	bool isCatchPlayer;
 	MapData* mapData;
 
@@ -43,7 +43,7 @@ public:
 	bool GetisCatchPlayer() { return this->isCatchPlayer; }
 
 	// 阁胶磐 积己 棺 包府
-	Monster* CreateMonster(FPOINT position, float speed = 0.5f);
+	Monster &CreateMonster(FPOINT position, float speed = 0.5f);
 	void RemoveMonster(int index);
 	void RemoveAllMonsters();
 
@@ -56,5 +56,7 @@ public:
 	int CalculateHeuristic(int x1, int y1, int x2, int y2);
 	bool IsNodeInList(const vector<PathNode*>& list, int x, int y);
 	PathNode* GetNodeFromList(vector<PathNode*>& list, int x, int y);
+
+	FPOINT Move(FPOINT src, FPOINT dst);
 };
 

@@ -27,11 +27,22 @@ typedef struct tagTexture
 	DWORD				bmpHeight;
 } Texture;
 
+typedef struct tagAnimationInfo
+{
+	FLOAT	frameTime;
+	FLOAT	currentTime;
+	POINT	frameSize;
+	POINT	maxFrame;
+	POINT	currentFrame;
+
+} AnimationInfo;
+
 typedef struct tagSprite
 {
-	FPOINT		pos;
-	double		distance;
-	Texture*	texture;
+	FPOINT			pos;
+	float			distance;
+	Texture*		texture;
+	AnimationInfo	aniInfo;
 } Sprite;
 
 typedef struct tagRay
