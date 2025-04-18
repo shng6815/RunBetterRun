@@ -16,7 +16,7 @@ HRESULT MonsterManager::Init()
 	CreateMonster(playerPos, 30.0f);
 	//CreateMonster(playerPos, 30.0f);
 
-	// Áï½Ã ½ºÇÁ¶óÀÌÆ® µî·Ï
+	// ì¦‰ì‹œ ìŠ¤í”„ë¼ì´íŠ¸ ë“±ë¡
 	for (auto& monster : monsters) {
 		if (monster.GetIsActive()) {
             SpriteManager::GetInstance()->
@@ -40,17 +40,17 @@ void MonsterManager::Update()
 {
     //SpriteManager::GetInstance()->ClearMonsterSprites(TEXT("Image/Rocket.bmp"));
 
-    // ÇÃ·¹ÀÌ¾î À§Ä¡ ¾÷µ¥ÀÌÆ®
+    // í”Œë ˆì´ì–´ ìœ„ì¹˜ ì—…ë°ì´íŠ¸
     playerPos = Player::GetInstance()->GetCameraPos();
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
 
-    // °¢ ¸ó½ºÅÍ ¾÷µ¥ÀÌÆ®
+    // ê° ëª¬ìŠ¤í„° ì—…ë°ì´íŠ¸
     for (auto& monster : monsters)
     {
         if (!monster.GetIsActive()) continue;
 
 
-        // °¢ ¸ó½ºÅÍÀÇ °æ·Î °è»ê
+        // ê° ëª¬ìŠ¤í„°ì˜ ê²½ë¡œ ê³„ì‚°
         for (auto& monster : monsters) {
             if (!monster.GetIsActive()) continue;
 
@@ -58,46 +58,46 @@ void MonsterManager::Update()
             vector<FPOINT> path = FindPath(monsterPos, playerPos);
 
             if (path.size() >= 2) {
-                // ´ÙÀ½ À§Ä¡¸¦ ¸ñÇ¥ À§Ä¡·Î ¼³Á¤
+                // ë‹¤ìŒ ìœ„ì¹˜ë¥¼ ëª©í‘œ ìœ„ì¹˜ë¡œ ì„¤ì •
                 monster.SetTargetPosition(path[1]);
             }
         }
     }
 
-    // °¢ ¸ó½ºÅÍ ÀÌµ¿ º¸°£ ¾÷µ¥ÀÌÆ®
+    // ê° ëª¬ìŠ¤í„° ì´ë™ ë³´ê°„ ì—…ë°ì´íŠ¸
     for (auto& monster : monsters) {
         if (!monster.GetIsActive() || !monster.IsMoving()) continue;
 
         FPOINT currentPos = monster.GetPostion();
         FPOINT targetPos = monster.GetTargetPosition();
 
-        // ÇöÀç À§Ä¡¿Í ¸ñÇ¥ À§Ä¡ °£ÀÇ °Å¸®
+        // í˜„ì¬ ìœ„ì¹˜ì™€ ëª©í‘œ ìœ„ì¹˜ ê°„ì˜ ê±°ë¦¬
         float dx = targetPos.x - currentPos.x;
         float dy = targetPos.y - currentPos.y;
         float distance = sqrt(dx * dx + dy * dy);
 
         if (distance < 0.05f) {
-            // ¸ñÇ¥¿¡ °ÅÀÇ µµ´ŞÇßÀ¸¸é Á¤È®ÇÑ À§Ä¡·Î ¼³Á¤
+            // ëª©í‘œì— ê±°ì˜ ë„ë‹¬í–ˆìœ¼ë©´ ì •í™•í•œ ìœ„ì¹˜ë¡œ ì„¤ì •
             monster.SetPosition(Move(currentPos, targetPos));
             monster.SetMoving(false);
         }
         else {
-            // ¸ñÇ¥¸¦ ÇâÇØ ÀÌµ¿
+            // ëª©í‘œë¥¼ í–¥í•´ ì´ë™
             float dirX = dx / distance;
             float dirY = dy / distance;
 
-            // »õ À§Ä¡ °è»ê (µ¨Å¸ Å¸ÀÓÀ¸·Î ºÎµå·¯¿î ÀÌµ¿)
+            // ìƒˆ ìœ„ì¹˜ ê³„ì‚° (ë¸íƒ€ íƒ€ì„ìœ¼ë¡œ ë¶€ë“œëŸ¬ìš´ ì´ë™)
             FPOINT newPos = {
                 currentPos.x + dirX * monster.GetSpeed() * deltaTime,
                 currentPos.y + dirY * monster.GetSpeed() * deltaTime
             };
 
-            // ÀÌµ¿ °¡´É ¿©ºÎ È®ÀÎ
+            // ì´ë™ ê°€ëŠ¥ ì—¬ë¶€ í™•ì¸
             if (CanMoveToPosition(newPos)) {
                 monster.SetPosition(Move(currentPos, newPos));
             }
             else {
-                // °æ·Î°¡ ¸·ÇûÀ¸¸é ÀÌµ¿ ÁßÁö ¹× ´ÙÀ½ ¾÷µ¥ÀÌÆ®¿¡¼­ °æ·Î Àç°è»ê
+                // ê²½ë¡œê°€ ë§‰í˜”ìœ¼ë©´ ì´ë™ ì¤‘ì§€ ë° ë‹¤ìŒ ì—…ë°ì´íŠ¸ì—ì„œ ê²½ë¡œ ì¬ê³„ì‚°
                 monster.SetMoving(false);
             }
         }
@@ -117,7 +117,7 @@ void MonsterManager::FindPlayer(FPOINT monsterPos, FPOINT targetPos, float delta
 
         if (path.size() >= 2)
         {
-            // ´ÙÀ½ À§Ä¡·Î ¼³Á¤
+            // ë‹¤ìŒ ìœ„ì¹˜ë¡œ ì„¤ì •
             monster.SetPosition(Move(monsterPos, path[1]));
         }
 	}
@@ -153,9 +153,8 @@ FPOINT MonsterManager::GetDirectionToPlayer(const FPOINT& monsterPos)
 		playerPos.y - monsterPos.y
 	};
 
-	// Á¤±ÔÈ­ (´ÜÀ§ º¤ÅÍ·Î º¯È¯)
 	float length = sqrt(direction.x * direction.x + direction.y * direction.y);
-	if (length > 0.001f) {  // 0À¸·Î ³ª´©±â ¹æÁö
+	if (length > 0.001f) { 
 		direction.x /= length;
 		direction.y /= length;
 	}
@@ -165,14 +164,14 @@ FPOINT MonsterManager::GetDirectionToPlayer(const FPOINT& monsterPos)
 
 bool MonsterManager::CanMoveToPosition(const FPOINT& pos)
 {
-	// ¸Ê °æ°è È®ÀÎ
+	// ë§µ ê²½ê³„ í™•ì¸
 	int x = static_cast<int>(pos.x);
 	int y = static_cast<int>(pos.y);
 
 	if (x < 0 || x >= MAP_COLUME || y < 0 || y >= MAP_ROW)
 		return false;
 
-	// Å¸ÀÏ Å¸ÀÔ È®ÀÎ (¹Ù´ÚÀÎ °æ¿ì¸¸ ÀÌµ¿ °¡´É)
+	// íƒ€ì¼ íƒ€ì… í™•ì¸ (ë°”ë‹¥ì¸ ê²½ìš°ë§Œ ì´ë™ ê°€ëŠ¥)
 	if (!mapData) return false;
 
 	Room& tile = mapData->tiles[y * mapData->width + x];
@@ -181,58 +180,58 @@ bool MonsterManager::CanMoveToPosition(const FPOINT& pos)
 
 vector<FPOINT> MonsterManager::FindPath(FPOINT start, FPOINT end)
 {
-    // °á°ú °æ·Î ÀúÀå
+    // ê²°ê³¼ ê²½ë¡œ ì €ì¥
     vector<FPOINT> path;
 
-    // ¸Ê µ¥ÀÌÅÍ È®ÀÎ
+    // ë§µ ë°ì´í„° í™•ì¸
     if (!mapData) return path;
 
-    // ½ÃÀÛÁ¡°ú ¸ñÇ¥Á¡ÀÇ Á¤¼ö ÁÂÇ¥
+    // ì‹œì‘ì ê³¼ ëª©í‘œì ì˜ ì •ìˆ˜ ì¢Œí‘œ
     int startX = static_cast<int>(start.x);
     int startY = static_cast<int>(start.y);
     int endX = static_cast<int>(end.x);
     int endY = static_cast<int>(end.y);
 
-    // ½ÃÀÛÁ¡°ú ¸ñÇ¥Á¡ÀÌ ¸Ê ¹üÀ§¸¦ ¹ş¾î³ª´ÂÁö È®ÀÎ
+    // ì‹œì‘ì ê³¼ ëª©í‘œì ì´ ë§µ ë²”ìœ„ë¥¼ ë²—ì–´ë‚˜ëŠ”ì§€ í™•ì¸
     if (startX < 0 || startX >= mapData->width || startY < 0 || startY >= mapData->height ||
         endX < 0 || endX >= mapData->width || endY < 0 || endY >= mapData->height)
         return path;
 
-    // ½ÃÀÛÁ¡ÀÌ³ª ¸ñÇ¥Á¡ÀÌ º®ÀÎ °æ¿ì Ã³¸®
+    // ì‹œì‘ì ì´ë‚˜ ëª©í‘œì ì´ ë²½ì¸ ê²½ìš° ì²˜ë¦¬
     if (mapData->tiles[startY * mapData->width + startX].roomType == RoomType::WALL ||
         mapData->tiles[endY * mapData->width + endX].roomType == RoomType::WALL)
         return path;
 
-    // ¿­¸° ¸ñ·Ï°ú ´İÈù ¸ñ·Ï ÃÊ±âÈ­
+    // ì—´ë¦° ëª©ë¡ê³¼ ë‹«íŒ ëª©ë¡ ì´ˆê¸°í™”
     vector<PathNode*> openList;
     vector<PathNode*> closedList;
 
-    // ½ÃÀÛ ³ëµå »ı¼º
+    // ì‹œì‘ ë…¸ë“œ ìƒì„±
     PathNode* startNode = new PathNode(startX, startY);
     startNode->h = CalculateHeuristic(startX, startY, endX, endY);
     startNode->f = startNode->h;
 
-    // ¿­¸° ¸ñ·Ï¿¡ ½ÃÀÛ ³ëµå Ãß°¡
+    // ì—´ë¦° ëª©ë¡ì— ì‹œì‘ ë…¸ë“œ ì¶”ê°€
     openList.push_back(startNode);
 
-    // »óÇÏÁÂ¿ì ÀÌµ¿ ¹æÇâ (Á÷¼± ÀÌµ¿¸¸)
+    // ìƒí•˜ì¢Œìš° ì´ë™ ë°©í–¥ (ì§ì„  ì´ë™ë§Œ)
     const int dx[4] = { 0, 1, 0, -1 };
     const int dy[4] = { -1, 0, 1, 0 };
 
-    // A* ¾Ë°í¸®Áò ¸ŞÀÎ ·çÇÁ
+    // A* ì•Œê³ ë¦¬ì¦˜ ë©”ì¸ ë£¨í”„
     while (!openList.empty())
     {
-        // f°ªÀÌ °¡Àå ÀÛÀº ³ëµå Ã£±â
+        // fê°’ì´ ê°€ì¥ ì‘ì€ ë…¸ë“œ ì°¾ê¸°
         auto it = min_element(openList.begin(), openList.end(), [](PathNode* a, PathNode* b) {
             return a->f < b->f;
             });
 
         PathNode* current = *it;
 
-        // ¸ñÇ¥ µµ´Ş È®ÀÎ
+        // ëª©í‘œ ë„ë‹¬ í™•ì¸
         if (current->x == endX && current->y == endY)
         {
-            // °æ·Î ¿ªÃßÀû
+            // ê²½ë¡œ ì—­ì¶”ì 
             PathNode* temp = current;
             while (temp)
             {
@@ -240,63 +239,63 @@ vector<FPOINT> MonsterManager::FindPath(FPOINT start, FPOINT end)
                 temp = temp->parent;
             }
 
-            // °æ·Î ¼ø¼­ µÚÁı±â
+            // ê²½ë¡œ ìˆœì„œ ë’¤ì§‘ê¸°
             reverse(path.begin(), path.end());
 
-            // ¸Ş¸ğ¸® Á¤¸®
+            // ë©”ëª¨ë¦¬ ì •ë¦¬
             for (auto node : openList)
                 delete node;
             for (auto node : closedList)
                 delete node;
 
-            // °æ·Î ¹İÈ¯
+            // ê²½ë¡œ ë°˜í™˜
             return path;
         }
 
-        // ÇöÀç ³ëµå¸¦ ¿­¸° ¸ñ·Ï¿¡¼­ Á¦°ÅÇÏ°í ´İÈù ¸ñ·Ï¿¡ Ãß°¡
+        // í˜„ì¬ ë…¸ë“œë¥¼ ì—´ë¦° ëª©ë¡ì—ì„œ ì œê±°í•˜ê³  ë‹«íŒ ëª©ë¡ì— ì¶”ê°€
         openList.erase(it);
         closedList.push_back(current);
 
-        // »óÇÏÁÂ¿ì ÀÌ¿ô ³ëµå Ã³¸®
+        // ìƒí•˜ì¢Œìš° ì´ì›ƒ ë…¸ë“œ ì²˜ë¦¬
         for (int i = 0; i < 4; i++)
         {
             int nx = current->x + dx[i];
             int ny = current->y + dy[i];
 
-            // ¸Ê °æ°è È®ÀÎ
+            // ë§µ ê²½ê³„ í™•ì¸
             if (nx < 0 || nx >= mapData->width || ny < 0 || ny >= mapData->height)
                 continue;
 
-            // ÀÌµ¿ °¡´ÉÇÑ Å¸ÀÏÀÎÁö È®ÀÎ (FLOOR ¶Ç´Â START)
+            // ì´ë™ ê°€ëŠ¥í•œ íƒ€ì¼ì¸ì§€ í™•ì¸ (FLOOR ë˜ëŠ” START)
             Room& tile = mapData->tiles[ny * mapData->width + nx];
             if (tile.roomType != RoomType::FLOOR && tile.roomType != RoomType::START)
                 continue;
 
-            // ÀÌ¹Ì ´İÈù ¸ñ·Ï¿¡ ÀÖ´ÂÁö È®ÀÎ
+            // ì´ë¯¸ ë‹«íŒ ëª©ë¡ì— ìˆëŠ”ì§€ í™•ì¸
             if (IsNodeInList(closedList, nx, ny))
                 continue;
 
-            // »õ g°ª °è»ê (Á÷¼± ÀÌµ¿Àº ºñ¿ë 1)
+            // ìƒˆ gê°’ ê³„ì‚° (ì§ì„  ì´ë™ì€ ë¹„ìš© 1)
             int newG = current->g + 1;
 
-            // ÀÌ¹Ì ¿­¸° ¸ñ·Ï¿¡ ÀÖ´ÂÁö È®ÀÎ
+            // ì´ë¯¸ ì—´ë¦° ëª©ë¡ì— ìˆëŠ”ì§€ í™•ì¸
             PathNode* neighbor = GetNodeFromList(openList, nx, ny);
 
             if (!neighbor)
             {
-                // »õ ³ëµå »ı¼º
+                // ìƒˆ ë…¸ë“œ ìƒì„±
                 neighbor = new PathNode(nx, ny);
                 neighbor->g = newG;
                 neighbor->h = CalculateHeuristic(nx, ny, endX, endY);
                 neighbor->f = neighbor->g + neighbor->h;
                 neighbor->parent = current;
 
-                // ¿­¸° ¸ñ·Ï¿¡ Ãß°¡
+                // ì—´ë¦° ëª©ë¡ì— ì¶”ê°€
                 openList.push_back(neighbor);
             }
             else if (newG < neighbor->g)
             {
-                // ´õ ÁÁÀº °æ·Î¸¦ Ã£À½
+                // ë” ì¢‹ì€ ê²½ë¡œë¥¼ ì°¾ìŒ
                 neighbor->g = newG;
                 neighbor->f = neighbor->g + neighbor->h;
                 neighbor->parent = current;
@@ -304,13 +303,13 @@ vector<FPOINT> MonsterManager::FindPath(FPOINT start, FPOINT end)
         }
     }
 
-    // °æ·Î¸¦ Ã£Áö ¸øÇÔ, ¸Ş¸ğ¸® Á¤¸®
+    // ê²½ë¡œë¥¼ ì°¾ì§€ ëª»í•¨, ë©”ëª¨ë¦¬ ì •ë¦¬
     for (auto node : openList)
         delete node;
     for (auto node : closedList)
         delete node;
 
-    // ºó °æ·Î ¹İÈ¯
+    // ë¹ˆ ê²½ë¡œ ë°˜í™˜
     return path;
 }
 
