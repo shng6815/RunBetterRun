@@ -10,7 +10,7 @@ HRESULT MainGameScene::Init()
 	rayCasting = new RayCast();
 	if (FAILED(rayCasting->Init()))
 	{
-		MessageBox(g_hWnd, TEXT("RayCasting �ʱ�ȭ ����"), TEXT("���"), MB_OK);
+		//MessageBox(g_hWnd, TEXT("RayCasting �ʱ�ȭ ����"), TEXT("���"), MB_OK);
 		return E_FAIL;
 	}
 
