@@ -1,7 +1,18 @@
 #include "MapManager.h"
+#include "TextureManager.h"
+#include <fstream>
 
 HRESULT MapManager::Init()
 {
+	mapData.height = 24;
+	mapData.width = 24;
+	mapData.tiles.resize(mapData.height * mapData.width);
+	mapData.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/mapTiles.bmp"));
+	if (!mapData.texture)
+		return E_FAIL;
+	mapData.textureTileSize = 32;
+	mapData.textureTileRowSize = 20;
+	mapData.textureTileColumnSize = 9;
 	// ±âº» ¸Ê »ý¼º
 	//return CreateNewMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
     return CreateMazeMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
