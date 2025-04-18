@@ -216,7 +216,7 @@ void RayCast::RenderSprite(const Sprite* sprite, POINT renderX, POINT renderY, F
                         {
                             FPOINT pixel = { renderX.x, renderY.x };
                             if (color != 0xFF00FF)
-                                RenderPixel(pixel, GetDistanceShadeColor(color, sprite->distance));
+                                RenderPixel(pixel, GetDistanceShadeColor(color, sprite->distance, SPRITE_SHADE_VALUE));
                             ++renderY.x;
                         }
                     }
@@ -355,8 +355,8 @@ void RayCast::RenderCeilingFloor(Ray& ray, int column, COLORREF ceiling, COLORRE
         while (y < endY)
         {
             pixel.y = y;
-            RenderPixel(pixel, GetDistanceShadeColor(floor, screenHeightPixelDepths[y]));
-            RenderPixel({ pixel.x, WINSIZE_Y - (pixel.y + 1) }, GetDistanceShadeColor(ceiling, screenHeightPixelDepths[y]));
+            RenderPixel(pixel, GetDistanceShadeColor(floor, screenHeightPixelDepths[y], SHADE_VALUE));
+            RenderPixel({ pixel.x, WINSIZE_Y - (pixel.y + 1) }, GetDistanceShadeColor(ceiling, screenHeightPixelDepths[y], SHADE_VALUE));
         }
     }
 }
@@ -390,9 +390,9 @@ COLORREF RayCast::GetDistanceShadeColor(int tile, FPOINT texturePixel, float dis
             INT(GetBValue(color) / divide));
 }
 
-COLORREF RayCast::GetDistanceShadeColor(COLORREF color, float distance)
+COLORREF RayCast::GetDistanceShadeColor(COLORREF color, float distance, float shade)
 {
-    float divide = distance / SHADE_VALUE;
+    float divide = distance / shade;
 
     if (divide <= 1.0f)
         return color;

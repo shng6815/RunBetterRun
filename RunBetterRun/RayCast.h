@@ -7,6 +7,7 @@
 #define FLOOR_COLOR 0x717171
 
 #define SHADE_VALUE 0.4f
+#define SPRITE_SHADE_VALUE 0.7f
 #define FLOAT(n) static_cast<float>(n)
 #define INT(n) static_cast<int>(n)
 
@@ -61,7 +62,7 @@ private:
 	void RenderCeilingFloor(Ray& ray, int column, COLORREF ceiling, COLORREF floor);
 	void RenderPixel(FPOINT pixel, int color);
 	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance);
-	COLORREF GetDistanceShadeColor(COLORREF color, float distance);
+	COLORREF GetDistanceShadeColor(COLORREF color, float distance, float shade);
 	void RenderSprites(DWORD start, DWORD end);
 	void RenderSprite(const Sprite* sprite, POINT renderX, POINT renderY, FPOINT transform);
 	int GetRenderScaleBasedOnFPS(void);
