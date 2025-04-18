@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "MonsterManager.h"
 #include "SpriteManager.h"
+#include "ItemManager.h"
 
 
 HRESULT MainGameScene::Init()
@@ -16,8 +17,8 @@ HRESULT MainGameScene::Init()
 
 	MapManager::GetInstance()->Init();
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
-	//ItemManager::GetInstance()->Init();
 	MonsterManager::GetInstance()->Init();
+	ItemManager::GetInstance()->Init();
 
 	status = SceneStatus::IN_GAME;
 	ShowCursor(FALSE);
@@ -31,8 +32,7 @@ HRESULT MainGameScene::Init()
 	oldBitmap = (HBITMAP)SelectObject(backBufferDC, backBufferBitmap);
 	ReleaseDC(g_hWnd, screenDC);
 
-	//SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
-	//SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
+	ItemManager::GetInstance()->PutItem({ 21.5, 10.5 });
 
 
 	return S_OK;
@@ -51,8 +51,8 @@ void MainGameScene::Release()
 		delete rayCasting;
 		rayCasting = nullptr;
 	}
+	ItemManager::GetInstance()->Release();
 	MonsterManager::GetInstance()->Release();
-	//ItemManaher::GetInstance()->Release();
 	Player::GetInstance()->Release();
 	SpriteManager::GetInstance()->Release();
 	MapManager::GetInstance()->Release();
@@ -76,8 +76,8 @@ void MainGameScene::Update()
 		if (rayCasting)
 			rayCasting->Update();
 		SpriteManager::GetInstance()->SortSpritesByDistance();
-		//ItemManager::GetInstance()->Update();
 		MonsterManager::GetInstance()->Update();
+		ItemManager::GetInstance()->Update();
 		//UIManager::GetInstance()->Update();
 
 		break;
@@ -99,10 +99,8 @@ void MainGameScene::Update()
 
 void MainGameScene::Render(HDC hdc)
 {
-	// 1. 모든 렌더링을 백 버퍼에
 	rayCasting->Render(backBufferDC);
 
-	// 2. 흔들림 반영하여 백 버퍼를 실제 hdc에 출력
 	AddShake(hdc);
 }
 
@@ -127,20 +125,16 @@ void MainGameScene::ShakeScreen(float shakePower, float time, bool isStepShake)
 
 void MainGameScene::AddShake(HDC hdc)
 {
-	// 흔들림 좌표 계산
 	int offsetX = static_cast<int>(shakeX);
 	int offsetY = static_cast<int>(shakeY);
 
-	// 백 버퍼 내용을 흔들림을 적용해 출력
 	BitBlt(hdc, offsetX, offsetY, WINSIZE_X, WINSIZE_Y, backBufferDC, 0, 0, SRCCOPY);
 
-	// 흔들림 지속시간 갱신
 	if (shakeTime > 0.0f)
 	{
 		float dt = TimerManager::GetInstance()->GetDeltaTime();
 		elapsedTime += dt;
 
-		// 흔들림 종료
 		if (elapsedTime >= shakeTime)
 		{
 			shakeX = 0.0f;
@@ -155,13 +149,11 @@ void MainGameScene::AddShake(HDC hdc)
 
 			if (isStepShake)
 			{
-				// stepShake면 Y축만 흔들기
 				shakeX = 0.0f;
 				shakeY = ((rand() % 3) - 1) * damping * maxShakePower;
 			}
 			else
 			{
-				// 일반 랜덤 흔들림
 				shakeX = ((rand() % 3) - 1) * damping * maxShakePower;
 				shakeY = ((rand() % 3) - 1) * damping * maxShakePower;
 			}

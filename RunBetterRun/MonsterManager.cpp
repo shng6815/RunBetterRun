@@ -1,5 +1,6 @@
 #include "MonsterManager.h"
 #include "SpriteManager.h"
+#include "TextureManager.h"
 #include "Player.h"
 #include "MapManager.h"
 #include <cmath>
@@ -10,20 +11,16 @@ HRESULT MonsterManager::Init()
 	mapData = MapManager::GetInstance()->GetMapData();
 	isCatchPlayer = false;
 
-	Texture monsterTexture;
-	SpriteManager::GetInstance()->LoadTexture(TEXT("Image/boss.bmp"), monsterTexture);
+	Texture* monsterTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/boss.bmp"));
 
 	CreateMonster(playerPos, 30.0f);
 	//CreateMonster(playerPos, 30.0f);
 
 	// 즉시 스프라이트 등록
 	for (auto& monster : monsters) {
-		if (monster->GetIsActive()) {
-			SpriteManager::GetInstance()->
-				PutSprite(
-					TEXT("Image/boss.bmp"), 
-					monster->GetPostion()
-				);
+		if (monster.GetIsActive()) {
+            SpriteManager::GetInstance()->
+                AddSprite(monster.GetSprite());
 		}
 	}
 
@@ -34,8 +31,7 @@ void MonsterManager::Release()
 {
 	for (auto& monster : monsters)
 	{
-		monster->Release();
-		delete monster;
+		monster.Release();
 	}
 	monsters.clear();
 }
@@ -48,79 +44,64 @@ void MonsterManager::Update()
     playerPos = Player::GetInstance()->GetCameraPos();
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
 
-    static float pathUpdateTimer = 0.0f;
-    pathUpdateTimer += deltaTime;
-
-    if (pathUpdateTimer >= 0.2f) {
-        pathUpdateTimer = 0.0f;
-
-        // 각 몬스터 업데이트
-        for (auto& monster : monsters)
-        {
-            if (!monster->GetIsActive()) continue;
+    // 각 몬스터 업데이트
+    for (auto& monster : monsters)
+    {
+        if (!monster.GetIsActive()) continue;
 
 
-            // 각 몬스터의 경로 계산
-            for (auto& monster : monsters) {
-                if (!monster->GetIsActive()) continue;
+        // 각 몬스터의 경로 계산
+        for (auto& monster : monsters) {
+            if (!monster.GetIsActive()) continue;
 
-                FPOINT monsterPos = monster->GetPostion();
-                vector<FPOINT> path = FindPath(monsterPos, playerPos);
+            FPOINT monsterPos = monster.GetPostion();
+            vector<FPOINT> path = FindPath(monsterPos, playerPos);
 
-                if (path.size() >= 2) {
-                    // 다음 위치를 목표 위치로 설정
-                    monster->SetTargetPosition(path[1]);
-                }
+            if (path.size() >= 2) {
+                // 다음 위치를 목표 위치로 설정
+                monster.SetTargetPosition(path[1]);
             }
         }
+    }
 
-        // 각 몬스터 이동 보간 업데이트
-        for (auto& monster : monsters) {
-            if (!monster->GetIsActive() || !monster->IsMoving()) continue;
+    // 각 몬스터 이동 보간 업데이트
+    for (auto& monster : monsters) {
+        if (!monster.GetIsActive() || !monster.IsMoving()) continue;
 
-            FPOINT currentPos = monster->GetPostion();
-            FPOINT targetPos = monster->GetTargetPosition();
+        FPOINT currentPos = monster.GetPostion();
+        FPOINT targetPos = monster.GetTargetPosition();
 
-            // 현재 위치와 목표 위치 간의 거리
-            float dx = targetPos.x - currentPos.x;
-            float dy = targetPos.y - currentPos.y;
-            float distance = sqrt(dx * dx + dy * dy);
+        // 현재 위치와 목표 위치 간의 거리
+        float dx = targetPos.x - currentPos.x;
+        float dy = targetPos.y - currentPos.y;
+        float distance = sqrt(dx * dx + dy * dy);
 
-            if (distance < 0.05f) {
-                // 목표에 거의 도달했으면 정확한 위치로 설정
-                monster->SetPosition(targetPos);
-                monster->SetMoving(false);
+        if (distance < 0.05f) {
+            // 목표에 거의 도달했으면 정확한 위치로 설정
+            monster.SetPosition(Move(currentPos, targetPos));
+            monster.SetMoving(false);
+        }
+        else {
+            // 목표를 향해 이동
+            float dirX = dx / distance;
+            float dirY = dy / distance;
+
+            // 새 위치 계산 (델타 타임으로 부드러운 이동)
+            FPOINT newPos = {
+                currentPos.x + dirX * monster.GetSpeed() * deltaTime,
+                currentPos.y + dirY * monster.GetSpeed() * deltaTime
+            };
+
+            // 이동 가능 여부 확인
+            if (CanMoveToPosition(newPos)) {
+                monster.SetPosition(Move(currentPos, newPos));
             }
             else {
-                // 목표를 향해 이동
-                float dirX = dx / distance;
-                float dirY = dy / distance;
-
-                // 새 위치 계산 (델타 타임으로 부드러운 이동)
-                FPOINT newPos = {
-                    currentPos.x + dirX * monster->GetSpeed() * deltaTime,
-                    currentPos.y + dirY * monster->GetSpeed() * deltaTime
-                };
-
-                // 이동 가능 여부 확인
-                if (CanMoveToPosition(newPos)) {
-                    monster->SetPosition(newPos);
-
-                    SpriteManager::GetInstance()->ClearMonsterSprites(TEXT("Image/boss.bmp"));
-
-                    // 스프라이트 업데이트
-                    SpriteManager::GetInstance()->UpdateMonsterPosition(
-                        TEXT("Image/boss.bmp"),
-                        monster->GetPostion());
-                }
-                else {
-                    // 경로가 막혔으면 이동 중지 및 다음 업데이트에서 경로 재계산
-                    monster->SetMoving(false);
-                    pathUpdateTimer = 0.2f; // 즉시 경로 재계산
-                }
+                // 경로가 막혔으면 이동 중지 및 다음 업데이트에서 경로 재계산
+                monster.SetMoving(false);
             }
-
         }
+
     }
 }
 
@@ -128,23 +109,17 @@ void MonsterManager::FindPlayer(FPOINT monsterPos, FPOINT targetPos, float delta
 {
 	for (auto& monster : monsters)
 	{
-		if (!monster->GetIsActive()) continue;
+		if (!monster.GetIsActive()) continue;
 
-		FPOINT monsterPos = monster->GetPostion();
+		FPOINT monsterPos = monster.GetPostion();
 
 		vector<FPOINT> path = FindPath(monsterPos, playerPos);
 
-		if (path.size() >= 2)
-		{
-			// 다음 위치로 설정
-			monster->SetPosition(path[1]);
-
-			// 스프라이트 업데이트
-			SpriteManager::GetInstance()->UpdateMonsterPosition(
-				TEXT("Image/Rocket.bmp"),
-				monster->GetPostion());
-		}
-
+        if (path.size() >= 2)
+        {
+            // 다음 위치로 설정
+            monster.SetPosition(Move(monsterPos, path[1]));
+        }
 	}
 }
 
@@ -153,12 +128,12 @@ void MonsterManager::CatchPlayer()
 {
 }
 
-Monster* MonsterManager::CreateMonster(FPOINT position, float speed)
+Monster &MonsterManager::CreateMonster(FPOINT position, float speed)
 {
-	Monster* monster = new Monster();
-	monster->Init(position, speed);
+    Monster monster;
+	monster.Init(position, speed);
 	monsters.push_back(monster);
-	return monster;
+	return monsters.back();
 }
 
 void MonsterManager::RemoveMonster(int index)
@@ -362,4 +337,11 @@ MonsterManager::PathNode* MonsterManager::GetNodeFromList(vector<PathNode*>& lis
 			return node;
 	}
 	return nullptr;
+}
+
+FPOINT MonsterManager::Move(FPOINT src, FPOINT dst)
+{
+    float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
+    FPOINT move = { dst.x - src.x, dst.y - src.y };
+    return { src.x + (move.x * 6.0f *deltaTime), src.y + (move.y * 6.0f * deltaTime) };
 }

@@ -1,22 +1,24 @@
 #pragma once
 
 #include "Singleton.h"
-#include "config.h"
-#include <vector>
+#include "structs.h"
+#include <list>
 
-using namespace std;
-class Item;
-class Sprite;
-class ItemManager : public Singleton<ItemManager>
+class ItemManager: public Singleton<ItemManager>
 {
-private:
-	int itemCount;
-	vector<Item*> vecitem;
-	map<LPCWCH, Sprite>	itemMap;
+	list<Sprite>	items;
+	Texture*		texture;
+	AnimationInfo	aniInfo;
+
+	HRESULT LoadFile(LPCWCH path);
+
 public:
-	// TODO: item 생성로직?
-	// TODO: item 스프라이트 적용
-	// TODO: item 먹을때 카운트 증가
-	// TODO:
+	HRESULT Init(void);
+	HRESULT Init(LPCWCH path);
+	void	Release(void);
+	void	Update(void);
+
+	SIZE_T	Size(void) { return items.size(); }
+	void	PutItem(FPOINT pos);
 };
 
