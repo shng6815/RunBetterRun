@@ -2,6 +2,8 @@
 #include "KeyManager.h"
 #include "SpriteManager.h"
 #include "MapManager.h"
+#include "MonsterManager.h"
+#include <fstream>
 #include "Player.h"
 #include "TextureManager.h"
 
@@ -45,8 +47,6 @@ HRESULT RayCast::Init(void)
 
     SpriteManager::GetInstance()->LoadMapTileTexture(TEXT("Image/maptiles.bmp"));
     mapTile = SpriteManager::GetInstance()->GetMapTileTexture();
-    SpriteManager::GetInstance()->PutSprite(TEXT("Image/boss.bmp"), { 19, 12 });
-    SpriteManager::GetInstance()->PutSprite(TEXT("Image/boss.bmp"), { 16, 12 });
 
     renderScale = SCALE;
     currentFPS = 60;
@@ -92,6 +92,10 @@ void RayCast::Release(void)
 void RayCast::Update(void)
 {
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
+
+
+    SpriteManager::GetInstance()->UpdatePlayerPosition(Player::GetInstance()->GetCameraPos());
+    SpriteManager::GetInstance()->SortSpritesByDistance();
 
     fpsCheckCounter++;
     fpsCheckTime += deltaTime;
@@ -151,7 +155,7 @@ void RayCast::FillScreen(DWORD start, DWORD end)
 void RayCast::RenderSprites(DWORD start, DWORD end)
 {
     const list<Sprite>& sprites = SpriteManager::GetInstance()->GetSprites();
-    
+
     float invDet = 1.0f / ((Player::GetInstance()->GetPlane().x * Player::GetInstance()->GetCameraVerDir().y) - (Player::GetInstance()->GetPlane().y * Player::GetInstance()->GetCameraVerDir().x));
 
     for (auto& sprite : sprites)
@@ -227,7 +231,8 @@ void RayCast::RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY, F
     }
 }
 
-Ray RayCast::RayCasting(int column)
+
+Ray RayCast::RayCasting(int colume)
 {
     bool    hit = false;
     bool    nextSide = false;

@@ -63,7 +63,7 @@ private:
 	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance);
 	COLORREF GetDistanceShadeColor(COLORREF color, float distance);
 	void RenderSprites(DWORD start, DWORD end);
-	void RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY, FPOINT transform);
+	void RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY, FPOINT transform);;
 	int GetRenderScaleBasedOnFPS(void);
 
 public:

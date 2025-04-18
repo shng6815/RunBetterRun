@@ -1,6 +1,7 @@
 #include "MainGameScene.h"
 #include "RayCast.h"
 #include "Player.h"
+#include "MonsterManager.h"
 #include "SpriteManager.h"
 
 HRESULT MainGameScene::Init()
@@ -15,7 +16,7 @@ HRESULT MainGameScene::Init()
 	//MapManager::GetInstance()->Init();
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	//ItemManager::GetInstance()->Init();
-	//MonsterManager::GetInstance()->Init();
+	MonsterManager::GetInstance()->Init();
 
 	status = SceneStatus::IN_GAME;
 	ShowCursor(FALSE);
@@ -74,7 +75,7 @@ void MainGameScene::Update()
 			rayCasting->Update();
 		SpriteManager::GetInstance()->SortSpritesByDistance();
 		//ItemManager::GetInstance()->Update();
-		//MonsterManager::GetInstance()->Update();
+		MonsterManager::GetInstance()->Update();
 		//UIManager::GetInstance()->Update();
 
 		break;

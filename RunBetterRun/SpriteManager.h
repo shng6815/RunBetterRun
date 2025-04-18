@@ -10,6 +10,7 @@ class SpriteManager : public Singleton<SpriteManager>
 private:
     list<Sprite> sprites;
     FPOINT playerPos;
+    FPOINT monsterPos;
 
 public:
     HRESULT Init();
@@ -17,5 +18,12 @@ public:
 
     void PutSprite(LPCWCH path, FPOINT pos);
     void SortSpritesByDistance();
+    void UpdatePlayerPosition(FPOINT pos) { playerPos = pos; }
+    void UpdateMonsterPosition(LPCWCH path, FPOINT newPos);
+
+    HRESULT LoadTexture(LPCWCH path, Texture& outTexture);
+    HRESULT LoadMapTileTexture(LPCWCH path);
+
+    // 접근자 함수
     const list<Sprite>& GetSprites() const { return sprites; }
 };

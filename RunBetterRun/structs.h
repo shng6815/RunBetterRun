@@ -34,7 +34,6 @@ typedef struct tagSprite
 	Texture*	texture;
 } Sprite;
 
-
 typedef struct tagRay
 {
 	float		distance;

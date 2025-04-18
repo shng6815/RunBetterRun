@@ -1,8 +1,13 @@
 #include "Monster.h"
 
-HRESULT Monster::Init()
+HRESULT Monster::Init(FPOINT startPos, float speed)
 {
-	return E_NOTIMPL;
+	position = startPos;
+	targetPosition = startPos;
+	this->speed = speed;
+	isActive = true;
+	isMoving = false;
+	return S_OK;
 }
 
 void Monster::Release()
