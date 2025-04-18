@@ -148,7 +148,6 @@ void RayCast::Render(HDC hdc)
     BOOL print = FALSE;
     while (!print)
     {
-        BOOL ready = TRUE;
         WaitForSingleObject(threadMutex, INFINITE);
         if (threadJobDone == THREAD_NUM)
         {
