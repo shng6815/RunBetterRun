@@ -94,75 +94,18 @@ void MainGameScene::Render(HDC hdc)
 	rayCasting->Render(backBufferDC);
 
 	// 2. 흔들림 반영하여 백 버퍼를 실제 hdc에 출력
-	AddShake(hdc);
+	ApplyShake(hdc);
 }
 
 void MainGameScene::ShakeScreen(float shakePower, float time, bool isStepShake)
 {
-	this->isStepShake = isStepShake;
-	maxShakePower = shakePower;
-
-	if (!isStepShake)
-	{
-		shakeX = ((rand() % 3) - 1) * shakePower;
-		shakeY = ((rand() % 3) - 1) * shakePower;
-	}
-
-	shakeTime = time;
-	elapsedTime = 0.0f;
+	screenShake.Start(shakePower, time, isStepShake);
 }
 
-void MainGameScene::AddShake(HDC hdc)
+void MainGameScene::ApplyShake(HDC hdc)
 {
-	// 흔들림 좌표 계산
-	int offsetX = static_cast<int>(shakeX);
-	int offsetY = static_cast<int>(shakeY);
+	screenShake.Update(TimerManager::GetInstance()->GetDeltaTime());
+	POINT offset = screenShake.GetOffset();
 
-	// 백 버퍼 내용을 흔들림을 적용해 출력
-	BitBlt(hdc, offsetX, offsetY, WINSIZE_X, WINSIZE_Y, backBufferDC, 0, 0, SRCCOPY);
-
-	// 흔들림 지속시간 갱신
-	if (shakeTime > 0.0f)
-	{
-		float dt = TimerManager::GetInstance()->GetDeltaTime();
-		elapsedTime += dt;
-
-		// 흔들림 종료
-		if (elapsedTime >= shakeTime)
-		{
-			shakeX = 0.0f;
-			shakeY = 0.0f;
-			shakeTime = 0.0f;
-			elapsedTime = 0.0f;
-		}
-		else
-		{
-			float progress = elapsedTime / shakeTime;
-			float damping = 1.0f - progress;
-
-			if (isStepShake)
-			{
-				float halfTime = 0.5f;
-				if (progress < halfTime)
-				{
-					// 전반부: Y값 증가 (0 → max)
-					float ratio = progress / halfTime;  // 0 ~ 1
-					shakeY = maxShakePower * ratio;
-				}
-				else
-				{
-					// 후반부: Y값 감소 (max → 0)
-					float ratio = (1.0f - progress) / halfTime;  // 1 ~ 0
-					shakeY = maxShakePower * ratio;
-				}
-				shakeX = 0.0f;
-			}
-			else
-			{
-				// 일반 랜덤 흔들림
-				shakeX = ((rand() % 3) - 1) * damping * maxShakePower;
-				shakeY = ((rand() % 3) - 1) * damping * maxShakePower;
-			}
-		}
-	}
+	BitBlt(hdc, offset.x, offset.y, WINSIZE_X, WINSIZE_Y, backBufferDC, 0, 0, SRCCOPY);
 }
