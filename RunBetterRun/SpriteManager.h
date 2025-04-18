@@ -28,4 +28,6 @@ public:
 
     // 접근자 함수
     const list<Sprite>& GetSprites() const { return sprites; }
+    Texture* GetTexture(LPCWCH path);
+    Texture* GetMapTileTexture() { return &mapTileTexture; }
 };

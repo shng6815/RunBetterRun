@@ -239,7 +239,7 @@ Ray RayCast::RayCasting(int colume)
     Ray     ray(Player::GetInstance()->GetCameraPos(),
                 Player::GetInstance()->GetPlane(),
                 Player::GetInstance()->GetCameraVerDir(),
-                screenWidthPixelUnitPos[column]);
+                screenWidthPixelUnitPos[colume]);
     MapData* md = MapManager::GetInstance()->GetMapData();
 
     while (!hit)

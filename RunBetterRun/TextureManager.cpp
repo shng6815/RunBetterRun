@@ -62,6 +62,7 @@ HRESULT TextureManager::LoadTexture(LPCWCH path, Texture& texture)
     return S_OK;
 }
 
+
 void TextureManager::Release(void)
 {
     if (!source.empty())

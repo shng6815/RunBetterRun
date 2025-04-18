@@ -7,7 +7,7 @@ HRESULT MapManager::Init()
 	mapData.height = 24;
 	mapData.width = 24;
 	mapData.tiles.resize(mapData.height * mapData.width);
-	mapData.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/mapTiles.bmp"));
+	mapData.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/horrorMapTiles.bmp"));
 	if (!mapData.texture)
 		return E_FAIL;
     mapData.textureTileSize = 32;

@@ -13,7 +13,7 @@ HRESULT MainGameScene::Init()
 		return E_FAIL;
 	}
 
-	//MapManager::GetInstance()->Init();
+	MapManager::GetInstance()->Init();
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	//ItemManager::GetInstance()->Init();
 	MonsterManager::GetInstance()->Init();
@@ -30,8 +30,7 @@ HRESULT MainGameScene::Init()
 	oldBitmap = (HBITMAP)SelectObject(backBufferDC, backBufferBitmap);
 	ReleaseDC(g_hWnd, screenDC);
 
-	SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
-	SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
+
 
 	return S_OK;
 }
@@ -49,11 +48,11 @@ void MainGameScene::Release()
 		delete rayCasting;
 		rayCasting = nullptr;
 	}
-	//MonsterManager::GetInstance()->Release();
+	MonsterManager::GetInstance()->Release();
 	//ItemManaher::GetInstance()->Release();
 	Player::GetInstance()->Release();
 	SpriteManager::GetInstance()->Release();
-	//MapManager::GetInstance()->Release();
+	MapManager::GetInstance()->Release();
 
 	SelectObject(backBufferDC, oldBitmap);
 	DeleteObject(backBufferBitmap);

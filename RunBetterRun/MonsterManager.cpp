@@ -13,8 +13,8 @@ HRESULT MonsterManager::Init()
 	Texture monsterTexture;
 	SpriteManager::GetInstance()->LoadTexture(TEXT("Image/Rocket.bmp"), monsterTexture);
 
-	CreateMonster({ 10.0f, 10.0f }, 30.0f);
-	CreateMonster({ 20.0f,  10.0f}, 30.0f);
+	CreateMonster({22, 17}, 30.0f);
+    //CreateMonster({ 22,14 }, 30.0f);
 
 	// 즉시 스프라이트 등록
 	for (auto& monster : monsters) {

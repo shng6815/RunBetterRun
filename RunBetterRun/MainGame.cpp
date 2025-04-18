@@ -15,7 +15,7 @@ HRESULT MainGame::Init()
 	KeyManager::GetInstance()->Init();
 	SceneManager::GetInstance()->Init();
 	SpriteManager::GetInstance()->Init();
-	MapManager::GetInstance()->Init();
+	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
 
 	SceneManager::GetInstance()->AddScene("타일맵툴", new TilemapTool());
 	SceneManager::GetInstance()->AddLoadingScene("로딩_1", new LoadingScene());
