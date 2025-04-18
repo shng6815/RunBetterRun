@@ -173,15 +173,15 @@ void RayCast::FillScreen(DWORD start, DWORD end)
 
 void RayCast::RenderSprites(DWORD start, DWORD end)
 {
-    const list<Sprite>& sprites = SpriteManager::GetInstance()->GetSprites();
+    auto sprites = SpriteManager::GetInstance()->GetSprites();
     
     float invDet = 1.0f / ((Player::GetInstance()->GetPlane().x * Player::GetInstance()->GetCameraVerDir().y) - (Player::GetInstance()->GetPlane().y * Player::GetInstance()->GetCameraVerDir().x));
 
     for (auto& sprite : sprites)
     {
-        if (sprite.distance > 0.1f)
+        if (sprite->distance > 0.1f)
         {
-            FPOINT pos = { sprite.pos.x - Player::GetInstance()->GetCameraPos().x, sprite.pos.y - Player::GetInstance()->GetCameraPos().y };
+            FPOINT pos = { sprite->pos.x - Player::GetInstance()->GetCameraPos().x, sprite->pos.y - Player::GetInstance()->GetCameraPos().y };
             FPOINT transform = { invDet * (Player::GetInstance()->GetCameraVerDir().y * pos.x - Player::GetInstance()->GetCameraVerDir().x * pos.y),
                                 invDet * (-Player::GetInstance()->GetPlane().y * pos.x + Player::GetInstance()->GetPlane().x * pos.y) };
             if (fabs(transform.y) < EPSILON)
@@ -205,7 +205,7 @@ void RayCast::RenderSprites(DWORD start, DWORD end)
     }
 }
 
-void RayCast::RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY, FPOINT transform)
+void RayCast::RenderSprite(const Sprite* sprite, POINT renderX, POINT renderY, FPOINT transform)
 {
     float renderYOrg = renderY.x;
     int screen = INT((WINSIZE_X / 2) * (1.0f + transform.x / transform.y));
@@ -214,30 +214,31 @@ void RayCast::RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY, F
     while (renderX.x < renderX.y)
     {
         POINT texturePos = { INT(256 * ((INT(renderX.x) - (-size / 2.0f + screen)))
-                       * sprite.texture->bmpWidth / size) / 256, 0 };
-
+                       * sprite->aniInfo.frameSize.x / size) / 256, 0 };
+        texturePos.x += sprite->aniInfo.currentFrame.x * sprite->aniInfo.frameSize.x;
         DWORD endX = min(renderX.x + renderScale, renderX.y);
         while (renderX.x < endX)
         {
             if (transform.y > 0
                 && transform.y < screenWidthRayDistance[renderX.x]
-                && texturePos.x < sprite.texture->bmpWidth)
+                && texturePos.x < sprite->texture->bmpWidth)
             {
                 renderY.x = renderYOrg;
                 while (renderY.x < renderY.y)
                 {
                     LONG fact = (INT(renderY.x) * 256.0f) - (WINSIZE_Y * 128.0f) + (size * 128.0f);
-                    texturePos.y = ((fact * sprite.texture->bmpHeight) / size) / 256.0f;
-                    if (texturePos.y < sprite.texture->bmpHeight)
+                    texturePos.y = ((fact * sprite->texture->bmpHeight) / size) / 256.0f;
+                    texturePos.y += sprite->aniInfo.currentFrame.y * sprite->aniInfo.frameSize.y;
+                    if (texturePos.y < sprite->texture->bmpHeight)
                     {
                         COLORREF color =
-                            sprite.texture->bmp[texturePos.y * sprite.texture->bmpWidth + texturePos.x];
+                            sprite->texture->bmp[texturePos.y * sprite->texture->bmpWidth + texturePos.x];
                         DWORD endY = min(renderY.x + renderScale, renderY.y);
                         while (renderY.x < endY)
                         {
                             FPOINT pixel = { renderX.x, renderY.x };
                             if (color != 0xFF00FF)
-                                RenderPixel(pixel, GetDistanceShadeColor(color, sprite.distance));
+                                RenderPixel(pixel, GetDistanceShadeColor(color, sprite->distance));
                             ++renderY.x;
                         }
                     }

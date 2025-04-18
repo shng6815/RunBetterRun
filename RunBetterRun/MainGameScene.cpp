@@ -2,6 +2,7 @@
 #include "RayCast.h"
 #include "Player.h"
 #include "SpriteManager.h"
+#include "ItemManager.h"
 
 HRESULT MainGameScene::Init()
 {
@@ -14,7 +15,7 @@ HRESULT MainGameScene::Init()
 
 	//MapManager::GetInstance()->Init();
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
-	//ItemManager::GetInstance()->Init();
+	ItemManager::GetInstance()->Init();
 	//MonsterManager::GetInstance()->Init();
 
 	status = SceneStatus::IN_GAME;
@@ -29,8 +30,7 @@ HRESULT MainGameScene::Init()
 	oldBitmap = (HBITMAP)SelectObject(backBufferDC, backBufferBitmap);
 	ReleaseDC(g_hWnd, screenDC);
 
-	SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
-	SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
+	ItemManager::GetInstance()->PutItem({ 21.5, 10.5 });
 
 	return S_OK;
 }
@@ -49,7 +49,7 @@ void MainGameScene::Release()
 		rayCasting = nullptr;
 	}
 	//MonsterManager::GetInstance()->Release();
-	//ItemManaher::GetInstance()->Release();
+	ItemManager::GetInstance()->Release();
 	Player::GetInstance()->Release();
 	SpriteManager::GetInstance()->Release();
 	//MapManager::GetInstance()->Release();
@@ -73,7 +73,7 @@ void MainGameScene::Update()
 		if (rayCasting)
 			rayCasting->Update();
 		SpriteManager::GetInstance()->SortSpritesByDistance();
-		//ItemManager::GetInstance()->Update();
+		ItemManager::GetInstance()->Update();
 		//MonsterManager::GetInstance()->Update();
 		//UIManager::GetInstance()->Update();
 

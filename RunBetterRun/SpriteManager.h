@@ -8,14 +8,15 @@
 class SpriteManager : public Singleton<SpriteManager>
 {
 private:
-    list<Sprite> sprites;
+    list<Sprite*> sprites;
     FPOINT playerPos;
 
 public:
     HRESULT Init();
     void Release();
-
-    void PutSprite(LPCWCH path, FPOINT pos);
     void SortSpritesByDistance();
-    const list<Sprite>& GetSprites() const { return sprites; }
+    const list<Sprite*>& GetSprites() const { return sprites; }
+
+    void AddSprite(Sprite& sprite);
+    void DeleteSprite(Sprite& sprite);
 };
