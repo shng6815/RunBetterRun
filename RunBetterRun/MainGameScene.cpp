@@ -2,13 +2,15 @@
 #include "RayCast.h"
 #include "Player.h"
 #include "MonsterManager.h"
+#include "SpriteManager.h"
+
 
 HRESULT MainGameScene::Init()
 {
 	rayCasting = new RayCast();
 	if (FAILED(rayCasting->Init()))
 	{
-		MessageBox(g_hWnd, TEXT("RayCasting ÃÊ±âÈ­ ½ÇÆÐ"), TEXT("°æ°í"), MB_OK);
+		MessageBox(g_hWnd, TEXT("RayCasting ï¿½Ê±ï¿½È­ ï¿½ï¿½ï¿½ï¿½"), TEXT("ï¿½ï¿½ï¿½"), MB_OK);
 		return E_FAIL;
 	}
 
@@ -29,6 +31,9 @@ HRESULT MainGameScene::Init()
 	oldBitmap = (HBITMAP)SelectObject(backBufferDC, backBufferBitmap);
 	ReleaseDC(g_hWnd, screenDC);
 
+	SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
+	SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
+
 	return S_OK;
 }
 
@@ -48,6 +53,7 @@ void MainGameScene::Release()
 	//MonsterManager::GetInstance()->Release();
 	//ItemManaher::GetInstance()->Release();
 	Player::GetInstance()->Release();
+	SpriteManager::GetInstance()->Release();
 	//MapManager::GetInstance()->Release();
 
 	SelectObject(backBufferDC, oldBitmap);
@@ -68,6 +74,7 @@ void MainGameScene::Update()
 		Player::GetInstance()->Update();
 		if (rayCasting)
 			rayCasting->Update();
+		SpriteManager::GetInstance()->SortSpritesByDistance();
 		//ItemManager::GetInstance()->Update();
 		MonsterManager::GetInstance()->Update();
 		//UIManager::GetInstance()->Update();
@@ -91,10 +98,10 @@ void MainGameScene::Update()
 
 void MainGameScene::Render(HDC hdc)
 {
-	// 1. ¸ðµç ·»´õ¸µÀ» ¹é ¹öÆÛ¿¡
+	// 1. ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Û¿ï¿½
 	rayCasting->Render(backBufferDC);
 
-	// 2. Èçµé¸² ¹Ý¿µÇÏ¿© ¹é ¹öÆÛ¸¦ ½ÇÁ¦ hdc¿¡ Ãâ·Â
+	// 2. ï¿½ï¿½é¸² ï¿½Ý¿ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Û¸ï¿½ ï¿½ï¿½ï¿½ï¿½ hdcï¿½ï¿½ ï¿½ï¿½ï¿½
 	AddShake(hdc);
 }
 
@@ -119,20 +126,20 @@ void MainGameScene::ShakeScreen(float shakePower, float time, bool isStepShake)
 
 void MainGameScene::AddShake(HDC hdc)
 {
-	// Èçµé¸² ÁÂÇ¥ °è»ê
+	// ï¿½ï¿½é¸² ï¿½ï¿½Ç¥ ï¿½ï¿½ï¿½
 	int offsetX = static_cast<int>(shakeX);
 	int offsetY = static_cast<int>(shakeY);
 
-	// ¹é ¹öÆÛ ³»¿ëÀ» Èçµé¸²À» Àû¿ëÇØ Ãâ·Â
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½é¸²ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 	BitBlt(hdc, offsetX, offsetY, WINSIZE_X, WINSIZE_Y, backBufferDC, 0, 0, SRCCOPY);
 
-	// Èçµé¸² Áö¼Ó½Ã°£ °»½Å
+	// ï¿½ï¿½é¸² ï¿½ï¿½ï¿½Ó½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½
 	if (shakeTime > 0.0f)
 	{
 		float dt = TimerManager::GetInstance()->GetDeltaTime();
 		elapsedTime += dt;
 
-		// Èçµé¸² Á¾·á
+		// ï¿½ï¿½é¸² ï¿½ï¿½ï¿½ï¿½
 		if (elapsedTime >= shakeTime)
 		{
 			shakeX = 0.0f;
@@ -147,13 +154,13 @@ void MainGameScene::AddShake(HDC hdc)
 
 			if (isStepShake)
 			{
-				// stepShake¸é YÃà¸¸ Èçµé±â
+				// stepShakeï¿½ï¿½ Yï¿½à¸¸ ï¿½ï¿½ï¿½ï¿½
 				shakeX = 0.0f;
 				shakeY = ((rand() % 3) - 1) * damping * maxShakePower;
 			}
 			else
 			{
-				// ÀÏ¹Ý ·£´ý Èçµé¸²
+				// ï¿½Ï¹ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½é¸²
 				shakeX = ((rand() % 3) - 1) * damping * maxShakePower;
 				shakeY = ((rand() % 3) - 1) * damping * maxShakePower;
 			}

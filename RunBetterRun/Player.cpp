@@ -74,6 +74,12 @@ void Player::KeyInput(void)
 
     if (km->IsOnceKeyUp(VK_SHIFT))
         moveSpeed = defaultSpeed;
+
+    if (km->IsOnceKeyDown('O'))
+        Save();
+
+    if (km->IsOnceKeyDown('P'))
+        Load();
 }
 
 void Player::MouseInput(void)
@@ -121,9 +127,9 @@ void Player::MoveCamera(float deltaTime)
     // 카메라가 이동할 수 있는지 확인
     int x = INT(pos.x);
     int y = INT(pos.y);
-
-    if ((0 <= x && x < MAP_COLUME && 0 <= y && y < MAP_ROW)
-        && MapManager::GetInstance()->GetMapData()->tiles[MAP_COLUME * y + x].roomType == RoomType::FLOOR)
+    MapData* md = MapManager::GetInstance()->GetMapData();
+    if ((0 <= x && x < md->width && 0 <= y && y < md->height)
+        && md->tiles[y * md->width + x].roomType == RoomType::FLOOR)
     {
         cameraPos = pos;
     }
@@ -158,4 +164,34 @@ void Player::UpdateFOV()
 {
     plane.x = cameraHorDir.x * fov;
     plane.y = cameraHorDir.y * fov;
+}
+
+void Player::Save()
+{
+    const LPCWCH filePath = L"Map/SavedMap.dat";
+
+    CreateDirectory(L"Map", NULL);
+
+    if (MapManager::GetInstance()->SaveMap(filePath))
+    {
+        MessageBox(g_hWnd, TEXT("맵이 성공적으로 저장되었습니다."), TEXT("알림"), MB_OK);
+    }
+    else
+    {
+        MessageBox(g_hWnd, TEXT("맵 저장에 실패했습니다."), TEXT("경고"), MB_OK);
+    }
+}
+
+void Player::Load()
+{
+    const LPCWCH filePath = L"Map/SavedMap.dat";
+
+    if (MapManager::GetInstance()->LoadMap(filePath))
+    {
+        MessageBox(g_hWnd, TEXT("맵이 성공적으로 로드되었습니다."), TEXT("알림"), MB_OK);
+    }
+    else
+    {
+        MessageBox(g_hWnd, TEXT("맵 로드에 실패했습니다."), TEXT("경고"), MB_OK);
+    }
 }

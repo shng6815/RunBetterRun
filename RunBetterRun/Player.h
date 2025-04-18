@@ -39,6 +39,8 @@ private:
 
 	// 카메라 흔들기
 	function<void(float, float, bool)> shakeFunc;
+	void Save();
+	void Load();
 } Camera;
 
 

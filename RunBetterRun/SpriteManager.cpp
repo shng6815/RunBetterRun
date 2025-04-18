@@ -1,4 +1,6 @@
 #include "SpriteManager.h"
+#include "TextureManager.h"
+#include "Player.h"
 #include <fstream>
 #include <map>
 
@@ -7,52 +9,27 @@ HRESULT SpriteManager::Init()
     static bool isInitialized = false;
     if (isInitialized)
         return S_OK;
-
-    spritesTextureData.clear();
     sprites.clear();
     playerPos = { 0, 0 };
-
     isInitialized = true;
-
     return S_OK;
 }
 
 void SpriteManager::Release()
 {
-    for (auto& pair : spritesTextureData)
-    {
-        pair.second.bmp.clear();
-    }
-    spritesTextureData.clear();
     sprites.clear();
-
-    if (!mapTileTexture.bmp.empty())
-        mapTileTexture.bmp.clear();
 }
 
 void SpriteManager::PutSprite(LPCWCH path, FPOINT pos)
 {
-    auto it = spritesTextureData.find(path);
-    if (it != spritesTextureData.end())
-        sprites.push_back(Sprite{ pos, 0, &it->second });
-    else
-    {
-        spritesTextureData.insert(make_pair(path, Texture()));
-        Texture& sprite = spritesTextureData[path];
-        if (FAILED(LoadTexture(path, sprite)))
-            spritesTextureData.erase(path);
-        else
-            sprites.push_back(Sprite{ pos, 0, &sprite });
-    }
-}
-
-void SpriteManager::ClearSprites()
-{
-    sprites.clear();
+    Texture* texture = TextureManager::GetInstance()->GetTexture(path);
+    if (texture)
+        sprites.push_back(Sprite{ pos, 0, texture });
 }
 
 void SpriteManager::SortSpritesByDistance()
 {
+    playerPos = Player::GetInstance()->GetCameraPos();
     for (auto& sprite : sprites)
     {
         sprite.distance = sqrtf(
@@ -114,14 +91,14 @@ HRESULT SpriteManager::LoadTexture(LPCWCH path, Texture& texture)
         return E_FAIL;
     }
 
-    // ºñÆ®¸Ê Çì´õ ÀÐ±â
+    // ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ð±ï¿½
     BITMAPFILEHEADER fileHeader;
     BITMAPINFOHEADER infoHeader;
 
     file.read(reinterpret_cast<LPCH>(&fileHeader), sizeof(fileHeader));
     file.read(reinterpret_cast<LPCH>(&infoHeader), sizeof(infoHeader));
 
-    // ÆÄÀÏ Çü½Ä °ËÁõ
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     if (fileHeader.bfType != 0x4D42)
     {
         wstring error = TEXT("Not a valid BMP file: ");
@@ -150,7 +127,7 @@ HRESULT SpriteManager::LoadTexture(LPCWCH path, Texture& texture)
     file.read(reinterpret_cast<LPCH>(bmpData.data()), bmpData.size());
     file.close();
 
-    // ºñÆ®¸ÊÀ» COLORREF Çü½ÄÀ¸·Î º¯È¯
+    // ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ COLORREF ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
     texture.bmp.resize(texture.bmpWidth * texture.bmpHeight);
     for (DWORD i = 0; i < texture.bmpWidth * texture.bmpHeight; ++i)
     {

@@ -1,4 +1,5 @@
 #include "MapManager.h"
+#include "TextureManager.h"
 #include <fstream>
 
 HRESULT MapManager::Init()
@@ -6,195 +7,229 @@ HRESULT MapManager::Init()
 	mapData.height = 24;
 	mapData.width = 24;
 	mapData.tiles.resize(mapData.height * mapData.width);
-
-	for (int i = 0; i < 24; i++)
-	{
-		for (int j = 0; j < 24; j++)
-		{
-			if (i == 0 || i == 23 || j == 0 || j == 23)
-			{
-				SetTile(i, j, RoomType::WALL,4);
-			}
-			else if (i == 30)
-			{
-				SetTile(i, j, RoomType::START, 3);
-			}
-			else
-			{
-				SetTile(i, j, RoomType::FLOOR,10);
-			}
-		}
-	}
-	return S_OK;
+	mapData.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/mapTiles.bmp"));
+	if (!mapData.texture)
+		return E_FAIL;
+    mapData.textureTileSize = 32;
+    mapData.textureTileRowSize = 20;
+    mapData.textureTileColumnSize = 9;
+	// 기본 맵 생성
+	//return CreateNewMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
+    return CreateMazeMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
 }
 
 HRESULT MapManager::Init(LPCWCH filePath)
 {
-	return S_OK;
+    if (LoadMap(filePath))
+    {
+        return S_OK;  
+    }
+
+    // 로드 실패 시 기본 맵 생성
+    //return CreateNewMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
+    return CreateMazeMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
 }
 
 void MapManager::Release()
 {
+	mapData.tiles.clear();
 }
 
 bool MapManager::LoadMap(const LPCWCH filePath)
 {
+    HANDLE hFile = CreateFile(
+        filePath,           
+        GENERIC_READ,       
+        0,                  
+        NULL,               
+        OPEN_EXISTING,     
+        FILE_ATTRIBUTE_NORMAL, 
+        NULL                
+    );
 
-	/*HANDLE hFile = CreateFile(
-		filePath, GENERIC_READ, 0, NULL,
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile == INVALID_HANDLE_VALUE)
+    {
+        return false;  // 파일 열기 실패
+    }
 
-	if (hFile == INVALID_HANDLE_VALUE)
-	{
-		return false;
-	}
+    DWORD bytesRead = 0;
 
-	MapData newMap;
-	DWORD bytesRead = 0;
-	BOOL readResult = FALSE;
+    // 맵 너비 읽기
+    int width;
+    ReadFile(hFile, &width, sizeof(int), &bytesRead, NULL);
+    if (bytesRead != sizeof(int))
+    {
+        CloseHandle(hFile);
+        return false;
+    }
 
-	int nameLength = 0;
-	readResult = ReadFile(hFile, &nameLength, sizeof(int), &bytesRead, NULL);
+    // 맵 높이 읽기
+    int height;
+    ReadFile(hFile, &height, sizeof(int), &bytesRead, NULL);
+    if (bytesRead != sizeof(int))
+    {
+        CloseHandle(hFile);
+        return false;
+    }
 
-	if (!readResult || bytesRead != sizeof(int) || nameLength <= 0)
-	{
-		CloseHandle(hFile);
-		return false;
-	}
+    // 타일 개수 읽기
+    int tileCount;
+    ReadFile(hFile, &tileCount, sizeof(int), &bytesRead, NULL);
+    if (bytesRead != sizeof(int))
+    {
+        CloseHandle(hFile);
+        return false;
+    }
 
-	char* nameBuffer = new char[nameLength + 1];
-	readResult = ReadFile(hFile, nameBuffer, nameLength, &bytesRead, NULL);
+    // 데이터 유효성 검사
+    if (width <= 0 || height <= 0 || tileCount != width * height)
+    {
+        CloseHandle(hFile);
+        return false;  
+    }
 
-	if (!readResult || bytesRead != nameLength)
-	{
-		delete[] nameBuffer;
-		CloseHandle(hFile);
-		return false;
-	}
+    // 맵 데이터 초기화
+    mapData.width = width;
+    mapData.height = height;
+    mapData.tiles.resize(tileCount);
 
-	nameBuffer[nameLength] = '\0';
-	newMap.name = nameBuffer;
-	delete[] nameBuffer;
+    // 타일 데이터 읽기
+    ReadFile(hFile, mapData.tiles.data(), sizeof(Room) * tileCount, &bytesRead, NULL);
+    if (bytesRead != sizeof(Room) * tileCount)
+    {
+        CloseHandle(hFile);
+        return false;
+    }
 
-	readResult = ReadFile(hFile, &newMap.width, sizeof(int), &bytesRead, NULL);
-	if (!readResult || bytesRead != sizeof(int))
-	{
-		CloseHandle(hFile);
-		return false;
-	}
+    // 플레이어 위치 읽기
 
-	readResult = ReadFile(hFile, &newMap.height, sizeof(int), &bytesRead, NULL);
-	if (!readResult || bytesRead != sizeof(int))
-	{
-		CloseHandle(hFile);
-		return false;
-	}
-
-	int tileCount = 0;
-	readResult = ReadFile(hFile, &tileCount, sizeof(int), &bytesRead, NULL);
-	if (!readResult || bytesRead != sizeof(int))
-	{
-		CloseHandle(hFile);
-		return false;
-	}
-
-	if (tileCount > 0)
-	{
-		newMap.tiles.resize(tileCount);
-		readResult = ReadFile(hFile, newMap.tiles.data(), sizeof(int) * tileCount, &bytesRead, NULL);
-		if (!readResult || bytesRead != sizeof(int) * tileCount)
-		{
-			CloseHandle(hFile);
-			return false;
-		}
-	}
-	CloseHandle(hFile);*/
-
-	/*  mapDataList[mapName] = newMap;
-	  currMapName = mapName;*/
-
-	return true;
+    CloseHandle(hFile);
+    return true;  
 }
 
 bool MapManager::SaveMap(const LPCWCH filePath)
 {
-	/*auto it = mapDataList.find(mapName);
-	if (it == mapDataList.end())
-	{
-		return false;
-	}
+    if (mapData.tiles.empty())
+    {
+        return false; 
+    }
 
-	const MapData& mapData = it->second;
+    // 파일 생성
+    HANDLE hFile = CreateFile(
+        filePath,           
+        GENERIC_WRITE,     
+        0,                  
+        NULL,              
+        CREATE_ALWAYS,      
+        FILE_ATTRIBUTE_NORMAL, 
+        NULL                
+    );
 
-	HANDLE hFile = CreateFile(
-		filePath, GENERIC_WRITE, 0, NULL,
-		CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    // 파일 생성 실패 확인
+    if (hFile == INVALID_HANDLE_VALUE)
+    {
+        return false;  
+    }
 
-	if (hFile == INVALID_HANDLE_VALUE)
-	{
-		return false;
-	}
+    DWORD bytesWritten = 0;
 
-	DWORD bytesWritten = 0;
-	BOOL writeResult = FALSE;
+    // 맵 너비 저장
+    WriteFile(hFile, &mapData.width, sizeof(int), &bytesWritten, NULL);
 
-	int nameLength = mapData.name.length();
-	writeResult = WriteFile(hFile, &nameLength, sizeof(int), &bytesWritten, NULL);
-	if (!writeResult || bytesWritten != sizeof(int))
-	{
-		CloseHandle(hFile);
-		return false;
-	}
+    // 맵 높이 저장
+    WriteFile(hFile, &mapData.height, sizeof(int), &bytesWritten, NULL);
 
-	writeResult = WriteFile(hFile, mapData.name.c_str(), nameLength, &bytesWritten, NULL);
-	if (!writeResult || bytesWritten != nameLength)
-	{
-		CloseHandle(hFile);
-		return false;
-	}
+    // 타일 개수 저장
+    int tileCount = mapData.tiles.size();
+    WriteFile(hFile, &tileCount, sizeof(int), &bytesWritten, NULL);
 
-	writeResult = WriteFile(hFile, &mapData.width, sizeof(int), &bytesWritten, NULL);
-	if (!writeResult || bytesWritten != sizeof(int))
-	{
-		CloseHandle(hFile);
-		return false;
-	}
+    // 타일 데이터 저장
+    WriteFile(hFile, mapData.tiles.data(), sizeof(Room) * tileCount, &bytesWritten, NULL);
 
-	writeResult = WriteFile(hFile, &mapData.height, sizeof(int), &bytesWritten, NULL);
-	if (!writeResult || bytesWritten != sizeof(int))
-	{
-		CloseHandle(hFile);
-		return false;
-	}
+    // 플레이어 위치 저장
+    //WriteFile(hFile, &playerPos, sizeof(FPOINT), &bytesWritten, NULL);
 
-	int tileCount = mapData.tiles.size();
-	writeResult = WriteFile(hFile, &tileCount, sizeof(int), &bytesWritten, NULL);
-	if (!writeResult || bytesWritten != sizeof(int))
-	{
-		CloseHandle(hFile);
-		return false;
-	}
-
-	if (tileCount > 0)
-	{
-		writeResult = WriteFile(hFile, mapData.tiles.data(), sizeof(int) * tileCount, &bytesWritten, NULL);
-		if (!writeResult || bytesWritten != sizeof(int) * tileCount)
-		{
-			CloseHandle(hFile);
-			return false;
-		}
-	}
-
-	CloseHandle(hFile);
-
-	*/
-	return true;
+    // 파일 핸들 닫기
+    CloseHandle(hFile);
+    return true; 
 }
 
-bool MapManager::CreateEmptyMap(int width, int height)
+bool MapManager::CreateNewMap(int width, int height)
 {
+    if (width <= 0 || height <= 0)
+    {
+        return false;  
+    }
 
-	return true;
+    // 맵 데이터 초기화
+    mapData.width = width;
+    mapData.height = height;
+    mapData.tiles.resize(width * height);
+
+    // 맵 타일 초기화
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            // 맵 가장자리는 벽으로 설정
+            if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
+            {
+                // 벽 타일 (인덱스 4)
+                mapData.tiles[y * width + x].roomType = RoomType::WALL;
+                mapData.tiles[y * width + x].tilePos = 4;
+            }
+            else
+            {
+                // 내부는 바닥으로 설정 (인덱스 10)
+                mapData.tiles[y * width + x].roomType = RoomType::FLOOR;
+                mapData.tiles[y * width + x].tilePos = 10;
+            }
+        }
+    }
+
+    // 시작 위치 설정 (중앙 근처)
+    int startX = width / 2;
+    int startY = height / 2;
+    mapData.tiles[startY * width + startX].roomType = RoomType::START;
+    mapData.tiles[startY * width + startX].tilePos = 3;
+
+    return true;  
+}
+
+bool MapManager::CreateMazeMap(int width, int height) {
+    // 기본 맵 생성 (모든 타일을 바닥으로)
+    CreateNewMap(width, height);
+
+    // 체스판 패턴으로 벽 생성 (간단한 미로 패턴)
+    for (int y = 2; y < height - 2; y += 2) {
+        for (int x = 2; x < width - 2; x += 2) {
+            SetTile(x, y, RoomType::WALL, 4);
+        }
+    }
+
+    // 세로 벽 배치 
+    for (int y = 3; y < height - 2; y += 4) {
+        for (int x = 4; x < width - 4; x += 4) {
+            SetTile(x, y, RoomType::WALL, 4);
+        }
+    }
+
+    // 가로 벽 배치 
+    for (int x = 3; x < width - 2; x += 4) {
+        for (int y = 4; y < height - 4; y += 4) {
+            SetTile(x, y, RoomType::WALL, 4);
+        }
+    }
+
+    // 랜덤으로 벽 뚫기
+    srand(static_cast<unsigned int>(time(NULL)));
+    for (int i = 0; i < width * height / 10; i++) {
+        int x = 2 + rand() % (width - 4);
+        int y = 2 + rand() % (height - 4);
+        SetTile(x, y, RoomType::FLOOR, 10);
+    }
+
+    return true;
 }
 
 MapData* MapManager::GetMapData()
@@ -204,6 +239,10 @@ MapData* MapManager::GetMapData()
 
 void MapManager::SetTile(int x, int y, RoomType tileType, int index)
 {
-	mapData.tiles[y * mapData.height + x].roomType = tileType;
-	mapData.tiles[y * mapData.height + x].tilePos = index;
+    if (x >= 0 && x < mapData.width && y >= 0 && y < mapData.height)
+    {
+        // 타일 정보 설정
+        mapData.tiles[y * mapData.width + x].roomType = tileType;
+        mapData.tiles[y * mapData.width + x].tilePos = index;
+    }
 }
