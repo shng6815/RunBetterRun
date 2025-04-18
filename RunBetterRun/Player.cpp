@@ -3,7 +3,8 @@
 
 HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 {
-	fov = 0.66f;
+    fov = 0.66f;
+    targetFOV = fov;
 
 	cameraPos = { 22, 12 };
 
@@ -45,6 +46,10 @@ void Player::Update()
 
 	MoveCamera(deltaTime);
 	RotateCamera(deltaTime);
+
+    fov += (targetFOV - fov) * deltaTime * fovLerpSpeed;
+    UpdateFOV(); // 보간된 fov로 평면 업데이트
+
 }
 
 void Player::Render(HDC hdc)
@@ -70,10 +75,16 @@ void Player::KeyInput(void)
         moveInput.y = 1;
     
     if (km->IsOnceKeyDown(VK_SHIFT))
+    {
+        targetFOV = 0.5f;
         moveSpeed = runSpeed;
+    }
 
     if (km->IsOnceKeyUp(VK_SHIFT))
+    {
+        targetFOV = 0.66f;
         moveSpeed = defaultSpeed;
+    }
 }
 
 void Player::MouseInput(void)
@@ -155,11 +166,11 @@ void Player::RotateCamera(float deltaTime)
     cameraHorDir.x = cameraVerDir.y;
 	cameraHorDir.y = -cameraVerDir.x;
 
-    UpdateFOV();
+	UpdateFOV();
 }
 
 void Player::UpdateFOV()
 {
-    plane.x = cameraHorDir.x * fov;
-    plane.y = cameraHorDir.y * fov;
+	plane.x = cameraVerDir.y * this->fov;
+	plane.y = -cameraVerDir.x * this->fov;
 }

@@ -40,6 +40,8 @@ private:
 	FLOAT rotateSpeed;                        // 카메라 회전 속도
 
 	float fov;                                // 시야각
+	float targetFOV;
+	float fovLerpSpeed = 5.0f;
 
 	// 카메라 흔들기
 	function<void(float, float, bool)> shakeFunc;
