@@ -11,6 +11,8 @@ private:
     list<Sprite> sprites;
     FPOINT playerPos;
     FPOINT monsterPos;
+    map<LPCWCH, Texture> spritesTextureData;
+    Texture mapTileTexture;
 
 public:
     HRESULT Init();
