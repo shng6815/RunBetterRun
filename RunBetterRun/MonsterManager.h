@@ -5,18 +5,20 @@
 #include "MapManager.h"
 #include <vector>
 
+#define MONSTER_SPEED 3.0f
+
 using namespace std;
 
 class MonsterManager : public Singleton<MonsterManager>
 {
 private:
-	// A* ¾Ë°í¸®ÁòÀ» À§ÇÑ ³ëµå ±¸Á¶Ã¼
+	// A* ì•Œê³ ë¦¬ì¦˜ì„ ìœ„í•œ ë…¸ë“œ êµ¬ì¡°ì²´
 	struct PathNode {
-		int x, y;           // À§Ä¡
-		int g;              // ½ÃÀÛÁ¡¿¡¼­ ÇöÀç ³ëµå±îÁöÀÇ ºñ¿ë
-		int h;              // ÇöÀç ³ëµå¿¡¼­ ¸ñÇ¥±îÁöÀÇ ÃßÁ¤ ºñ¿ë
+		int x, y;           // ìœ„ì¹˜
+		int g;              // ì‹œì‘ì ì—ì„œ í˜„ì¬ ë…¸ë“œê¹Œì§€ì˜ ë¹„ìš©
+		int h;              // í˜„ì¬ ë…¸ë“œì—ì„œ ëª©í‘œê¹Œì§€ì˜ ì¶”ì • ë¹„ìš©
 		int f;              // f = g + h
-		PathNode* parent;   // ºÎ¸ğ ³ëµå
+		PathNode* parent;   // ë¶€ëª¨ ë…¸ë“œ
 
 		PathNode(int x, int y) : x(x), y(y), g(0), h(0), f(0), parent(nullptr) {}
 	};
@@ -31,23 +33,23 @@ public:
 	HRESULT Init();
 	void Release();
 	void Update();
-	//TODO: ±æ Ã£±â ¾Ë°í¸®Áò
+	//TODO: ê¸¸ ì°¾ê¸° ì•Œê³ ë¦¬ì¦˜
 	void FindPlayer(FPOINT monsterPos, FPOINT targetPos, float deletaTime);
 
 
-	//TODO: ÀûÀÌ ÇÃ·¹ÀÌ¾î¸¦ Àâ¾ÒÀ» ¶§ÀÇ ¸Ş¼Òµå
+	//TODO: ì ì´ í”Œë ˆì´ì–´ë¥¼ ì¡ì•˜ì„ ë•Œì˜ ë©”ì†Œë“œ
 	void CatchPlayer();
 
 	//TODO:
 	void SetisCatchPlayer(bool SetisCatchPlayer) { this->isCatchPlayer = isCatchPlayer; }
 	bool GetisCatchPlayer() { return this->isCatchPlayer; }
 
-	// ¸ó½ºÅÍ »ı¼º ¹× °ü¸®
+	// ëª¬ìŠ¤í„° ìƒì„± ë° ê´€ë¦¬
 	Monster &CreateMonster(FPOINT position, float speed = 0.5f);
 	void RemoveMonster(int index);
 	void RemoveAllMonsters();
 
-	// °£´ÜÇÑ °æ·Î Ã£±â (Á÷¼± ÀÌµ¿)
+	// ê°„ë‹¨í•œ ê²½ë¡œ ì°¾ê¸° (ì§ì„  ì´ë™)
 	FPOINT GetDirectionToPlayer(const FPOINT& monsterPos);
 	bool CanMoveToPosition(const FPOINT& pos);
 

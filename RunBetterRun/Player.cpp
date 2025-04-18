@@ -48,7 +48,7 @@ void Player::Update()
 	RotateCamera(deltaTime);
 
     fov += (targetFOV - fov) * deltaTime * fovLerpSpeed;
-    UpdateFOV(); // ������ fov�� ��� ������Ʈ
+    UpdateFOV();
 
 }
 
@@ -138,7 +138,7 @@ void Player::MoveCamera(float deltaTime)
         pos.y += (moveLeft ? -1 : 1) * (cameraHorDir.y * moveSpeed * deltaTime);
     }
 
-    // ī�޶� �̵��� �� �ִ��� Ȯ��
+
     int x = INT(pos.x);
     int y = INT(pos.y);
     MapData* md = MapManager::GetInstance()->GetMapData();

@@ -11,8 +11,6 @@ HRESULT MonsterManager::Init()
 	mapData = MapManager::GetInstance()->GetMapData();
 	isCatchPlayer = false;
 
-	Texture* monsterTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/boss.bmp"));
-
 	CreateMonster(playerPos, 30.0f);
 	//CreateMonster(playerPos, 30.0f);
 
@@ -342,5 +340,6 @@ FPOINT MonsterManager::Move(FPOINT src, FPOINT dst)
 {
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
     FPOINT move = { dst.x - src.x, dst.y - src.y };
-    return { src.x + (move.x * 6.0f *deltaTime), src.y + (move.y * 6.0f * deltaTime) };
+    return { src.x + (move.x * MONSTER_SPEED * deltaTime),
+		src.y + (move.y * MONSTER_SPEED * deltaTime) };
 }
