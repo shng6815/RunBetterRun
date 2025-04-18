@@ -22,7 +22,7 @@ public:
     void ClearSprites();
     void SortSpritesByDistance();
     void UpdatePlayerPosition(FPOINT pos) { playerPos = pos; }
-    void UpdateMonsterPosition(FPOINT pos) { monsterPos = pos;  }
+    void UpdateMonsterPosition(LPCWCH path, FPOINT newPos);
 
     HRESULT LoadTexture(LPCWCH path, Texture& outTexture);
     HRESULT LoadMapTileTexture(LPCWCH path);

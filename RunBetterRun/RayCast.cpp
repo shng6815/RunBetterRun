@@ -184,7 +184,7 @@ void RayCast::FillScreen(DWORD start, DWORD end)
 void RayCast::RenderSprites(DWORD start, DWORD end)
 {
     const list<Sprite>& sprites = SpriteManager::GetInstance()->GetSprites();
-    
+
     float invDet = 1.0f / ((Player::GetInstance()->GetPlane().x * Player::GetInstance()->GetCameraVerDir().y) - (Player::GetInstance()->GetPlane().y * Player::GetInstance()->GetCameraVerDir().x));
 
     for (auto& sprite : sprites)
@@ -259,6 +259,7 @@ void RayCast::RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY, F
         }
     }
 }
+
 
 Ray RayCast::RayCasting(int colume)
 {

@@ -1,12 +1,12 @@
 #include "Monster.h"
 
-HRESULT Monster::Init(FPOINT startPos)
+HRESULT Monster::Init(FPOINT startPos, float speed)
 {
 	position = startPos;
-	speed = 1.0f;
+	targetPosition = startPos;
+	this->speed = speed;
 	isActive = true;
-	//sprite = nullptr;
-
+	isMoving = false;
 	return S_OK;
 }
 

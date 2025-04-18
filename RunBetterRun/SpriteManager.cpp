@@ -1,5 +1,6 @@
 #include "SpriteManager.h"
 #include <fstream>
+#include <map>
 
 HRESULT SpriteManager::Init()
 {
@@ -63,6 +64,37 @@ void SpriteManager::SortSpritesByDistance()
     sprites.sort([](const Sprite& a, const Sprite& b) -> BOOL {
         return a.distance > b.distance;
         });
+}
+
+void SpriteManager::UpdateMonsterPosition(LPCWCH path, FPOINT newPos)
+{
+
+    auto it = spritesTextureData.find(path);
+    if (it == spritesTextureData.end()) {
+
+        PutSprite(path, newPos);
+        return;
+    }
+
+
+    Texture* targetTexture = &it->second;
+
+
+    bool found = false;
+    for (auto& sprite : sprites) {
+        if (sprite.texture == targetTexture) {
+
+            sprite.pos = newPos;
+            found = true;
+            
+            break;
+        }
+    }
+
+
+    if (!found) {
+        sprites.push_back(Sprite{ newPos, 0, targetTexture });
+    }
 }
 
 

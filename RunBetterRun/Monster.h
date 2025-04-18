@@ -11,9 +11,11 @@ private:
 	FPOINT position;
 	float speed;
 	bool isActive;
+	FPOINT targetPosition;
+	bool isMoving;
 
 public:
-	virtual HRESULT Init(FPOINT startPos);		// 멤버 변수의 초기화, 메모리 할당
+	virtual HRESULT Init(FPOINT startPos, float speed);		// 멤버 변수의 초기화, 메모리 할당
 	virtual void Release();		// 메모리 해제
 	virtual void Update();		// 프레임 단위로 게임 로직 실행(데이터 계산)
 	virtual void Render(HDC hdc);	// 프레임 단위로 출력(이미지, 텍스트 등)
@@ -23,5 +25,10 @@ public:
 	bool GetIsActive() { return isActive; }
 	void SetActive(bool active) { active = isActive; }
 	float GetSpeed() { return speed; }
+
+	void SetTargetPosition(FPOINT target) { targetPosition = target; isMoving = true; }
+	FPOINT GetTargetPosition() const { return targetPosition; }
+	bool IsMoving() const { return isMoving; }
+	void SetMoving(bool moving) { isMoving = moving; }
 };
 
