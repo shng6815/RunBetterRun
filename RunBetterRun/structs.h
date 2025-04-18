@@ -57,4 +57,7 @@ typedef struct tagMapData
 	int height;
 	vector<Room> tiles;
 	Texture* texture;
+	DWORD textureTileSize ;
+	DWORD textureTileRowSize;
+	DWORD textureTileColumnSize;
 } MapData;
