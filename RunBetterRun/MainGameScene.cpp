@@ -10,7 +10,7 @@ HRESULT MainGameScene::Init()
 	rayCasting = new RayCast();
 	if (FAILED(rayCasting->Init()))
 	{
-		//MessageBox(g_hWnd, TEXT("RayCasting �ʱ�ȭ ����"), TEXT("���"), MB_OK);
+		MessageBox(g_hWnd, TEXT("error"), TEXT("error"), MB_OK);
 		return E_FAIL;
 	}
 
@@ -31,6 +31,8 @@ HRESULT MainGameScene::Init()
 	oldBitmap = (HBITMAP)SelectObject(backBufferDC, backBufferBitmap);
 	ReleaseDC(g_hWnd, screenDC);
 
+	//SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
+	//SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
 
 
 	return S_OK;

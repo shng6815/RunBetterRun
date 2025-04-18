@@ -11,17 +11,17 @@ HRESULT MonsterManager::Init()
 	isCatchPlayer = false;
 
 	Texture monsterTexture;
-	SpriteManager::GetInstance()->LoadTexture(TEXT("Image/Rocket.bmp"), monsterTexture);
+	SpriteManager::GetInstance()->LoadTexture(TEXT("Image/boss.bmp"), monsterTexture);
 
-	CreateMonster({22, 17}, 30.0f);
-    //CreateMonster({ 22,14 }, 30.0f);
+	CreateMonster(playerPos, 30.0f);
+	//CreateMonster(playerPos, 30.0f);
 
 	// 즉시 스프라이트 등록
 	for (auto& monster : monsters) {
 		if (monster->GetIsActive()) {
 			SpriteManager::GetInstance()->
 				PutSprite(
-					TEXT("Image/Rocket.bmp"), 
+					TEXT("Image/boss.bmp"), 
 					monster->GetPostion()
 				);
 		}
@@ -42,6 +42,8 @@ void MonsterManager::Release()
 
 void MonsterManager::Update()
 {
+    //SpriteManager::GetInstance()->ClearMonsterSprites(TEXT("Image/Rocket.bmp"));
+
     // 플레이어 위치 업데이트
     playerPos = Player::GetInstance()->GetCameraPos();
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
@@ -104,9 +106,11 @@ void MonsterManager::Update()
                 if (CanMoveToPosition(newPos)) {
                     monster->SetPosition(newPos);
 
+                    SpriteManager::GetInstance()->ClearMonsterSprites(TEXT("Image/boss.bmp"));
+
                     // 스프라이트 업데이트
                     SpriteManager::GetInstance()->UpdateMonsterPosition(
-                        TEXT("Image/Rocket.bmp"),
+                        TEXT("Image/boss.bmp"),
                         monster->GetPostion());
                 }
                 else {
