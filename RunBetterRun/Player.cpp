@@ -121,9 +121,9 @@ void Player::MoveCamera(float deltaTime)
     // 카메라가 이동할 수 있는지 확인
     int x = INT(pos.x);
     int y = INT(pos.y);
-
-    if ((0 <= x && x < MAP_COLUME && 0 <= y && y < MAP_ROW)
-        && MapManager::GetInstance()->GetMapData()->tiles[MAP_COLUME * y + x].roomType == RoomType::FLOOR)
+    MapData* md = MapManager::GetInstance()->GetMapData();
+    if ((0 <= x && x < md->width && 0 <= y && y < md->height)
+        && md->tiles[y * md->width + x].roomType == RoomType::FLOOR)
     {
         cameraPos = pos;
     }

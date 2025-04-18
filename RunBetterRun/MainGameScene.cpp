@@ -1,6 +1,7 @@
 #include "MainGameScene.h"
 #include "RayCast.h"
 #include "Player.h"
+#include "SpriteManager.h"
 
 HRESULT MainGameScene::Init()
 {
@@ -28,6 +29,9 @@ HRESULT MainGameScene::Init()
 	oldBitmap = (HBITMAP)SelectObject(backBufferDC, backBufferBitmap);
 	ReleaseDC(g_hWnd, screenDC);
 
+	SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 19, 12 });
+	SpriteManager::GetInstance()->PutSprite(TEXT("Image/rocket.bmp"), { 16, 12 });
+
 	return S_OK;
 }
 
@@ -47,6 +51,7 @@ void MainGameScene::Release()
 	//MonsterManager::GetInstance()->Release();
 	//ItemManaher::GetInstance()->Release();
 	Player::GetInstance()->Release();
+	SpriteManager::GetInstance()->Release();
 	//MapManager::GetInstance()->Release();
 
 	SelectObject(backBufferDC, oldBitmap);
@@ -67,6 +72,7 @@ void MainGameScene::Update()
 		Player::GetInstance()->Update();
 		if (rayCasting)
 			rayCasting->Update();
+		SpriteManager::GetInstance()->SortSpritesByDistance();
 		//ItemManager::GetInstance()->Update();
 		//MonsterManager::GetInstance()->Update();
 		//UIManager::GetInstance()->Update();

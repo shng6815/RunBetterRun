@@ -1,4 +1,5 @@
 #include "MapManager.h"
+#include "TextureManager.h"
 #include <fstream>
 
 HRESULT MapManager::Init()
@@ -6,6 +7,12 @@ HRESULT MapManager::Init()
 	mapData.height = 24;
 	mapData.width = 24;
 	mapData.tiles.resize(mapData.height * mapData.width);
+	mapData.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/mapTiles.bmp"));
+	if (!mapData.texture)
+		return E_FAIL;
+	mapData.textureTileSize = 32;
+	mapData.textureTileRowSize = 20;
+	mapData.textureTileColumnSize = 9;
 
 	for (int i = 0; i < mapData.height; i++)
 	{
@@ -207,6 +214,6 @@ MapData* MapManager::GetMapData()
 
 void MapManager::SetTile(int x, int y, RoomType tileType, int index)
 {
-	mapData.tiles[y * mapData.height + x].roomType = tileType;
-	mapData.tiles[y * mapData.height + x].tilePos = index;
+	mapData.tiles[y * mapData.width + x].roomType = tileType;
+	mapData.tiles[y * mapData.width + x].tilePos = index;
 }

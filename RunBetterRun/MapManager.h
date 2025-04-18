@@ -6,15 +6,15 @@
 #include <map>
 #include "structs.h"
 
-#define MAP_COLUME 24
-#define MAP_ROW 24
-
 typedef struct tagMapData
 {
-	int width;
-	int height;
-	vector<Room> tiles;
-	Texture* texture;
+	int				width;
+	int				height;
+	vector<Room>	tiles;
+	Texture*		texture;
+	DWORD			textureTileSize;
+	DWORD			textureTileRowSize;
+	DWORD			textureTileColumnSize;
 } MapData;
 
 class MapManager : public Singleton<MapManager>

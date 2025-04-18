@@ -6,15 +6,10 @@
 #define CEILING_COLOR 0x383838
 #define FLOOR_COLOR 0x717171
 
-#define MAP_COLUME 24
-#define MAP_ROW 24
 #define SHADE_VALUE 1.5f
 #define FLOAT(n) static_cast<float>(n)
 #define INT(n) static_cast<int>(n)
 
-#define TILE_ROW_SIZE	20
-#define TILE_COLUME_SIZE	9
-#define TILE_SIZE	32
 #define EPSILON 1e-6f
 #define THREAD_NUM 5
 #define SCALE 4
@@ -55,17 +50,17 @@ private:
 	int mapWidth;
 	int mapHeight;
 
-	static int map[MAP_ROW * MAP_COLUME];
+	//static int map[MAP_ROW * MAP_COLUME];
 	float	screenWidthPixelUnitPos[WINSIZE_X];
 	float	screenWidthRayDistance[WINSIZE_X];
 	float	screenHeightPixelDepths[WINSIZE_Y];
 
-	Ray RayCasting(int colume);
-	void RenderWall(Ray& ray, int colume);
-	void RenderCeilingFloor(Ray& ray, int colume);
-	void RenderCeilingFloor(Ray& ray, int colume, COLORREF ceiling, COLORREF floor);
+	Ray RayCasting(int column);
+	void RenderWall(Ray& ray, int column);
+	void RenderCeilingFloor(Ray& ray, int column);
+	void RenderCeilingFloor(Ray& ray, int column, COLORREF ceiling, COLORREF floor);
 	void RenderPixel(FPOINT pixel, int color);
-	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance, bool isSide = false);
+	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance);
 	COLORREF GetDistanceShadeColor(COLORREF color, float distance);
 	void RenderSprites(DWORD start, DWORD end);
 	void RenderSprite(const Sprite& sprite, POINT renderX, POINT renderY, FPOINT transform);
@@ -78,5 +73,4 @@ public:
 	virtual void Render(HDC hdc) override;
 
 	void FillScreen(DWORD start, DWORD end);
-	void ReloadMapData();
 };
