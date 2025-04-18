@@ -144,7 +144,6 @@ HRESULT SpriteManager::LoadTexture(LPCWCH path, Texture& texture)
     file.read(reinterpret_cast<LPCH>(bmpData.data()), bmpData.size());
     file.close();
 
-    // ��Ʈ���� COLORREF �������� ��ȯ
     texture.bmp.resize(texture.bmpWidth * texture.bmpHeight);
     for (DWORD i = 0; i < texture.bmpWidth * texture.bmpHeight; ++i)
     {
