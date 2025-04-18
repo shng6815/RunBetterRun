@@ -1,7 +1,9 @@
 #include "UIUnit.h"
+#include "MapManager.h"
 
 HRESULT UIUnit::Init()
 {
+	isActive = true;
     return E_NOTIMPL;
 }
 
@@ -25,5 +27,8 @@ void UIUnit::Update()
 
 void UIUnit::Render(HDC hdc)
 {
-	Rectangle(hdc, pos.x, pos.y, pos.x + size.x, pos.y + size.y);
+	if (isActive == false)
+		return;
+	 
+	
 }

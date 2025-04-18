@@ -71,3 +71,21 @@ void UIManager::RemoveUIUnit(string str, UIUnit* uiUnit)
 		cout << "UIUnit is nullptr" << endl;
 	}
 }
+
+void UIManager::SetActiveUIUnit(string str, bool isActive)
+{
+	auto it = uiUnits.find(str);
+	if (it != uiUnits.end())
+	{
+		it->second->SetActive(isActive);
+	}
+}
+
+void UIManager::ToggleActiveUIUnit(string str)
+{
+	auto it = uiUnits.find(str);
+	if (it != uiUnits.end())
+	{
+		it->second->ToggleActive();
+	}
+}

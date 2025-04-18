@@ -12,12 +12,16 @@ public:
 	virtual void Render(HDC hdc) override;
 
 	UIType GetUIType() { return uiType; }
+	void SetActive(bool isActive) { this->isActive = isActive; }
+	void ToggleActive() { isActive = !isActive; }
 
-private:
+protected:
 	UIType uiType;
 	//vector<UIUnit*> uiUnits;
 	FPOINT pos;
 	FPOINT size;
 	INT layer;
+
+	bool isActive;
 };
 

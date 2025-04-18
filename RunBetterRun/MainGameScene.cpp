@@ -2,7 +2,7 @@
 #include "RayCast.h"
 #include "Player.h"
 #include "UIManager.h"
-#include "UIUnit.h"
+#include "PhoneUI.h"
 
 HRESULT MainGameScene::Init()
 {
@@ -20,8 +20,8 @@ HRESULT MainGameScene::Init()
 
 	UIManager::GetInstance()->Init();
 	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
-	UIUnit* uiUnit = new UIUnit();
-	uiUnit->Init(UIType::PLAYING, FPOINT{ 0, 0 }, FPOINT{ WINSIZE_X/10, WINSIZE_Y/10 }, 0);
+	PhoneUI* uiUnit = new PhoneUI();
+	uiUnit->Init(UIType::PLAYING, FPOINT{ 200, WINSIZE_Y - 200 }, FPOINT{ 150, 150 }, 0);
 	UIManager::GetInstance()->AddUIUnit("PhoneUI", uiUnit);
 
 	status = SceneStatus::IN_GAME;
@@ -72,6 +72,10 @@ void MainGameScene::Update()
 		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {
 			ShowCursor(TRUE);
 			status = SceneStatus::PAUSE;
+		}
+
+		if (KeyManager::GetInstance()->IsOnceKeyDown('M')) {
+			UIManager::GetInstance()->ToggleActiveUIUnit("PhoneUI");
 		}
 		
 		Player::GetInstance()->Update();

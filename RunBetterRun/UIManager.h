@@ -15,6 +15,8 @@ public:
 	void AddUIUnit(string str, UIUnit* uiUnit);
 	void RemoveUIUnit(string str, UIUnit* uiUnit);
 	void ChangeUIType(UIType type) { uiType = type; }
+	void SetActiveUIUnit(string str, bool isActive);
+	void ToggleActiveUIUnit(string str);
 
 private:
 	map<string, UIUnit*> uiUnits;
