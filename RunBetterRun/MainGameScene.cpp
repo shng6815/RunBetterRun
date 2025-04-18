@@ -4,12 +4,13 @@
 #include "MonsterManager.h"
 #include "SpriteManager.h"
 
+
 HRESULT MainGameScene::Init()
 {
 	rayCasting = new RayCast();
 	if (FAILED(rayCasting->Init()))
 	{
-		MessageBox(g_hWnd, TEXT("RayCasting ÃÊ±âÈ­ ½ÇÆĞ"), TEXT("°æ°í"), MB_OK);
+		MessageBox(g_hWnd, TEXT("RayCasting ï¿½Ê±ï¿½È­ ï¿½ï¿½ï¿½ï¿½"), TEXT("ï¿½ï¿½ï¿½"), MB_OK);
 		return E_FAIL;
 	}
 
@@ -96,10 +97,10 @@ void MainGameScene::Update()
 
 void MainGameScene::Render(HDC hdc)
 {
-	// 1. ¸ğµç ·»´õ¸µÀ» ¹é ¹öÆÛ¿¡
+	// 1. ëª¨ë“  ë Œë”ë§ì„ ë°± ë²„í¼ì—
 	rayCasting->Render(backBufferDC);
 
-	// 2. Èçµé¸² ¹İ¿µÇÏ¿© ¹é ¹öÆÛ¸¦ ½ÇÁ¦ hdc¿¡ Ãâ·Â
+	// 2. í”ë“¤ë¦¼ ë°˜ì˜í•˜ì—¬ ë°± ë²„í¼ë¥¼ ì‹¤ì œ hdcì— ì¶œë ¥
 	AddShake(hdc);
 }
 
@@ -124,20 +125,20 @@ void MainGameScene::ShakeScreen(float shakePower, float time, bool isStepShake)
 
 void MainGameScene::AddShake(HDC hdc)
 {
-	// Èçµé¸² ÁÂÇ¥ °è»ê
+	// í”ë“¤ë¦¼ ì¢Œí‘œ ê³„ì‚°
 	int offsetX = static_cast<int>(shakeX);
 	int offsetY = static_cast<int>(shakeY);
 
-	// ¹é ¹öÆÛ ³»¿ëÀ» Èçµé¸²À» Àû¿ëÇØ Ãâ·Â
+	// ë°± ë²„í¼ ë‚´ìš©ì„ í”ë“¤ë¦¼ì„ ì ìš©í•´ ì¶œë ¥
 	BitBlt(hdc, offsetX, offsetY, WINSIZE_X, WINSIZE_Y, backBufferDC, 0, 0, SRCCOPY);
 
-	// Èçµé¸² Áö¼Ó½Ã°£ °»½Å
+	// í”ë“¤ë¦¼ ì§€ì†ì‹œê°„ ê°±ì‹ 
 	if (shakeTime > 0.0f)
 	{
 		float dt = TimerManager::GetInstance()->GetDeltaTime();
 		elapsedTime += dt;
 
-		// Èçµé¸² Á¾·á
+		// í”ë“¤ë¦¼ ì¢…ë£Œ
 		if (elapsedTime >= shakeTime)
 		{
 			shakeX = 0.0f;
@@ -152,13 +153,13 @@ void MainGameScene::AddShake(HDC hdc)
 
 			if (isStepShake)
 			{
-				// stepShake¸é YÃà¸¸ Èçµé±â
+				// stepShakeë©´ Yì¶•ë§Œ í”ë“¤ê¸°
 				shakeX = 0.0f;
 				shakeY = ((rand() % 3) - 1) * damping * maxShakePower;
 			}
 			else
 			{
-				// ÀÏ¹İ ·£´ı Èçµé¸²
+				// ì¼ë°˜ ëœë¤ í”ë“¤ë¦¼
 				shakeX = ((rand() % 3) - 1) * damping * maxShakePower;
 				shakeY = ((rand() % 3) - 1) * damping * maxShakePower;
 			}

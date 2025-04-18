@@ -91,14 +91,14 @@ HRESULT SpriteManager::LoadTexture(LPCWCH path, Texture& texture)
         return E_FAIL;
     }
 
-    // ºñÆ®¸Ê Çì´õ ÀÐ±â
+    // ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ð±ï¿½
     BITMAPFILEHEADER fileHeader;
     BITMAPINFOHEADER infoHeader;
 
     file.read(reinterpret_cast<LPCH>(&fileHeader), sizeof(fileHeader));
     file.read(reinterpret_cast<LPCH>(&infoHeader), sizeof(infoHeader));
 
-    // ÆÄÀÏ Çü½Ä °ËÁõ
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     if (fileHeader.bfType != 0x4D42)
     {
         wstring error = TEXT("Not a valid BMP file: ");
@@ -127,7 +127,7 @@ HRESULT SpriteManager::LoadTexture(LPCWCH path, Texture& texture)
     file.read(reinterpret_cast<LPCH>(bmpData.data()), bmpData.size());
     file.close();
 
-    // ºñÆ®¸ÊÀ» COLORREF Çü½ÄÀ¸·Î º¯È¯
+    // ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ COLORREF ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
     texture.bmp.resize(texture.bmpWidth * texture.bmpHeight);
     for (DWORD i = 0; i < texture.bmpWidth * texture.bmpHeight; ++i)
     {
