@@ -13,7 +13,7 @@ HRESULT MapManager::Init()
     mapData.textureTileSize = 32;
     mapData.textureTileRowSize = 20;
     mapData.textureTileColumnSize = 9;
-	// ±âº» ¸Ê »ý¼º
+	// ï¿½âº» ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	//return CreateNewMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
     return CreateMazeMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
 }
@@ -25,7 +25,7 @@ HRESULT MapManager::Init(LPCWCH filePath)
         return S_OK;  
     }
 
-    // ·Îµå ½ÇÆÐ ½Ã ±âº» ¸Ê »ý¼º
+    // ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½âº» ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     //return CreateNewMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
     return CreateMazeMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
 }
@@ -49,12 +49,12 @@ bool MapManager::LoadMap(const LPCWCH filePath)
 
     if (hFile == INVALID_HANDLE_VALUE)
     {
-        return false;  // ÆÄÀÏ ¿­±â ½ÇÆÐ
+        return false;  // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     }
 
     DWORD bytesRead = 0;
 
-    // ¸Ê ³Êºñ ÀÐ±â
+    // ï¿½ï¿½ ï¿½Êºï¿½ ï¿½Ð±ï¿½
     int width;
     ReadFile(hFile, &width, sizeof(int), &bytesRead, NULL);
     if (bytesRead != sizeof(int))
@@ -63,7 +63,7 @@ bool MapManager::LoadMap(const LPCWCH filePath)
         return false;
     }
 
-    // ¸Ê ³ôÀÌ ÀÐ±â
+    // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ð±ï¿½
     int height;
     ReadFile(hFile, &height, sizeof(int), &bytesRead, NULL);
     if (bytesRead != sizeof(int))
@@ -72,7 +72,7 @@ bool MapManager::LoadMap(const LPCWCH filePath)
         return false;
     }
 
-    // Å¸ÀÏ °³¼ö ÀÐ±â
+    // Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ð±ï¿½
     int tileCount;
     ReadFile(hFile, &tileCount, sizeof(int), &bytesRead, NULL);
     if (bytesRead != sizeof(int))
@@ -81,19 +81,19 @@ bool MapManager::LoadMap(const LPCWCH filePath)
         return false;
     }
 
-    // µ¥ÀÌÅÍ À¯È¿¼º °Ë»ç
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¿ï¿½ï¿½ ï¿½Ë»ï¿½
     if (width <= 0 || height <= 0 || tileCount != width * height)
     {
         CloseHandle(hFile);
         return false;  
     }
 
-    // ¸Ê µ¥ÀÌÅÍ ÃÊ±âÈ­
+    // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
     mapData.width = width;
     mapData.height = height;
     mapData.tiles.resize(tileCount);
 
-    // Å¸ÀÏ µ¥ÀÌÅÍ ÀÐ±â
+    // Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ð±ï¿½
     ReadFile(hFile, mapData.tiles.data(), sizeof(Room) * tileCount, &bytesRead, NULL);
     if (bytesRead != sizeof(Room) * tileCount)
     {
@@ -101,7 +101,7 @@ bool MapManager::LoadMap(const LPCWCH filePath)
         return false;
     }
 
-    // ÇÃ·¹ÀÌ¾î À§Ä¡ ÀÐ±â
+    // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Ä¡ ï¿½Ð±ï¿½
 
     CloseHandle(hFile);
     return true;  
@@ -114,7 +114,7 @@ bool MapManager::SaveMap(const LPCWCH filePath)
         return false; 
     }
 
-    // ÆÄÀÏ »ý¼º
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     HANDLE hFile = CreateFile(
         filePath,           
         GENERIC_WRITE,     
@@ -125,7 +125,7 @@ bool MapManager::SaveMap(const LPCWCH filePath)
         NULL                
     );
 
-    // ÆÄÀÏ »ý¼º ½ÇÆÐ È®ÀÎ
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
     if (hFile == INVALID_HANDLE_VALUE)
     {
         return false;  
@@ -133,23 +133,23 @@ bool MapManager::SaveMap(const LPCWCH filePath)
 
     DWORD bytesWritten = 0;
 
-    // ¸Ê ³Êºñ ÀúÀå
+    // ï¿½ï¿½ ï¿½Êºï¿½ ï¿½ï¿½ï¿½ï¿½
     WriteFile(hFile, &mapData.width, sizeof(int), &bytesWritten, NULL);
 
-    // ¸Ê ³ôÀÌ ÀúÀå
+    // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     WriteFile(hFile, &mapData.height, sizeof(int), &bytesWritten, NULL);
 
-    // Å¸ÀÏ °³¼ö ÀúÀå
+    // Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     int tileCount = mapData.tiles.size();
     WriteFile(hFile, &tileCount, sizeof(int), &bytesWritten, NULL);
 
-    // Å¸ÀÏ µ¥ÀÌÅÍ ÀúÀå
+    // Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     WriteFile(hFile, mapData.tiles.data(), sizeof(Room) * tileCount, &bytesWritten, NULL);
 
-    // ÇÃ·¹ÀÌ¾î À§Ä¡ ÀúÀå
+    // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½
     //WriteFile(hFile, &playerPos, sizeof(FPOINT), &bytesWritten, NULL);
 
-    // ÆÄÀÏ ÇÚµé ´Ý±â
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ ï¿½Ý±ï¿½
     CloseHandle(hFile);
     return true; 
 }
@@ -161,33 +161,33 @@ bool MapManager::CreateNewMap(int width, int height)
         return false;  
     }
 
-    // ¸Ê µ¥ÀÌÅÍ ÃÊ±âÈ­
+    // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
     mapData.width = width;
     mapData.height = height;
     mapData.tiles.resize(width * height);
 
-    // ¸Ê Å¸ÀÏ ÃÊ±âÈ­
+    // ï¿½ï¿½ Å¸ï¿½ï¿½ ï¿½Ê±ï¿½È­
     for (int y = 0; y < height; y++)
     {
         for (int x = 0; x < width; x++)
         {
-            // ¸Ê °¡ÀåÀÚ¸®´Â º®À¸·Î ¼³Á¤
+            // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
             {
-                // º® Å¸ÀÏ (ÀÎµ¦½º 4)
+                // ï¿½ï¿½ Å¸ï¿½ï¿½ (ï¿½Îµï¿½ï¿½ï¿½ 4)
                 mapData.tiles[y * width + x].roomType = RoomType::WALL;
                 mapData.tiles[y * width + x].tilePos = 4;
             }
             else
             {
-                // ³»ºÎ´Â ¹Ù´ÚÀ¸·Î ¼³Á¤ (ÀÎµ¦½º 10)
+                // ï¿½ï¿½ï¿½Î´ï¿½ ï¿½Ù´ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½Îµï¿½ï¿½ï¿½ 10)
                 mapData.tiles[y * width + x].roomType = RoomType::FLOOR;
                 mapData.tiles[y * width + x].tilePos = 10;
             }
         }
     }
 
-    // ½ÃÀÛ À§Ä¡ ¼³Á¤ (Áß¾Ó ±ÙÃ³)
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½ (ï¿½ß¾ï¿½ ï¿½ï¿½Ã³)
     int startX = width / 2;
     int startY = height / 2;
     mapData.tiles[startY * width + startX].roomType = RoomType::START;
@@ -197,31 +197,31 @@ bool MapManager::CreateNewMap(int width, int height)
 }
 
 bool MapManager::CreateMazeMap(int width, int height) {
-    // ±âº» ¸Ê »ý¼º (¸ðµç Å¸ÀÏÀ» ¹Ù´ÚÀ¸·Î)
+    // ï¿½âº» ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½Ù´ï¿½ï¿½ï¿½ï¿½ï¿½)
     CreateNewMap(width, height);
 
-    // Ã¼½ºÆÇ ÆÐÅÏÀ¸·Î º® »ý¼º (°£´ÜÇÑ ¹Ì·Î ÆÐÅÏ)
+    // Ã¼ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì·ï¿½ ï¿½ï¿½ï¿½ï¿½)
     for (int y = 2; y < height - 2; y += 2) {
         for (int x = 2; x < width - 2; x += 2) {
             SetTile(x, y, RoomType::WALL, 4);
         }
     }
 
-    // ¼¼·Î º® ¹èÄ¡ 
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½Ä¡ 
     for (int y = 3; y < height - 2; y += 4) {
         for (int x = 4; x < width - 4; x += 4) {
             SetTile(x, y, RoomType::WALL, 4);
         }
     }
 
-    // °¡·Î º® ¹èÄ¡ 
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½Ä¡ 
     for (int x = 3; x < width - 2; x += 4) {
         for (int y = 4; y < height - 4; y += 4) {
             SetTile(x, y, RoomType::WALL, 4);
         }
     }
 
-    // ·£´ýÀ¸·Î º® ¶Õ±â
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Õ±ï¿½
     srand(static_cast<unsigned int>(time(NULL)));
     for (int i = 0; i < width * height / 10; i++) {
         int x = 2 + rand() % (width - 4);
@@ -241,7 +241,7 @@ void MapManager::SetTile(int x, int y, RoomType tileType, int index)
 {
     if (x >= 0 && x < mapData.width && y >= 0 && y < mapData.height)
     {
-        // Å¸ÀÏ Á¤º¸ ¼³Á¤
+        // Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         mapData.tiles[y * mapData.width + x].roomType = tileType;
         mapData.tiles[y * mapData.width + x].tilePos = index;
     }

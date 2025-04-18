@@ -29,6 +29,10 @@ private:
 
 	FPOINT moveInput;                         // 카메라 이동 방향
 	FLOAT moveSpeed;                          // 카메라 이동 속도
+	FLOAT stepElapsedTime;                   // 카메라 이동 시간
+	FLOAT stepTime;                           // 카메라 이동 시간
+	FLOAT runTime;                           // 카메라 이동 시간
+
 	FLOAT runSpeed;
 	FLOAT defaultSpeed;
 
@@ -36,6 +40,8 @@ private:
 	FLOAT rotateSpeed;                        // 카메라 회전 속도
 
 	float fov;                                // 시야각
+	float targetFOV;
+	float fovLerpSpeed = 5.0f;
 
 	// 카메라 흔들기
 	function<void(float, float, bool)> shakeFunc;

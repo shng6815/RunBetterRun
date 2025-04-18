@@ -4,6 +4,11 @@
 enum class RoomType
 { NONE, WALL, FLOOR, START };
 
+enum class UIType
+{
+	NONE, PLAYING, GAMEOVER, PAUSE, TITLE
+};
+
 typedef struct tagRoom
 {
 	RoomType	roomType;
