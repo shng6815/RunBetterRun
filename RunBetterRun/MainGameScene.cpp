@@ -1,6 +1,8 @@
 #include "MainGameScene.h"
 #include "RayCast.h"
 #include "Player.h"
+#include "UIManager.h"
+#include "UIUnit.h"
 
 HRESULT MainGameScene::Init()
 {
@@ -15,6 +17,12 @@ HRESULT MainGameScene::Init()
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	//ItemManager::GetInstance()->Init();
 	//MonsterManager::GetInstance()->Init();
+
+	UIManager::GetInstance()->Init();
+	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
+	UIUnit* uiUnit = new UIUnit();
+	uiUnit->Init(UIType::PLAYING, FPOINT{ 0, 0 }, FPOINT{ WINSIZE_X/10, WINSIZE_Y/10 }, 0);
+	UIManager::GetInstance()->AddUIUnit("PhoneUI", uiUnit);
 
 	status = SceneStatus::IN_GAME;
 	ShowCursor(FALSE);
@@ -49,6 +57,8 @@ void MainGameScene::Release()
 	Player::GetInstance()->Release();
 	//MapManager::GetInstance()->Release();
 
+	UIManager::GetInstance()->Release();
+
 	SelectObject(backBufferDC, oldBitmap);
 	DeleteObject(backBufferBitmap);
 	DeleteDC(backBufferDC);
@@ -69,7 +79,6 @@ void MainGameScene::Update()
 			rayCasting->Update();
 		//ItemManager::GetInstance()->Update();
 		//MonsterManager::GetInstance()->Update();
-		//UIManager::GetInstance()->Update();
 
 		break;
 	case MainGameScene::SceneStatus::PAUSE:
@@ -78,14 +87,14 @@ void MainGameScene::Update()
 			status = SceneStatus::IN_GAME;
 		}
 
-		//UIManager::GetInstance()->PauseUpdate();
-
 		break;
 	case MainGameScene::SceneStatus::QUIT:
 		break;
 	default:
 		break;
 	}
+
+	UIManager::GetInstance()->Update();
 }
 
 void MainGameScene::Render(HDC hdc)
@@ -95,6 +104,9 @@ void MainGameScene::Render(HDC hdc)
 
 	// 2. 흔들림 반영하여 백 버퍼를 실제 hdc에 출력
 	ApplyShake(hdc);
+
+	// 3. UI 렌더링
+	UIManager::GetInstance()->Render(hdc);
 }
 
 void MainGameScene::ShakeScreen(float shakePower, float time, bool isStepShake)
