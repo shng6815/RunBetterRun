@@ -105,24 +105,6 @@ void MonsterManager::Update()
     }
 }
 
-void MonsterManager::FindPlayer(FPOINT monsterPos, FPOINT targetPos, float deltaTime)
-{
-	for (auto& monster : monsters)
-	{
-		if (!monster.GetIsActive()) continue;
-
-		FPOINT monsterPos = monster.GetPostion();
-
-		vector<FPOINT> path = FindPath(monsterPos, playerPos);
-
-        if (path.size() >= 2)
-        {
-            // 다음 위치로 설정
-            monster.SetPosition(Move(monsterPos, path[1]));
-        }
-	}
-}
-
 
 void MonsterManager::CatchPlayer()
 {

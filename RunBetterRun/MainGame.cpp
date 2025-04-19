@@ -8,19 +8,25 @@
 #include "SpriteManager.h"
 #include "MapManager.h"
 #include "MainGameScene.h"
+#include "GameStartScene.h"
 
 HRESULT MainGame::Init()
 {
 	ImageManager::GetInstance()->Init();
 	KeyManager::GetInstance()->Init();
-	SceneManager::GetInstance()->Init();
+	SceneManager::GetInstance()->Init(); 
 	SpriteManager::GetInstance()->Init();
 	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
 
-	SceneManager::GetInstance()->AddScene("Å¸ÀÏ¸ÊÅø", new TilemapTool());
-	SceneManager::GetInstance()->AddLoadingScene("·Îµù_1", new LoadingScene());
-	SceneManager::GetInstance()->AddScene("MainGameScene", new MainGameScene());
-	SceneManager::GetInstance()->ChangeScene("MainGameScene");
+	SceneManager::GetInstance()->AddScene("MainGame",new MainGameScene());
+	SceneManager::GetInstance()->AddScene("GameStart",new GameStartScene());
+	SceneManager::GetInstance()->ChangeScene("GameStart");
+	//SceneManager::GetInstance()->AddScene("íƒ€ì¼ë§µíˆ´", new TilemapTool());
+	//SceneManager::GetInstance()->AddLoadingScene("ë¡œë”©_1", new LoadingScene());
+	//SceneManager::GetInstance()->AddScene("MainGameScene", new MainGameScene());
+	//SceneManager::GetInstance()->ChangeScene("MainGameScene");
+	//SceneManager::GetInstance()->AddScene("GameStartScene",new GameStartScene());
+	//SceneManager::GetInstance()->ChangeScene("GameStartScene");
 
 	hdc = GetDC(g_hWnd);
 
@@ -28,7 +34,7 @@ HRESULT MainGame::Init()
 	if (FAILED(backBuffer->Init(TILEMAPTOOL_X, TILEMAPTOOL_Y)))
 	{
 		MessageBox(g_hWnd,
-			TEXT("¹é¹öÆÛ »ý¼º ½ÇÆÐ"), TEXT("°æ°í"), MB_OK);
+			TEXT("ë°±ë²„í¼ ìƒì„± ì‹¤íŒ¨"), TEXT("ê²½ê³ "), MB_OK);
 		return E_FAIL;
 	}
 
@@ -61,7 +67,7 @@ void MainGame::Update()
 
 void MainGame::Render()
 {
-	// ¹é¹öÆÛ¿¡ ¸ÕÀú º¹»ç
+	// ë°±ë²„í¼ì— ë¨¼ì € ë³µì‚¬
 	HDC hBackBufferDC = backBuffer->GetMemDC();
 
 	SceneManager::GetInstance()->Render(hBackBufferDC);
@@ -70,7 +76,7 @@ void MainGame::Render()
 	/*wsprintf(szText, TEXT("Mouse X : %d, Y : %d"), g_ptMouse.x, g_ptMouse.y);
 	TextOut(hBackBufferDC, 20, 60, szText, wcslen(szText));*/
 
-	// ¹é¹öÆÛ¿¡ ÀÖ´Â ³»¿ëÀ» ¸ÞÀÎ hdc¿¡ º¹»ç
+	// ë°±ë²„í¼ì— ìžˆëŠ” ë‚´ìš©ì„ ë©”ì¸ hdcì— ë³µì‚¬
 	backBuffer->Render(hdc);
 }
 
