@@ -18,15 +18,10 @@ HRESULT MainGame::Init()
 	SpriteManager::GetInstance()->Init();
 	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
 
-	SceneManager::GetInstance()->AddScene("MainGame",new MainGameScene());
-	SceneManager::GetInstance()->AddScene("GameStart",new GameStartScene());
-	SceneManager::GetInstance()->ChangeScene("GameStart");
-	//SceneManager::GetInstance()->AddScene("타일맵툴", new TilemapTool());
+	SceneManager::GetInstance()->AddScene("MainGameScene",new MainGameScene());
+	SceneManager::GetInstance()->AddScene("GameStartScene",new GameStartScene());
+	SceneManager::GetInstance()->ChangeScene("GameStartScene");
 	//SceneManager::GetInstance()->AddLoadingScene("로딩_1", new LoadingScene());
-	//SceneManager::GetInstance()->AddScene("MainGameScene", new MainGameScene());
-	//SceneManager::GetInstance()->ChangeScene("MainGameScene");
-	//SceneManager::GetInstance()->AddScene("GameStartScene",new GameStartScene());
-	//SceneManager::GetInstance()->ChangeScene("GameStartScene");
 
 	hdc = GetDC(g_hWnd);
 
@@ -62,7 +57,7 @@ void MainGame::Release()
 void MainGame::Update()
 {
 	SceneManager::GetInstance()->Update();
-	InvalidateRect(g_hWnd, NULL, false);
+	InvalidateRect(g_hWnd,NULL,false);
 }
 
 void MainGame::Render()

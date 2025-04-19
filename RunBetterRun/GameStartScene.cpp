@@ -1,6 +1,7 @@
 #include "GameStartScene.h"
 #include "SceneManager.h"
 
+
 HRESULT GameStartScene::Init()
 {
 	titleText = TEXT("HorrorGame");
@@ -55,10 +56,6 @@ void GameStartScene::Render(HDC hdc)
 
 void GameStartScene::InitButtons()
 {
-	/*화면 중앙 위치 계산
-		3개 버튼 생성 (게임 시작,맵 에디터,게임 종료)
-		각 버튼의 위치,크기,종류,텍스트 설정*/
-		// 화면 중앙에 버튼 배치
 
 	RECT rc;
 	GetClientRect(g_hWnd,&rc);
@@ -78,7 +75,7 @@ void GameStartScene::InitButtons()
 		buttonWidth,
 		buttonHeight,
 		ButtonType::START,
-		TEXT("GameStart")
+		TEXT("Game Start")
 	);
 
 	// 맵 에디터 버튼
@@ -114,12 +111,12 @@ void GameStartScene::CheckButtonHover()
 			{
 				button.state=ButtonState::HOVER;
 			}
-			else
+		}
+		else
+		{
+			if(button.state!=ButtonState::CLICKED)
 			{
-				if(button.state!=ButtonState::CLICKED)
-				{
 				button.state=ButtonState::NORMAL;
-				}
 			}
 		}
 	}
@@ -128,7 +125,7 @@ void GameStartScene::CheckButtonHover()
 void GameStartScene::HandleButtonClick(Button & button)
 {
 
-	button.state == ButtonState::CLICKED;
+	button.state = ButtonState::CLICKED;
 
 	switch(button.type)
 	{
@@ -137,10 +134,10 @@ void GameStartScene::HandleButtonClick(Button & button)
 		break;
 	
 	case ButtonType::MAP_EDITOR:
-		SceneManager::GetInstance()->ChangeScene("MapEditer");
+		//SceneManager::GetInstance()->ChangeScene("MapEditerScene");
 		break;
 	case ButtonType::EXIT:
-		PostQuitMessage(0);
+		DestroyWindow(g_hWnd);	
 		break;
 	}
 }
@@ -153,7 +150,7 @@ void GameStartScene::DrawTitle(HDC hdc)
 	RECT rc;
 	GetClientRect(g_hWnd,&rc);
 
-	// 제목용 큰 폰트 생성
+	// 제목용 폰트 생성
 	HFONT hFont = CreateFont(60,0,0,0,FW_BOLD,FALSE,FALSE,FALSE,
 							 DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
 							 DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Arial"));
@@ -209,7 +206,6 @@ void GameStartScene::DrawButton(HDC hdc,Button & button)
 
 	DrawText(hdc,button.text,-1,&button.rect,DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
-	// 리소스 정리
 	SelectObject(hdc,oldFont);
 	DeleteObject(hFont);
 	SelectObject(hdc,oldBrush);
