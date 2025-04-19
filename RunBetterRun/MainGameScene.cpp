@@ -6,6 +6,8 @@
 #include "ItemManager.h"
 #include "UIManager.h"
 #include "PhoneUI.h"
+#include "Key.h"
+#include "Tentacle.h"
 
 HRESULT MainGameScene::Init()
 {
@@ -40,7 +42,8 @@ HRESULT MainGameScene::Init()
 	oldBitmap = (HBITMAP)SelectObject(backBufferDC, backBufferBitmap);
 	ReleaseDC(g_hWnd, screenDC);
 
-	ItemManager::GetInstance()->PutItem({ 21.5, 10.5 });
+	ItemManager::GetInstance()->PutItem(new Key({ 21.5, 10.5 }));
+	MonsterManager::GetInstance()->PutMonster(new Tentacle({ 21.5, 8.5 }));
 
 
 	return S_OK;
@@ -116,7 +119,6 @@ void MainGameScene::Render(HDC hdc)
 
 	ApplyShake(hdc);
 
-	// 3. UI ������
 	UIManager::GetInstance()->Render(hdc);
 }
 
