@@ -86,7 +86,7 @@ void Player::KeyInput(void)
         moveSpeed = defaultSpeed;
     }
     if (km->IsOnceKeyDown('O'))
-        Save();
+        Save(); 
 
     if (km->IsOnceKeyDown('P'))
         Load();

@@ -57,9 +57,6 @@
     <ClCompile Include="KeyManager.cpp">
       <Filter>Core\Source</Filter>
     </ClCompile>
-    <ClCompile Include="LoadingScene.cpp">
-      <Filter>Core\Source</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Core\Source</Filter>
     </ClCompile>
@@ -67,9 +64,6 @@
       <Filter>Core\Source</Filter>
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
-      <Filter>Core\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="TilemapTool.cpp">
       <Filter>Core\Source</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
@@ -135,6 +129,12 @@
     <ClCompile Include="GameStartScene.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="MapEditor.cpp">
+      <Filter>Core\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadingScene.cpp">
+      <Filter>InGame\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h">
@@ -162,9 +162,6 @@
       <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="Singleton.h">
-      <Filter>Core\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="TilemapTool.h">
       <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="Timer.h">
@@ -238,6 +235,9 @@
     </ClInclude>
     <ClInclude Include="GameStartScene.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MapEditor.h">
+      <Filter>Core\Header</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

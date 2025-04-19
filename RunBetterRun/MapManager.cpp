@@ -1,6 +1,5 @@
 #include "MapManager.h"
 #include "TextureManager.h"
-#include <fstream>
 
 HRESULT MapManager::Init()
 {

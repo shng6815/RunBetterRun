@@ -13,6 +13,13 @@
 #define TILE_X	20
 #define TILE_Y	20
 
+typedef struct tagMapEditorData {
+	MapData tileMapData;            
+	vector<FPOINT> itemPos;   
+	vector<FPOINT> monsterPos; 
+	FPOINT playerStartPos;      
+} MapEditorData;
+
 typedef struct tagTile
 {
 	RECT rc;
@@ -25,6 +32,7 @@ typedef struct tagTile
 //타일,몬스터,아이템을 선택해서 배치할 수 있어야 함.
 //인게임 에디터 
 //에디터에서 맵 저장/로드 기능 있어야함
+//mapEditorData 구조체: 플레이어, 
 class Image;
 class Button;
 class MapEditor : public GameObject

@@ -2,6 +2,7 @@
 #include "Image.h"
 #include "CommonFunction.h"
 #include "Button.h"
+#include "MapManager.h"
 #include <functional>
 
 HRESULT MapEditor::Init()
@@ -164,5 +165,6 @@ void MapEditor::Load()
 
 void MapEditor::RandomMapGenerate()
 {
-
+	//나중에 절차적 맵생성으로 추가
+	MapManager::GetInstance()->CreateMazeMap(TILEMAPTOOL_X,TILEMAPTOOL_Y);
 }
