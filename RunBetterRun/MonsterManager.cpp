@@ -36,7 +36,6 @@ void MonsterManager::Release()
 
 void MonsterManager::Update()
 {
-    //SpriteManager::GetInstance()->ClearMonsterSprites(TEXT("Image/Rocket.bmp"));
 
     // 플레이어 위치 업데이트
     playerPos = Player::GetInstance()->GetCameraPos();
@@ -74,10 +73,14 @@ void MonsterManager::Update()
         float dy = targetPos.y - currentPos.y;
         float distance = sqrt(dx * dx + dy * dy);
 
-        if (distance < 0.05f) {
+        if (distance < 0.30f) {
             // 목표에 거의 도달했으면 정확한 위치로 설정
             monster.SetPosition(Move(currentPos, targetPos));
             monster.SetMoving(false);
+
+			// 플레이어 잡힐 때 이번트 발생 - 나중 필요
+			SetisCatchPlayer(true);
+			//PostQuitMessage(0);
         }
         else {
             // 목표를 향해 이동

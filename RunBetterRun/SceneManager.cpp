@@ -1,5 +1,6 @@
 #include "SceneManager.h"
 #include "GameObject.h"
+#include "LoadingScene.h"
 
 GameObject* SceneManager::currentScene = nullptr;
 GameObject* SceneManager::loadingScene = nullptr;
@@ -9,10 +10,12 @@ DWORD CALLBACK LoadingThread(LPVOID pvParam)
 {
 	if (SUCCEEDED(SceneManager::nextScene->Init()))
 	{
-		SceneManager::currentScene = SceneManager::nextScene;
-		SceneManager::loadingScene->Release();
-		SceneManager::loadingScene = nullptr;
-		SceneManager::nextScene = nullptr;
+		//Sleep(3000);
+
+		if(SceneManager::loadingScene) 
+		{
+			((LoadingScene*)SceneManager::loadingScene)->SetLoadingComplete();
+		}
 	}
 
 	return 0;
@@ -161,4 +164,15 @@ GameObject* SceneManager::AddLoadingScene(string key, GameObject* scene)
 	mapLoadingScenes.insert(make_pair(key, scene));
 
 	return scene;
+}
+
+void SceneManager::LoadingComplete()
+{
+	if(nextScene && loadingScene)
+	{
+		currentScene = nextScene;
+		loadingScene->Release();
+		loadingScene = nullptr;
+		nextScene = nullptr;
+	}
 }

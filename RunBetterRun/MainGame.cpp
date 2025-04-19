@@ -20,8 +20,8 @@ HRESULT MainGame::Init()
 
 	SceneManager::GetInstance()->AddScene("MainGameScene",new MainGameScene());
 	SceneManager::GetInstance()->AddScene("GameStartScene",new GameStartScene());
+	SceneManager::GetInstance()->AddLoadingScene("LoadingScene",new LoadingScene());
 	SceneManager::GetInstance()->ChangeScene("GameStartScene");
-	//SceneManager::GetInstance()->AddLoadingScene("로딩_1", new LoadingScene());
 
 	hdc = GetDC(g_hWnd);
 
