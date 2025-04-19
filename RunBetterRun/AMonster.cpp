@@ -39,7 +39,7 @@ void AMonster::Action(void)
 
 void AMonster::Catch(void)
 {
-	// Catch Event
+	
 }
 
 BOOL AMonster::CanMoveToPosition(FPOINT pos)
