@@ -16,6 +16,7 @@ HRESULT Monster::Init(FPOINT startPos, float speed)
 
 void Monster::Release()
 {
+
 }
 
 void Monster::Update()

@@ -1,20 +1,44 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="소스 파일">
+    <Filter Include="InGame">
+      <UniqueIdentifier>{39b30919-dcff-4562-a4dd-e35f63a6499d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InGame\Item">
+      <UniqueIdentifier>{41ccf4d9-ae9f-4731-9614-b12e7a7ed534}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InGame\Monster">
+      <UniqueIdentifier>{3e4ce038-c23d-4e2b-ab2b-7a095e6e9d85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InGame\Scene">
+      <UniqueIdentifier>{26cdac16-efa6-4a3c-89d9-fd43d756b719}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InGame\UI">
+      <UniqueIdentifier>{fdb7e36b-8d4e-4976-aebc-52e0e1d343af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InGame\Map">
+      <UniqueIdentifier>{5a6e4a42-e385-4d75-ac18-becd495507a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InGame\Player">
+      <UniqueIdentifier>{cd7dde37-20e9-487b-9337-487557ece25e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InGame\Render">
+      <UniqueIdentifier>{56b91480-ad03-4d1f-815a-f2056e9f4995}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{5f8b1768-8bfa-4b51-bb6a-dfb0e2a650fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Source">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="헤더 파일">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="리소스 파일">
+    <Filter Include="Resouce">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="RunBetterRunManager">
-      <UniqueIdentifier>{39b30919-dcff-4562-a4dd-e35f63a6499d}</UniqueIdentifier>
+    <Filter Include="Core\Header">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
     <Filter Include="SHY">
       <UniqueIdentifier>{a687bb8a-cfb6-4a2d-bdea-7aeec952f9db}</UniqueIdentifier>
@@ -22,67 +46,94 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Button.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Core\Source</Filter>
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Core\Source</Filter>
     </ClCompile>
     <ClCompile Include="Image.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Core\Source</Filter>
     </ClCompile>
     <ClCompile Include="ImageManager.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Core\Source</Filter>
     </ClCompile>
     <ClCompile Include="KeyManager.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Core\Source</Filter>
     </ClCompile>
     <ClCompile Include="LoadingScene.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Core\Source</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Core\Source</Filter>
     </ClCompile>
     <ClCompile Include="MainGame.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="RayCast.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Core\Source</Filter>
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Core\Source</Filter>
     </ClCompile>
     <ClCompile Include="TilemapTool.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Core\Source</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Core\Source</Filter>
     </ClCompile>
     <ClCompile Include="TimerManager.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Core\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="UIManager.cpp">
+      <Filter>InGame\UI</Filter>
     </ClCompile>
-    <ClCompile Include="Monster.cpp">
-      <Filter>RunBetterRunManager</Filter>
+    <ClCompile Include="UIUnit.cpp">
+      <Filter>InGame\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="PhoneUI.cpp">
+      <Filter>InGame\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Tentacle.cpp">
+      <Filter>InGame\Monster</Filter>
+    </ClCompile>
+    <ClCompile Include="AMonster.cpp">
+      <Filter>InGame\Monster</Filter>
     </ClCompile>
     <ClCompile Include="MonsterManager.cpp">
-      <Filter>RunBetterRunManager</Filter>
+      <Filter>InGame\Monster</Filter>
     </ClCompile>
     <ClCompile Include="ItemManager.cpp">
-      <Filter>RunBetterRunManager</Filter>
+      <Filter>InGame\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="AItem.cpp">
+      <Filter>InGame\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="DeadScene.cpp">
+      <Filter>InGame\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="GameStartScene.cpp">
+      <Filter>InGame\Scene</Filter>
     </ClCompile>
     <ClCompile Include="MapManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SpriteManager.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Key.cpp">
+      <Filter>InGame\Item</Filter>
     </ClCompile>
     <ClCompile Include="MainGameScene.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>InGame\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="MapManager.cpp">
+      <Filter>InGame\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>InGame\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="RayCast.cpp">
+      <Filter>InGame\Render</Filter>
     </ClCompile>
     <ClCompile Include="TextureManager.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>InGame\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteManager.cpp">
+      <Filter>InGame\Render</Filter>
     </ClCompile>
     <ClCompile Include="UIUnit.cpp">
       <Filter>SHY</Filter>
@@ -90,97 +141,109 @@
     <ClCompile Include="UIManager.cpp">
       <Filter>SHY</Filter>
     </ClCompile>
-    <ClCompile Include="PhoneUI.cpp">
-      <Filter>SHY</Filter>
-    </ClCompile>
-    <ClCompile Include="MinimapUI.cpp">
-      <Filter>SHY</Filter>
+    <ClCompile Include="LossLifeScene.cpp">
+      <Filter>InGame\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="config.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="CommonFunction.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="GameObject.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="Image.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="ImageManager.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="KeyManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="LoadingScene.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="MainGame.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="RayCast.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="SceneManager.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="Singleton.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="TilemapTool.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="Timer.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="TimerManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ItemManager.h">
-      <Filter>RunBetterRunManager</Filter>
+      <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="MonsterManager.h">
-      <Filter>RunBetterRunManager</Filter>
+      <Filter>InGame\Monster</Filter>
     </ClInclude>
-    <ClInclude Include="Monster.h">
-      <Filter>RunBetterRunManager</Filter>
+    <ClInclude Include="ItemManager.h">
+      <Filter>InGame\Item</Filter>
     </ClInclude>
-    <ClInclude Include="structs.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="AItem.h">
+      <Filter>InGame\Item</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="AMonster.h">
+      <Filter>InGame\Monster</Filter>
     </ClInclude>
-    <ClInclude Include="MapManager.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="DeadScene.h">
+      <Filter>InGame\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="SpriteManager.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="GameStartScene.h">
+      <Filter>InGame\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Key.h">
+      <Filter>InGame\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadingScene.h">
+      <Filter>InGame\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="LossLifeScene.h">
+      <Filter>InGame\Scene</Filter>
     </ClInclude>
     <ClInclude Include="MainGameScene.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>InGame\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="MapManager.h">
+      <Filter>InGame\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Tentacle.h">
+      <Filter>InGame\Monster</Filter>
+    </ClInclude>
+    <ClInclude Include="RayCast.h">
+      <Filter>InGame\Render</Filter>
     </ClInclude>
     <ClInclude Include="TextureManager.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>InGame\Render</Filter>
     </ClInclude>
-    <ClInclude Include="UIUnit.h">
-      <Filter>SHY</Filter>
+    <ClInclude Include="Player.h">
+      <Filter>InGame\Player</Filter>
     </ClInclude>
-    <ClInclude Include="UIManager.h">
-      <Filter>SHY</Filter>
+    <ClInclude Include="SpriteManager.h">
+      <Filter>InGame\Render</Filter>
     </ClInclude>
     <ClInclude Include="PhoneUI.h">
-      <Filter>SHY</Filter>
+      <Filter>InGame\UI</Filter>
     </ClInclude>
-    <ClInclude Include="MinimapUI.h">
-      <Filter>SHY</Filter>
+    <ClInclude Include="UIManager.h">
+      <Filter>InGame\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UIUnit.h">
+      <Filter>InGame\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="structs.h">
+      <Filter>InGame</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>InGame</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

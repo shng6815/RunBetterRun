@@ -3,11 +3,11 @@
 #include "structs.h"
 #include <list>
 
+class AItem;
 class ItemManager: public Singleton<ItemManager>
 {
-	list<Sprite>	items;
-	Texture*		texture;
-	AnimationInfo	aniInfo;
+	list<AItem*>	items;
+	DWORD		keyCount;
 
 	HRESULT LoadFile(LPCWCH path);
 
@@ -18,6 +18,8 @@ public:
 	void	Update(void);
 
 	SIZE_T	Size(void) { return items.size(); }
-	void	PutItem(FPOINT pos);
+	void	PutItem(AItem* item);
+	void	PushKey(void);
+	void	PopKey(void);
 };
 

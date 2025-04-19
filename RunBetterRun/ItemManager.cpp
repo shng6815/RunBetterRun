@@ -1,6 +1,7 @@
 #include "ItemManager.h"
 #include "SpriteManager.h"
 #include "TextureManager.h"
+#include "AItem.h"
 
 HRESULT ItemManager::LoadFile(LPCWCH path)
 {
@@ -9,20 +10,22 @@ HRESULT ItemManager::LoadFile(LPCWCH path)
 
 HRESULT ItemManager::Init(void)
 {
-    texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/jewel.bmp"));
-    if (!texture)
-        return E_FAIL;
-    aniInfo = { 0.1f, 0.1f, {456, 488}, {10, 1}, {0, 0}};
+	keyCount = 0;
+	items.clear();
     return S_OK;
 }
 
 HRESULT ItemManager::Init(LPCWCH path)
 {
+	keyCount = 0;
+	items.clear();
     return S_OK;
 }
 
 void ItemManager::Release(void)
 {
+	for(auto& item : items)
+		delete item;
     items.clear();
 }
 
@@ -31,19 +34,31 @@ void ItemManager::Update(void)
     auto iter = items.begin();
     while (iter != items.end())
     {
-        if ((*iter).distance < 0.1f)
-        {
-            SpriteManager::GetInstance()->DeleteSprite(*iter);
-            iter = items.erase(iter);
-        }
+		if ((*iter)->Update())
+		{
+			delete *iter;
+			iter = items.erase(iter);
+		}
         else
             iter++;
     }
 }
 
-void ItemManager::PutItem(FPOINT pos)
+void ItemManager::PutItem(AItem* item)
 {
-    Sprite item{ pos, 0, texture, aniInfo };
     items.push_back(item);
-    SpriteManager::GetInstance()->AddSprite(items.back());
+}
+
+void ItemManager::PushKey(void)
+{
+	++keyCount;
+}
+
+void ItemManager::PopKey(void)
+{
+	if(--keyCount == 0)
+	{
+		keyCount;
+		// Escape Event
+	}
 }
