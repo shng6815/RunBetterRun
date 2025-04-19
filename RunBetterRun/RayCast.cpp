@@ -1,4 +1,4 @@
-﻿#include "RayCast.h"
+#include "RayCast.h"
 #include "KeyManager.h"
 #include "SpriteManager.h"
 #include "MapManager.h"
@@ -153,15 +153,23 @@ void RayCast::RenderSprites(DWORD start, DWORD end)
 {
     auto sprites = SpriteManager::GetInstance()->GetSprites();
     
-    float invDet = 1.0f / ((Player::GetInstance()->GetPlane().x * Player::GetInstance()->GetCameraVerDir().y) - (Player::GetInstance()->GetPlane().y * Player::GetInstance()->GetCameraVerDir().x));
+    float inverseDeterminant = 1.0f 
+		/ ((Player::GetInstance()->GetPlane().x
+		* Player::GetInstance()->GetCameraVerDir().y)
+		- (Player::GetInstance()->GetPlane().y
+		* Player::GetInstance()->GetCameraVerDir().x));
 
     for (auto& sprite : sprites)
     {
         if (sprite->distance > 0.1f)
         {
             FPOINT pos = { sprite->pos.x - Player::GetInstance()->GetCameraPos().x, sprite->pos.y - Player::GetInstance()->GetCameraPos().y };
-            FPOINT transform = { invDet * (Player::GetInstance()->GetCameraVerDir().y * pos.x - Player::GetInstance()->GetCameraVerDir().x * pos.y),
-                                invDet * (-Player::GetInstance()->GetPlane().y * pos.x + Player::GetInstance()->GetPlane().x * pos.y) };
+            FPOINT transform = {inverseDeterminant
+				* (Player::GetInstance()->GetCameraVerDir().y * pos.x
+				- Player::GetInstance()->GetCameraVerDir().x * pos.y),
+				inverseDeterminant 
+				* (-Player::GetInstance()->GetPlane().y * pos.x 
+				+ Player::GetInstance()->GetPlane().x * pos.y) };
             if (fabs(transform.y) < EPSILON)
                 continue;
             int screen = INT((WINSIZE_X / 2) * (1.0f + transform.x / transform.y));
@@ -296,11 +304,11 @@ void RayCast::RenderWall(Ray& ray, int column)
         texture.x = md->textureTileSize - texture.x - 1.0f;
 
     int tile = md->tiles[INT(ray.mapPos.y) * md->width + INT(ray.mapPos.x)].tilePos;
-    int y = max(0, INT(WINSIZE_Y / 2.0f - ray.height / 2.0f));
-    int end = (WINSIZE_Y - y < ray.height ? WINSIZE_Y : y + ray.height);
+    int y = max(0, WINSIZE_Y / 2 - INT(ray.height / 2.0f));
+	int end = min(WINSIZE_Y, y + ray.height);
     while (y < end)
     {
-        texture.y = INT((y * 2 - WINSIZE_Y + ray.height)
+        texture.y = INT((y * 2.0f - WINSIZE_Y + ray.height)
             * ((md->textureTileSize / 2.0f) / ray.height));
         int endY = min(y + renderScale, end);
         while (y < endY)
@@ -324,7 +332,7 @@ void RayCast::RenderCeilingFloor(Ray& ray, int column)
         floorTextureStartPos = { ray.mapPos.x + ray.wallTextureX, ray.mapPos.y + 1 };
 
     FPOINT pixel = { column, 0 };
-    int y = INT(WINSIZE_Y / 2 + ray.height / 2.0f);
+    int y = WINSIZE_Y / 2 + INT(ray.height / 2.0f);
     while (y < WINSIZE_Y)
     {
         float weight = screenHeightPixelDepths[y] / ray.distance;
@@ -364,7 +372,6 @@ void RayCast::RenderCeilingFloor(Ray& ray, int column, COLORREF ceiling, COLORRE
 void RayCast::RenderPixel(FPOINT pixel, int color)
 {
     int pixelPos = (WINSIZE_X * INT(pixel.y) + INT(pixel.x)) * 3;
-    //*reinterpret_cast<LPDWORD>(&pixelData[pixelPos]) += color;
     pixelData[pixelPos] = GetRValue(color);
     pixelData[pixelPos + 1] = GetGValue(color);
     pixelData[pixelPos + 2] = GetBValue(color);

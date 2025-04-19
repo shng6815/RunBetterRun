@@ -5,6 +5,8 @@
 #include "MapManager.h"
 #include <vector>
 
+#define MONSTER_SPEED 3.0f
+
 using namespace std;
 
 class MonsterManager : public Singleton<MonsterManager>
