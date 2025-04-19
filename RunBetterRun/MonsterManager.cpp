@@ -35,63 +35,6 @@ void MonsterManager::Update()
 		if(path.size() >= 2)
 			monster->SetTargetPosition(path[1]);
 
-        // 각 몬스터의 경로 계산
-        for (auto& monster : monsters) {
-            if (!monster.GetIsActive()) continue;
-
-            FPOINT monsterPos = monster.GetPostion();
-            vector<FPOINT> path = FindPath(monsterPos, playerPos);
-
-            if (path.size() >= 2) {
-                // 다음 위치를 목표 위치로 설정
-                monster.SetTargetPosition(path[1]);
-            }
-        }
-    }
-
-    // 각 몬스터 이동 보간 업데이트
-    for (auto& monster : monsters) {
-        if (!monster.GetIsActive() || !monster.IsMoving()) continue;
-
-        FPOINT currentPos = monster.GetPostion();
-        FPOINT targetPos = monster.GetTargetPosition();
-
-        // 현재 위치와 목표 위치 간의 거리
-        float dx = targetPos.x - currentPos.x;
-        float dy = targetPos.y - currentPos.y;
-        float distance = sqrt(dx * dx + dy * dy);
-
-        if (distance < 0.30f) {
-            // 목표에 거의 도달했으면 정확한 위치로 설정
-            monster.SetPosition(Move(currentPos, targetPos));
-            monster.SetMoving(false);
-
-			// 플레이어 잡힐 때 이번트 발생 - 나중 필요
-			SetisCatchPlayer(true);
-			SceneManager::GetInstance()->ChangeScene("LossLifeScene");
-			//PostQuitMessage(0);
-        }
-        else {
-            // 목표를 향해 이동
-            float dirX = dx / distance;
-            float dirY = dy / distance;
-
-            // 새 위치 계산 (델타 타임으로 부드러운 이동)
-            FPOINT newPos = {
-                currentPos.x + dirX * monster.GetSpeed() * deltaTime,
-                currentPos.y + dirY * monster.GetSpeed() * deltaTime
-            };
-
-            // 이동 가능 여부 확인
-            if (CanMoveToPosition(newPos)) {
-                monster.SetPosition(Move(currentPos, newPos));
-            }
-            else {
-                // 경로가 막혔으면 이동 중지 및 다음 업데이트에서 경로 재계산
-                monster.SetMoving(false);
-            }
-        }
-        
 		monster->Update();
     }
 }
@@ -268,17 +211,5 @@ FPOINT MonsterManager::Move(FPOINT src, FPOINT dst)
     FPOINT move = { dst.x - src.x, dst.y - src.y };
     return { src.x + (move.x * MONSTER_SPEED * deltaTime),
 		src.y + (move.y * MONSTER_SPEED * deltaTime) };
-}
-
-void MonsterManager::Reset()
-{
-	// 모든 몬스터 제거
-	for(auto& monster : monsters)
-	{
-		monster.Release();
-	}
-	monsters.clear();
-
-	Init();
 }
 
