@@ -92,7 +92,7 @@ HRESULT SceneManager::ChangeScene(string key, string loadingKey)
 		return S_OK;
 	}
 
-	// ·Îµù ¾À Ã£±â
+	// ë¡œë”© ì”¬ ì°¾ê¸°
 	map<string, GameObject*>::iterator iterLoading;
 	iterLoading = mapLoadingScenes.find(loadingKey);
 	if (iterLoading == mapLoadingScenes.end())
@@ -111,7 +111,7 @@ HRESULT SceneManager::ChangeScene(string key, string loadingKey)
 		nextScene = iter->second;
 		loadingScene = iterLoading->second;
 
-		// ´ÙÀ½ ¾ÀÀ» ÃÊ±âÈ­ÇÒ ¾²·¹µå¸¦ »ı¼º
+		// ë‹¤ìŒ ì”¬ì„ ì´ˆê¸°í™”í•  ì“°ë ˆë“œë¥¼ ìƒì„±
 		DWORD loadingThreadId;
 		HANDLE hThread;
 		hThread = CreateThread(NULL, 0,
