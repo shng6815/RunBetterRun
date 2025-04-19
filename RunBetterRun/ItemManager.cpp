@@ -1,6 +1,7 @@
 #include "ItemManager.h"
 #include "SpriteManager.h"
 #include "TextureManager.h"
+#include "AItem.h"
 
 HRESULT ItemManager::LoadFile(LPCWCH path)
 {
@@ -23,6 +24,8 @@ HRESULT ItemManager::Init(LPCWCH path)
 
 void ItemManager::Release(void)
 {
+	for(auto& item : items)
+		delete item;
     items.clear();
 }
 
@@ -31,17 +34,19 @@ void ItemManager::Update(void)
     auto iter = items.begin();
     while (iter != items.end())
     {
-        if (iter->Update())
-            iter = items.erase(iter);
+		if ((*iter)->Update())
+		{
+			delete *iter;
+			iter = items.erase(iter);
+		}
         else
             iter++;
     }
 }
 
-void ItemManager::PutItem(FPOINT pos)
+void ItemManager::PutItem(AItem* item)
 {
-    items.emplace_back();
-	items.back().Init(pos);
+    items.push_back(item);
 }
 
 void ItemManager::PushKey(void)

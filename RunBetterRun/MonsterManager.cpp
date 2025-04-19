@@ -10,18 +10,6 @@ HRESULT MonsterManager::Init()
 {
 	playerPos = Player::GetInstance()->GetCameraPos();
 	mapData = MapManager::GetInstance()->GetMapData();
-	isCatchPlayer = false;
-
-	CreateMonster(playerPos, 30.0f);
-	//CreateMonster(playerPos, 30.0f);
-
-	// 즉시 스프라이트 등록
-	for (auto& monster : monsters) {
-		if (monster.GetIsActive()) {
-            SpriteManager::GetInstance()->
-                AddSprite(monster.GetSprite());
-		}
-	}
 
 	return S_OK;
 }
@@ -29,24 +17,23 @@ HRESULT MonsterManager::Init()
 void MonsterManager::Release()
 {
 	for (auto& monster : monsters)
-	{
-		monster.Release();
-	}
+		delete monster;
 	monsters.clear();
 }
 
 void MonsterManager::Update()
 {
-
     // 플레이어 위치 업데이트
     playerPos = Player::GetInstance()->GetCameraPos();
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
 
-    // 각 몬스터 업데이트
     for (auto& monster : monsters)
     {
-        if (!monster.GetIsActive()) continue;
+		FPOINT monsterPos = monster->GetPostion();
+		vector<FPOINT> path = FindPath(monsterPos, playerPos);
 
+		if(path.size() >= 2)
+			monster->SetTargetPosition(path[1]);
 
         // 각 몬스터의 경로 계산
         for (auto& monster : monsters) {
@@ -104,63 +91,15 @@ void MonsterManager::Update()
                 monster.SetMoving(false);
             }
         }
-
+        
+		monster->Update();
     }
 }
 
 
-void MonsterManager::CatchPlayer()
+void MonsterManager::PutMonster(AMonster* monster)
 {
-}
-
-Monster &MonsterManager::CreateMonster(FPOINT position, float speed)
-{
-    Monster monster;
-	monster.Init(position, speed);
 	monsters.push_back(monster);
-	return monsters.back();
-}
-
-void MonsterManager::RemoveMonster(int index)
-{
-	//TODO
-}
-
-void MonsterManager::RemoveAllMonsters()
-{
-	//TODO
-}
-
-FPOINT MonsterManager::GetDirectionToPlayer(const FPOINT& monsterPos)
-{
-	FPOINT direction = {
-		playerPos.x - monsterPos.x,
-		playerPos.y - monsterPos.y
-	};
-
-	float length = sqrt(direction.x * direction.x + direction.y * direction.y);
-	if (length > 0.001f) { 
-		direction.x /= length;
-		direction.y /= length;
-	}
-
-	return direction;
-}
-
-bool MonsterManager::CanMoveToPosition(const FPOINT& pos)
-{
-	// 맵 경계 확인
-	int x = static_cast<int>(pos.x);
-	int y = static_cast<int>(pos.y);
-
-	if (x < 0 || x >= MAP_COLUME || y < 0 || y >= MAP_ROW)
-		return false;
-
-	// 타일 타입 확인 (바닥인 경우만 이동 가능)
-	if (!mapData) return false;
-
-	Room& tile = mapData->tiles[y * mapData->width + x];
-	return (tile.roomType == RoomType::FLOOR || tile.roomType == RoomType::START);
 }
 
 vector<FPOINT> MonsterManager::FindPath(FPOINT start, FPOINT end)
@@ -342,3 +281,4 @@ void MonsterManager::Reset()
 
 	Init();
 }
+
