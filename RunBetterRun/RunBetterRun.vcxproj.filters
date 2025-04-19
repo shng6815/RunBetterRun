@@ -40,9 +40,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="SHY">
-      <UniqueIdentifier>{a687bb8a-cfb6-4a2d-bdea-7aeec952f9db}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Button.cpp">
@@ -111,9 +108,6 @@
     <ClCompile Include="GameStartScene.cpp">
       <Filter>InGame\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="MapManager.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Key.cpp">
       <Filter>InGame\Item</Filter>
     </ClCompile>
@@ -134,12 +128,6 @@
     </ClCompile>
     <ClCompile Include="SpriteManager.cpp">
       <Filter>InGame\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="UIUnit.cpp">
-      <Filter>SHY</Filter>
-    </ClCompile>
-    <ClCompile Include="UIManager.cpp">
-      <Filter>SHY</Filter>
     </ClCompile>
     <ClCompile Include="LossLifeScene.cpp">
       <Filter>InGame\Scene</Filter>

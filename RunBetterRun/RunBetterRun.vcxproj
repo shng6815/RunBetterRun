@@ -143,7 +143,6 @@
     <ClCompile Include="MainGame.cpp" />
     <ClCompile Include="MainGameScene.cpp" />
     <ClCompile Include="MinimapUI.cpp" />
-    <ClCompile Include="Monster.cpp" />
     <ClCompile Include="AMonster.cpp" />
     <ClCompile Include="PhoneUI.cpp" />
     <ClCompile Include="MonsterManager.cpp" />
