@@ -24,29 +24,83 @@ void PhoneUI::Update()
 
 void PhoneUI::Render(HDC hdc)
 {
-    // 1. ¹Ì´Ï¸ÊÀ» ±×¸± ¸Ş¸ğ¸® DC¿Í ºñÆ®¸Ê »ı¼º
-    HDC memDC = CreateCompatibleDC(hdc);
-    HBITMAP hBmp = CreateCompatibleBitmap(hdc, size.x, size.y);
-    HBITMAP oldBmp = (HBITMAP)SelectObject(memDC, hBmp);
+	const int squareSize = static_cast<int>(min(size.x, size.y));
 
+	// ë¯¸ë‹ˆë§µì„ ê·¸ë¦´ ë©”ëª¨ë¦¬ DC
+	HDC memDC = CreateCompatibleDC(hdc);
+	HBITMAP memBmp = CreateCompatibleBitmap(hdc,squareSize,squareSize);
+	HBITMAP oldMemBmp = (HBITMAP)SelectObject(memDC,memBmp);
 
-    HBRUSH bgBrush = CreateSolidBrush(RGB(255, 0, 255));
-    RECT rect = { 0, 0, size.x, size.y };
-    FillRect(memDC, &rect, bgBrush);
-    DeleteObject(bgBrush);
+	// ë°°ê²½ íˆ¬ëª…ìƒ‰ìœ¼ë¡œ ì±„ìš°ê¸°
+	HBRUSH bgBrush = CreateSolidBrush(RGB(255,0,255));
+	RECT bgRect = {0,0,squareSize,squareSize};
+	FillRect(memDC,&bgRect,bgBrush);
+	DeleteObject(bgBrush);
 
-    // 2. ¹Ì´Ï¸ÊÀ» ±×¸®±â
-    DrawMiniMapToDC(memDC);
+	// íšŒì „ ê°ë„ ê³„ì‚°
+	auto dir = Player::GetInstance()->GetCameraVerDir();
+	float angle = atan2f(dir.y,dir.x);
+	float rotatedAngle = DEG_TO_RAD(-90) + angle;
 
-	// 3. ¸Ş¸ğ¸® DC¸¦ ¿øº» DC¿¡ º¹»ç
-    auto dir = Player::GetInstance()->GetCameraVerDir();
-    float angle = atan2f(dir.y, dir.x); // ¶óµğ¾È ´ÜÀ§
-    GDITransformRotate(hdc, memDC, DEG_TO_RAD(-90) + angle);
+	// íšŒì „ ì ìš©í•´ì„œ ë¯¸ë‹ˆë§µ ê·¸ë¦¬ê¸°
+	DrawMiniMapWithRotation(memDC,squareSize,rotatedAngle);
 
-    // 4. Á¤¸®
-    SelectObject(memDC, oldBmp);
-    DeleteObject(hBmp);
-    DeleteDC(memDC);
+	// ì›ë³¸ DCì— ì •ì‚¬ê°í˜• í´ë¦¬í•‘ ë Œë”ë§
+	int drawX = static_cast<int>(pos.x + (size.x - squareSize) / 2);
+	int drawY = static_cast<int>(pos.y + (size.y - squareSize) / 2);
+	TransparentBlt(hdc,drawX,drawY,squareSize,squareSize,memDC,0,0,squareSize,squareSize,RGB(255,0,255));
+
+	// ì •ë¦¬
+	SelectObject(memDC,oldMemBmp);
+	DeleteObject(memBmp);
+	DeleteDC(memDC);
+}
+
+void PhoneUI::DrawMiniMapWithRotation(HDC hdc,int size,float angle)
+{
+	// íšŒì „ ì¤‘ì‹¬
+	float centerX = size / 2.0f;
+	float centerY = size / 2.0f;
+
+	// íšŒì „ìš© ì„ì‹œ DC
+	HDC rotatedDC = CreateCompatibleDC(hdc);
+	HBITMAP rotatedBmp = CreateCompatibleBitmap(hdc,size,size);
+	HBITMAP oldBmp = (HBITMAP)SelectObject(rotatedDC,rotatedBmp);
+
+	// ë°°ê²½ ì±„ìš°ê¸°
+	HBRUSH bgBrush = CreateSolidBrush(RGB(255,0,255));
+	RECT rect = {0,0,size,size};
+	FillRect(rotatedDC,&rect,bgBrush);
+	DeleteObject(bgBrush);
+
+	// ë¯¸ë‹ˆë§µ ë‚´ìš© ê·¸ë¦¬ê¸° (ì´ì „ DrawMiniMapToDC ì‚¬ìš©)
+	this->size = {(float)size,(float)size};
+	DrawMiniMapToDC(rotatedDC);
+
+	// íšŒì „ ì ìš©í•´ì„œ ì›ë˜ hdcì— ê·¸ë¦¬ê¸°
+	XFORM xform;
+	float cosA = cosf(angle);
+	float sinA = sinf(angle);
+	xform.eM11 = cosA;
+	xform.eM12 = sinA;
+	xform.eM21 = -sinA;
+	xform.eM22 = cosA;
+	xform.eDx = centerX * (1 - cosA) + centerY * sinA;
+	xform.eDy = centerY * (1 - cosA) - centerX * sinA;
+
+	SetGraphicsMode(hdc,GM_ADVANCED);
+	XFORM oldXform;
+	GetWorldTransform(hdc,&oldXform);
+	SetWorldTransform(hdc,&xform);
+
+	TransparentBlt(hdc,0,0,size,size,rotatedDC,0,0,size,size,RGB(255,0,255));
+
+	SetWorldTransform(hdc,&oldXform);
+
+	// ì •ë¦¬
+	SelectObject(rotatedDC,oldBmp);
+	DeleteObject(rotatedBmp);
+	DeleteDC(rotatedDC);
 }
 
 void PhoneUI::DrawMiniMapToDC(HDC hdc)
@@ -54,13 +108,13 @@ void PhoneUI::DrawMiniMapToDC(HDC hdc)
     if (!isActive)
         return;
 
-    int tileSize = 15;
+    int tileSize = 20;
     int halfTile = tileSize / 2;
 
     FPOINT pPos = Player::GetInstance()->GetCameraPos();
     auto mapData = MapManager::GetInstance()->GetMapData();
 
-    // È­¸é Å©±â ±âÁØÀ¸·Î ±×¸± radius °è»ê
+    // í™”ë©´ í¬ê¸° ê¸°ì¤€ìœ¼ë¡œ ê·¸ë¦´ radius ê³„ì‚°
     float tilesVisibleX = size.x / (float)tileSize;
     float tilesVisibleY = size.y / (float)tileSize;
 
@@ -100,7 +154,7 @@ void PhoneUI::DrawMiniMapToDC(HDC hdc)
 
     DeleteObject(brush);
 
-    // ÇÃ·¹ÀÌ¾î Áß½É ±×¸®±â (Ç×»ó Áß¾Ó)
+    // í”Œë ˆì´ì–´ ì¤‘ì‹¬ ê·¸ë¦¬ê¸° (í•­ìƒ ì¤‘ì•™)
     float playerDrawX = size.x / 2.0f;
     float playerDrawY = size.y / 2.0f;
 
@@ -109,41 +163,4 @@ void PhoneUI::DrawMiniMapToDC(HDC hdc)
         static_cast<int>(playerDrawY - halfTile),
         static_cast<int>(playerDrawX + halfTile),
         static_cast<int>(playerDrawY + halfTile));
-}
-
-void PhoneUI::GDITransformRotate(HDC hdc, HDC memDC, float angle)
-{
-    XFORM oldXform;
-    GetWorldTransform(hdc, &oldXform);
-
-    SetGraphicsMode(hdc, GM_ADVANCED);
-
-    // È¸Àü Áß½É
-    float centerX = pos.x + size.x / 2.0f;
-    float centerY = pos.y + size.y / 2.0f;
-
-    // È¸Àü º¯È¯ Àû¿ë: ÀÌµ¿(-Áß½É) ¡æ È¸Àü ¡æ ÀÌµ¿(+Áß½É)
-    XFORM xform;
-
-    float cosA = cos(angle);
-    float sinA = sin(angle);
-
-    xform.eM11 = cosA;
-    xform.eM12 = sinA;
-    xform.eM21 = -sinA;
-    xform.eM22 = cosA;
-
-    // È¸Àü Áß½É º¸Á¤
-    xform.eDx = centerX * (1 - cosA) + centerY * sinA;
-    xform.eDy = centerY * (1 - cosA) - centerX * sinA;
-
-    SetWorldTransform(hdc, &xform);
-
-    // Áß½É ±âÁØÀ¸·Î BitBlt À§Ä¡ Á¶Á¤
-    int drawX = static_cast<int>(centerX - size.x / 2);
-    int drawY = static_cast<int>(centerY - size.y / 2);
-
-    TransparentBlt(hdc, drawX, drawY, size.x, size.y, memDC, 0, 0, size.x, size.y, RGB(255, 0, 255));
-
-    SetWorldTransform(hdc, &oldXform);
 }

@@ -24,7 +24,7 @@ HRESULT MainGameScene::Init()
 	UIManager::GetInstance()->Init();
 	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
 	PhoneUI* uiUnit = new PhoneUI();
-	uiUnit->Init(UIType::PLAYING, FPOINT{ 200, WINSIZE_Y - 200 }, FPOINT{ 150, 150 }, 0);
+	uiUnit->Init(UIType::PLAYING, FPOINT{ 300, WINSIZE_Y - 400 }, FPOINT{ 250, 250 }, 0);
 	UIManager::GetInstance()->AddUIUnit("PhoneUI", uiUnit);
 
 	status = SceneStatus::IN_GAME;

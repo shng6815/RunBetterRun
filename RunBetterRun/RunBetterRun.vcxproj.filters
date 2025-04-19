@@ -16,6 +16,9 @@
     <Filter Include="RunBetterRunManager">
       <UniqueIdentifier>{39b30919-dcff-4562-a4dd-e35f63a6499d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SHY">
+      <UniqueIdentifier>{a687bb8a-cfb6-4a2d-bdea-7aeec952f9db}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Button.cpp">
@@ -69,9 +72,6 @@
     <ClCompile Include="ItemManager.cpp">
       <Filter>RunBetterRunManager</Filter>
     </ClCompile>
-    <ClCompile Include="Item.cpp">
-      <Filter>RunBetterRunManager</Filter>
-    </ClCompile>
     <ClCompile Include="MapManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -81,14 +81,17 @@
     <ClCompile Include="MainGameScene.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="UIManager.cpp">
+    <ClCompile Include="TextureManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="UIUnit.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>SHY</Filter>
+    </ClCompile>
+    <ClCompile Include="UIManager.cpp">
+      <Filter>SHY</Filter>
     </ClCompile>
     <ClCompile Include="PhoneUI.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>SHY</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -140,9 +143,6 @@
     <ClInclude Include="ItemManager.h">
       <Filter>RunBetterRunManager</Filter>
     </ClInclude>
-    <ClInclude Include="Item.h">
-      <Filter>RunBetterRunManager</Filter>
-    </ClInclude>
     <ClInclude Include="MonsterManager.h">
       <Filter>RunBetterRunManager</Filter>
     </ClInclude>
@@ -164,14 +164,17 @@
     <ClInclude Include="MainGameScene.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="UIManager.h">
+    <ClInclude Include="TextureManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="UIUnit.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>SHY</Filter>
+    </ClInclude>
+    <ClInclude Include="UIManager.h">
+      <Filter>SHY</Filter>
     </ClInclude>
     <ClInclude Include="PhoneUI.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>SHY</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

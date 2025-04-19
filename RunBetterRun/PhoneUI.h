@@ -11,6 +11,6 @@ public:
 	void Render(HDC hdc) override;
 
 	void DrawMiniMapToDC(HDC hdc);
-	void GDITransformRotate(HDC hdc,HDC memDC, float angle);
+	void DrawMiniMapWithRotation(HDC hdc,int size,float angle);
 };
 
