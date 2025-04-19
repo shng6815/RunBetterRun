@@ -4,7 +4,7 @@
 class Timer;
 class Image;
 class EnemyManager;
-class TilemapTool;
+class MapEditor;
 class MainGame : public GameObject
 {
 private:
@@ -14,7 +14,7 @@ private:
 
 	Image* backBuffer;
 
-	TilemapTool* tilemapTool;
+	MapEditor* tilemapTool;
 
 	Timer* timer;
 

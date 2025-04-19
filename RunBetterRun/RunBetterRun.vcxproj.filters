@@ -48,7 +48,7 @@
     <ClCompile Include="SceneManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="TilemapTool.cpp">
+    <ClCompile Include="MapEditor.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
@@ -93,6 +93,9 @@
     <ClCompile Include="Item.cpp">
       <Filter>RunBetterRunManager</Filter>
     </ClCompile>
+    <ClCompile Include="GameStartScene.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h">
@@ -131,7 +134,7 @@
     <ClInclude Include="Singleton.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="TilemapTool.h">
+    <ClInclude Include="MapEditor.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Timer.h">
@@ -178,6 +181,9 @@
     </ClInclude>
     <ClInclude Include="Item.h">
       <Filter>RunBetterRunManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStartScene.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

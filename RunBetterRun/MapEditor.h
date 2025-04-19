@@ -1,13 +1,14 @@
 #pragma once
 #include "GameObject.h"
+#include "structs.h"
 
-// ���� Ÿ�� ����
-// 640 * 288
-#define SAMPLE_TILE_X	20
-#define SAMPLE_TILE_Y	9
+// 샘플 타일 정보
+// 1408 x 1408
+#define SAMPLE_TILE_X	11
+#define SAMPLE_TILE_Y	11
 #define TILE_SIZE	32
 
-// ���� �׸��� ���� ����
+// 메인 그리기 공간 정보
 #define TILE_X	20
 #define TILE_Y	20
 
@@ -18,9 +19,14 @@ typedef struct tagTile
 	int frameY;
 } TILE_INFO;
 
+//맵 에디터 기능 
+// 
+//타일,몬스터,아이템을 선택해서 배치할 수 있어야 함.
+//인게임 에디터 
+//에디터에서 맵 저장/로드 기능 있어야함
 class Image;
 class Button;
-class TilemapTool : public GameObject
+class MapEditor : public GameObject
 {
 private:
 	Image* sampleTile;
@@ -32,6 +38,8 @@ private:
 	POINT selectedTile;
 
 	Button* saveButton;
+	Button* loadButton;
+	Button* randomMapGenerate;
 
 public:
 	virtual HRESULT Init() override;
@@ -42,7 +50,7 @@ public:
 	void Save();
 	void Load();
 
-	TilemapTool() {};
-	virtual ~TilemapTool() {};
+	MapEditor() {};
+	virtual ~MapEditor() {};
 };
 

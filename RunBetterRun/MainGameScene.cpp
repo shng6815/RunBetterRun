@@ -29,7 +29,7 @@ HRESULT MainGameScene::Init()
 	UIManager::GetInstance()->AddUIUnit("PhoneUI", uiUnit);
 
 	status = SceneStatus::IN_GAME;
-	ShowCursor(FALSE);
+	while(ShowCursor(FALSE) >= 0);
 
 	RECT rc;
 	GetClientRect(g_hWnd, &rc);
@@ -78,7 +78,7 @@ void MainGameScene::Update()
 	{
 	case MainGameScene::SceneStatus::IN_GAME:
 		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {
-			ShowCursor(TRUE);
+			while(ShowCursor(TRUE) < 0);
 			status = SceneStatus::PAUSE;
 		}
 
@@ -96,7 +96,7 @@ void MainGameScene::Update()
 		break;
 	case MainGameScene::SceneStatus::PAUSE:
 		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {
-			ShowCursor(FALSE);
+			while(ShowCursor(FALSE) >= 0);
 			status = SceneStatus::IN_GAME;
 		}
 

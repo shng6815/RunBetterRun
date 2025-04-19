@@ -1,18 +1,14 @@
-#include "TilemapTool.h"
+#include "MapEditor.h"
 #include "Image.h"
 #include "CommonFunction.h"
 #include "Button.h"
 #include <functional>
 
-HRESULT TilemapTool::Init()
+HRESULT MapEditor::Init()
 {
 	SetClientRect(g_hWnd, TILEMAPTOOL_X, TILEMAPTOOL_Y);
 
-	sampleTile = ImageManager::GetInstance()->AddImage(
-		"¹èÆ²½ÃÆ¼_»ùÇÃÅ¸ÀÏ", L"Image/mapTiles.bmp", 640, 288,
-		SAMPLE_TILE_X, SAMPLE_TILE_Y);
-
-	// »ùÇÃ Å¸ÀÏ ¿µ¿ª
+	// íƒ€ì¼ ì‹œíŠ¸ ì˜ì—­
 	rcSampleTile.left = TILEMAPTOOL_X - sampleTile->GetWidth();
 	rcSampleTile.top = 0;
 	rcSampleTile.right = TILEMAPTOOL_X;
@@ -33,13 +29,13 @@ HRESULT TilemapTool::Init()
 		}
 	}
 
-	// ¸ŞÀÎ Å¸ÀÏ ¿µ¿ª
+	// ë©”ì¸ íƒ€ì¼ ì˜ì—­
 	rcMain.left = 0;
 	rcMain.top = 0;
 	rcMain.right = TILE_X * TILE_SIZE;
 	rcMain.bottom = TILE_Y * TILE_SIZE;
 
-	// UI - ¹öÆ°
+	//ë²„íŠ¼: save, load, 
 	saveButton = new Button();
 	saveButton->Init(
 		TILEMAPTOOL_X - sampleTile->GetWidth() + 180,
@@ -53,7 +49,7 @@ HRESULT TilemapTool::Init()
 	return S_OK;
 }
 
-void TilemapTool::Release()
+void MapEditor::Release()
 {
 	if (saveButton)
 	{
@@ -63,7 +59,7 @@ void TilemapTool::Release()
 	}
 }
 
-void TilemapTool::Update()
+void MapEditor::Update()
 {
 	if (PtInRect(&rcSampleTile, g_ptMouse))
 	{
@@ -91,11 +87,11 @@ void TilemapTool::Update()
 	if (saveButton)	saveButton->Update();
 }
 
-void TilemapTool::Render(HDC hdc)
+void MapEditor::Render(HDC hdc)
 {
 	PatBlt(hdc, 0, 0, TILEMAPTOOL_X, TILEMAPTOOL_Y, WHITENESS);
 
-	// ¸ŞÀÎ Å¸ÀÏ ¿µ¿ª
+	// ë©”ì¸ íƒ€ì¼ ì˜ì—­
 	for (int i = 0; i < TILE_X * TILE_Y; ++i)
 	{
 		sampleTile->FrameRender(hdc, tileInfo[i].rc.left,
@@ -103,10 +99,10 @@ void TilemapTool::Render(HDC hdc)
 			tileInfo[i].frameY, false, false);
 	}
 
-	// »ùÇÃ Å¸ÀÏ ¿µ¿ª
+	// ìƒ˜í”Œ íƒ€ì¼ ì˜ì—­
 	sampleTile->Render(hdc, TILEMAPTOOL_X - sampleTile->GetWidth(), 0);
 
-	// ¼±ÅÃµÈ Å¸ÀÏ
+	// ì„ íƒëœ íƒ€ì¼
 	sampleTile->FrameRender(hdc, 
 		TILEMAPTOOL_X - sampleTile->GetWidth(),
 		sampleTile->GetHeight() + 100,
@@ -115,15 +111,15 @@ void TilemapTool::Render(HDC hdc)
 	if (saveButton) saveButton->Render(hdc);
 }
 
-void TilemapTool::Save()
+void MapEditor::Save()
 {
-	// ÆÄÀÏ ÀúÀå
+	// íŒŒì¼ ì €ì¥
 	HANDLE hFile = CreateFile(
-		L"TileMapData.dat", GENERIC_WRITE, 0, NULL,
+		L"MapData.dat", GENERIC_WRITE, 0, NULL,
 		CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
-		MessageBox(g_hWnd, TEXT("ÆÄÀÏ »ı¼º ½ÇÆĞ"), TEXT("°æ°í"), MB_OK);
+		MessageBox(g_hWnd, TEXT("íŒŒì¼ ìƒì„± ì‹¤íŒ¨"), TEXT("ê²½ê³ "), MB_OK);
 		return;
 	}
 	DWORD dwByte = 0;
@@ -131,21 +127,21 @@ void TilemapTool::Save()
 	CloseHandle(hFile);
 }
 
-void TilemapTool::Load()
+void MapEditor::Load()
 {	
-	// ÆÄÀÏ ·Îµå
+	// íŒŒì¼ ë¡œë“œ
 	HANDLE hFile = CreateFile(
-		L"TileMapData.dat", GENERIC_READ, 0, NULL,
+		L"MapData.dat", GENERIC_READ, 0, NULL,
 		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
-		MessageBox(g_hWnd, TEXT("ÆÄÀÏ ¿­±â ½ÇÆĞ"), TEXT("°æ°í"), MB_OK);
+		MessageBox(g_hWnd, TEXT("íŒŒì¼ ì—´ê¸° ì‹¤íŒ¨"), TEXT("ê²½ê³ "), MB_OK);
 		return;
 	}
 	DWORD dwByte = 0;
 	if (!ReadFile(hFile, tileInfo, sizeof(tileInfo), &dwByte, NULL))
 	{
-		MessageBox(g_hWnd, TEXT("ÆÄÀÏ ÀĞ±â ½ÇÆĞ"), TEXT("°æ°í"), MB_OK);
+		MessageBox(g_hWnd, TEXT("íŒŒì¼ ì½ê¸° ì‹¤íŒ¨"), TEXT("ê²½ê³ "), MB_OK);
 	}
 	CloseHandle(hFile);
 }
