@@ -29,7 +29,7 @@ public:
 
 private:
 	HANDLE			threads[THREAD_NUM];
-	ThreadData		threadDatas[THREAD_NUM];
+	ThreadData		threadDatas;
 	DWORD			threadJobDone;
 	HANDLE			threadMutex;
 	LONG			colsPerThread;
@@ -46,12 +46,7 @@ private:
 	int     currentFPS;
 	int     fpsCheckCounter;
 	float   fpsCheckTime;
-	
-	const int* mapData;
-	int mapWidth;
-	int mapHeight;
 
-	//static int map[MAP_ROW * MAP_COLUME];
 	float	screenWidthPixelUnitPos[WINSIZE_X];
 	float	screenWidthRayDistance[WINSIZE_X];
 	float	screenHeightPixelDepths[WINSIZE_Y];
@@ -73,5 +68,6 @@ public:
 	virtual void Update(void) override;
 	virtual void Render(HDC hdc) override;
 
+	RayCast(void) { threadTermination = TRUE; }
 	void FillScreen(DWORD start, DWORD end);
 };

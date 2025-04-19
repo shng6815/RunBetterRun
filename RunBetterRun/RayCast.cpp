@@ -50,22 +50,24 @@ HRESULT RayCast::Init(void)
     fpsCheckCounter = 0;
     fpsCheckTime = 0.0f;
 
-    threadJobDone = 0;
-    threadTermination = FALSE;
-    queueMutex = CreateMutex(NULL, FALSE, NULL);
-    threadMutex = CreateMutex(NULL, FALSE, NULL);
-    colsPerThread = WINSIZE_X / THREAD_NUM;
-    for (DWORD i = 0; i < THREAD_NUM; ++i) {
-        threadDatas[i] = {
-            this,
-            &threadTermination,
-            &threadJobDone,
-            &threadQueue,
-            &threadMutex,
-            &queueMutex
-        };
-        threads[i] = CreateThread(NULL, 0, RaycastThread, &threadDatas[i], 0, NULL);
-    }
+	if (threadTermination)
+	{
+		threadJobDone = 0;
+		threadTermination = FALSE;
+		queueMutex = CreateMutex(NULL,FALSE,NULL);
+		threadMutex = CreateMutex(NULL,FALSE,NULL);
+		colsPerThread = WINSIZE_X / THREAD_NUM;
+		threadDatas = {
+			this,
+			&threadTermination,
+			&threadJobDone,
+			&threadQueue,
+			&threadMutex,
+			&queueMutex
+		};
+		for(DWORD i = 0; i < THREAD_NUM; ++i)
+			threads[i] = CreateThread(NULL,0,RaycastThread,&threadDatas,0,NULL);
+	}
 
     return S_OK;
 }
