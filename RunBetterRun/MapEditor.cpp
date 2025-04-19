@@ -40,11 +40,25 @@ HRESULT MapEditor::Init()
 	saveButton->Init(
 		TILEMAPTOOL_X - sampleTile->GetWidth() + 180,
 		sampleTile->GetHeight() + 100);
-	//saveButton->SetFunction(&TilemapTool::Save, this);
-	//saveButton->SetFunction(std::bind(&TilemapTool::Save, this));
 	saveButton->SetFunction([this]() {
 		this->Save();
 		});
+
+	loadButton = new Button();
+	loadButton->Init(
+		TILEMAPTOOL_X - sampleTile->GetWidth() + 180,
+		sampleTile->GetHeight() + 100);
+	loadButton->SetFunction([this](){
+		this->Save();
+		});
+
+	randomGen = new Button();
+	randomGen->Init(
+		TILEMAPTOOL_X - sampleTile->GetWidth() + 180,
+		sampleTile->GetHeight() + 100);
+	randomGen->SetFunction([this](){
+		this->Save();
+	});
 
 	return S_OK;
 }
@@ -109,6 +123,8 @@ void MapEditor::Render(HDC hdc)
 		selectedTile.x, selectedTile.y, false, false);
 
 	if (saveButton) saveButton->Render(hdc);
+	if(loadButton) loadButton->Render(hdc);
+	if(randomGen) randomGen->Render(hdc);
 }
 
 void MapEditor::Save()
@@ -144,4 +160,9 @@ void MapEditor::Load()
 		MessageBox(g_hWnd, TEXT("파일 읽기 실패"), TEXT("경고"), MB_OK);
 	}
 	CloseHandle(hFile);
+}
+
+void MapEditor::RandomMapGenerate()
+{
+
 }

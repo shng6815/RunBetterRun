@@ -1,6 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include "structs.h"
+#include <vector>
 
 // 샘플 타일 정보
 // 1408 x 1408
@@ -36,10 +37,10 @@ private:
 	RECT rcMain;
 
 	POINT selectedTile;
-
+	vector<MapData*> Monsters;
 	Button* saveButton;
 	Button* loadButton;
-	Button* randomMapGenerate;
+	Button* randomGen;
 
 public:
 	virtual HRESULT Init() override;
@@ -49,6 +50,7 @@ public:
 
 	void Save();
 	void Load();
+	void RandomMapGenerate();
 
 	MapEditor() {};
 	virtual ~MapEditor() {};
