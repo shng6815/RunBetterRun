@@ -25,6 +25,10 @@ void GameStartScene::Update()
 
 	CheckButtonHover();
 
+	if(KeyManager::GetInstance()->IsOnceKeyDown(VK_SPACE)) {
+		SceneManager::GetInstance()->ChangeScene("MapEditorScene");
+	}
+
 	if(KeyManager::GetInstance()->IsOnceKeyDown(VK_LBUTTON))
 	{
 		for(auto& button: buttons)
@@ -134,7 +138,7 @@ void GameStartScene::HandleButtonClick(Button & button)
 		break;
 	
 	case ButtonType::MAP_EDITOR:
-		//SceneManager::GetInstance()->ChangeScene("MapEditerScene");
+		SceneManager::GetInstance()->ChangeScene("MapEditerScene");
 		break;
 	case ButtonType::EXIT:
 		DestroyWindow(g_hWnd);	

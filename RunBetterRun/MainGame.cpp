@@ -17,7 +17,7 @@ HRESULT MainGame::Init()
 	KeyManager::GetInstance()->Init();
 	SceneManager::GetInstance()->Init();
 	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
-
+	SceneManager::GetInstance()->AddScene("MapEditorScene",new MapEditor());
 	SceneManager::GetInstance()->AddScene("MainGameScene",new MainGameScene());
 	SceneManager::GetInstance()->AddScene("GameStartScene",new GameStartScene());
 	SceneManager::GetInstance()->AddScene("LossLifeScene",new LossLifeScene());

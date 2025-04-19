@@ -1,5 +1,4 @@
-// config.h
-
+//config.h
 #pragma once
 #pragma comment(lib, "Winmm.lib")
 

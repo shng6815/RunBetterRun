@@ -11,16 +11,16 @@ private:
 	MapData mapData;
 
 public:
-	HRESULT Init();					//±âº»	   ¸Ê »ı¼º
-	HRESULT Init(LPCWCH filePath);  //ÆÄÀÏ°æ·Î ¸Ê ·Îµå
+	HRESULT Init();					//ê¸°ë³¸	   ë§µ ìƒì„±
+	HRESULT Init(LPCWCH filePath);  //íŒŒì¼ê²½ë¡œ ë§µ ë¡œë“œ
 	void Release();
 
 	bool LoadMap(const LPCWCH filePath);
 	bool SaveMap(const LPCWCH filePath);
-	
-	bool CreateNewMap(int width, int height); //»õ·Î¿î ¸Ê »ı¼º
+	bool CreateNewMap(int width, int height); //ìƒˆë¡œìš´ ë§µ ìƒì„±
 	bool CreateMazeMap(int width, int height);
-	void SetTile(int x, int y, RoomType tileType, int index); //Æ¯Á¤Å¸ÀÔÀÇ Å¸ÀÏ ¼³Á¤
+	HRESULT InitializeTexture();
+	void SetTile(int x, int y, RoomType tileType, int index); //íŠ¹ì •íƒ€ì…ì˜ íƒ€ì¼ ì„¤ì •
 
 	MapData* GetMapData();
 };

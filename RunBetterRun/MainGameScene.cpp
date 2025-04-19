@@ -18,7 +18,8 @@ HRESULT MainGameScene::Init()
 		return E_FAIL;
 	}
 
-	MapManager::GetInstance()->Init();
+	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
+	LoadMapItems(L"Map/EditorMap.dat");
 	SpriteManager::GetInstance()->Init();
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	MonsterManager::GetInstance()->Init();
@@ -133,4 +134,54 @@ void MainGameScene::ApplyShake(HDC hdc)
 	POINT offset = screenShake.GetOffset();
 
 	BitBlt(hdc, offset.x, offset.y, WINSIZE_X, WINSIZE_Y, backBufferDC, 0, 0, SRCCOPY);
+}
+
+void MainGameScene::LoadMapItems(LPCWCH filePath)
+{
+	HANDLE hFile = CreateFile(
+		filePath,GENERIC_READ,0,NULL,
+		OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
+
+	if(hFile == INVALID_HANDLE_VALUE) {
+		return;
+	}
+
+	DWORD bytesRead = 0;
+
+	// 맵 데이터 건너뛰기
+	int mapWidth,mapHeight,tileCount;
+	ReadFile(hFile,&mapWidth,sizeof(int),&bytesRead,NULL);
+	ReadFile(hFile,&mapHeight,sizeof(int),&bytesRead,NULL);
+	ReadFile(hFile,&tileCount,sizeof(int),&bytesRead,NULL);
+
+	// 타일 데이터 건너뛰기
+	SetFilePointer(hFile,sizeof(Room) * tileCount,NULL,FILE_CURRENT);
+
+	// 아이템 개수 읽기
+	int itemCount = 0;
+	ReadFile(hFile,&itemCount,sizeof(int),&bytesRead,NULL);
+
+	// 아이템 위치 정보 읽고 생성
+	for(int i = 0; i < itemCount; i++) {
+		FPOINT pos;
+		ReadFile(hFile,&pos,sizeof(FPOINT),&bytesRead,NULL);
+
+		// Key 아이템 생성
+		ItemManager::GetInstance()->PutItem(new Key(pos));
+	}
+
+	// 몬스터 개수 읽기
+	int monsterCount = 0;
+	ReadFile(hFile,&monsterCount,sizeof(int),&bytesRead,NULL);
+
+	// 몬스터 위치 정보 읽고 생성
+	for(int i = 0; i < monsterCount; i++) {
+		FPOINT pos;
+		ReadFile(hFile,&pos,sizeof(FPOINT),&bytesRead,NULL);
+
+		// Tentacle 몬스터 생성
+		MonsterManager::GetInstance()->PutMonster(new Tentacle(pos));
+	}
+
+	CloseHandle(hFile);
 }

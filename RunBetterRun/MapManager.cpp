@@ -6,14 +6,9 @@ HRESULT MapManager::Init()
 	mapData.height = 24;
 	mapData.width = 24;
 	mapData.tiles.resize(mapData.height * mapData.width);
-	mapData.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/horrorMapTiles.bmp"));
-	if (!mapData.texture)
-		return E_FAIL;
-    mapData.textureTileSize = 128;
-    mapData.textureTileRowSize = 11;
-    mapData.textureTileColumnSize = 11;
+
+	InitializeTexture();
 	// 기본 맵 생성
-	//return CreateNewMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
     return CreateMazeMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
 }
 
@@ -25,7 +20,6 @@ HRESULT MapManager::Init(LPCWCH filePath)
     }
 
     // 로드 실패 시 기본 맵 생성
-    //return CreateNewMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
     return CreateMazeMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
 }
 
@@ -36,76 +30,67 @@ void MapManager::Release()
 
 bool MapManager::LoadMap(const LPCWCH filePath)
 {
-    HANDLE hFile = CreateFile(
-        filePath,           
-        GENERIC_READ,       
-        0,                  
-        NULL,               
-        OPEN_EXISTING,     
-        FILE_ATTRIBUTE_NORMAL, 
-        NULL                
-    );
+	HANDLE hFile = CreateFile(
+		filePath,GENERIC_READ,0,NULL,
+		OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
 
-    if (hFile == INVALID_HANDLE_VALUE)
-    {
-        return false;  // 파일 열기 실패
-    }
+	if(hFile == INVALID_HANDLE_VALUE)
+	{
+		return false;
+	}
 
-    DWORD bytesRead = 0;
+	DWORD bytesRead = 0;
 
-    // 맵 너비 읽기
-    int width;
-    ReadFile(hFile, &width, sizeof(int), &bytesRead, NULL);
-    if (bytesRead != sizeof(int))
-    {
-        CloseHandle(hFile);
-        return false;
-    }
+	// 맵 너비 읽기
+	ReadFile(hFile,&mapData.width,sizeof(int),&bytesRead,NULL);
+	if(bytesRead != sizeof(int))
+	{
+		CloseHandle(hFile);
+		return false;
+	}
 
-    // 맵 높이 읽기
-    int height;
-    ReadFile(hFile, &height, sizeof(int), &bytesRead, NULL);
-    if (bytesRead != sizeof(int))
-    {
-        CloseHandle(hFile);
-        return false;
-    }
+	// 맵 높이 읽기
+	ReadFile(hFile,&mapData.height,sizeof(int),&bytesRead,NULL);
+	if(bytesRead != sizeof(int))
+	{
+		CloseHandle(hFile);
+		return false;
+	}
 
-    // 타일 개수 읽기
-    int tileCount;
-    ReadFile(hFile, &tileCount, sizeof(int), &bytesRead, NULL);
-    if (bytesRead != sizeof(int))
-    {
-        CloseHandle(hFile);
-        return false;
-    }
+	// 타일 개수 읽기
+	int tileCount;
+	ReadFile(hFile,&tileCount,sizeof(int),&bytesRead,NULL);
+	if(bytesRead != sizeof(int))
+	{
+		CloseHandle(hFile);
+		return false;
+	}
 
-    // 데이터 유효성 검사
-    if (width <= 0 || height <= 0 || tileCount != width * height)
-    {
-        CloseHandle(hFile);
-        return false;  
-    }
+	// 데이터 유효성 검사
+	if(mapData.width <= 0 || mapData.height <= 0 || tileCount != mapData.width * mapData.height)
+	{
+		CloseHandle(hFile);
+		return false;
+	}
 
-    // 맵 데이터 초기화
-    mapData.width = width;
-    mapData.height = height;
-    mapData.tiles.resize(tileCount);
+	// 타일 데이터 초기화
+	mapData.tiles.resize(tileCount);
 
-    // 타일 데이터 읽기
-    ReadFile(hFile, mapData.tiles.data(), sizeof(Room) * tileCount, &bytesRead, NULL);
-    if (bytesRead != sizeof(Room) * tileCount)
-    {
-        CloseHandle(hFile);
-        return false;
-    }
+	// 타일 데이터 읽기
+	ReadFile(hFile,mapData.tiles.data(),sizeof(Room) * tileCount,&bytesRead,NULL);
+	if(bytesRead != sizeof(Room) * tileCount)
+	{
+		CloseHandle(hFile);
+		return false;
+	}
 
-    // 플레이어 위치 읽기
+	CloseHandle(hFile);
 
-    CloseHandle(hFile);
-    return true;  
+	// texture 정보 직접 설정
+	static_cast<bool>(InitializeTexture());
+
+	return true;
 }
-
 bool MapManager::SaveMap(const LPCWCH filePath)
 {
     if (mapData.tiles.empty())
@@ -113,7 +98,6 @@ bool MapManager::SaveMap(const LPCWCH filePath)
         return false; 
     }
 
-    // 파일 생성
     HANDLE hFile = CreateFile(
         filePath,           
         GENERIC_WRITE,     
@@ -124,7 +108,6 @@ bool MapManager::SaveMap(const LPCWCH filePath)
         NULL                
     );
 
-    // 파일 생성 실패 확인
     if (hFile == INVALID_HANDLE_VALUE)
     {
         return false;  
@@ -132,23 +115,13 @@ bool MapManager::SaveMap(const LPCWCH filePath)
 
     DWORD bytesWritten = 0;
 
-    // 맵 너비 저장
     WriteFile(hFile, &mapData.width, sizeof(int), &bytesWritten, NULL);
-
-    // 맵 높이 저장
     WriteFile(hFile, &mapData.height, sizeof(int), &bytesWritten, NULL);
-
-    // 타일 개수 저장
     int tileCount = mapData.tiles.size();
     WriteFile(hFile, &tileCount, sizeof(int), &bytesWritten, NULL);
-
-    // 타일 데이터 저장
     WriteFile(hFile, mapData.tiles.data(), sizeof(Room) * tileCount, &bytesWritten, NULL);
-
-    // 플레이어 위치 저장
     //WriteFile(hFile, &playerPos, sizeof(FPOINT), &bytesWritten, NULL);
 
-    // 파일 핸들 닫기
     CloseHandle(hFile);
     return true; 
 }
@@ -240,8 +213,19 @@ void MapManager::SetTile(int x, int y, RoomType tileType, int index)
 {
     if (x >= 0 && x < mapData.width && y >= 0 && y < mapData.height)
     {
-        // 타일 정보 설정
         mapData.tiles[y * mapData.width + x].roomType = tileType;
         mapData.tiles[y * mapData.width + x].tilePos = index;
     }
+}
+
+HRESULT MapManager::InitializeTexture()
+{
+	mapData.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/horrorMapTiles.bmp"));
+	if(!mapData.texture)
+		return E_FAIL;
+	mapData.textureTileSize = 128;
+	mapData.textureTileRowSize = 11;
+	mapData.textureTileColumnSize = 11;
+
+	return S_OK;
 }
