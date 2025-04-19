@@ -8,6 +8,7 @@
 #include "SpriteManager.h"
 #include "MapManager.h"
 #include "MainGameScene.h"
+#include "GameStartScene.h"
 
 HRESULT MainGame::Init()
 {
@@ -16,10 +17,10 @@ HRESULT MainGame::Init()
 	SceneManager::GetInstance()->Init();
 	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
 
-	//SceneManager::GetInstance()->AddScene("타일맵툴", new TilemapTool());
+	SceneManager::GetInstance()->AddScene("MainGameScene",new MainGameScene());
+	SceneManager::GetInstance()->AddScene("GameStartScene",new GameStartScene());
+	SceneManager::GetInstance()->ChangeScene("GameStartScene");
 	//SceneManager::GetInstance()->AddLoadingScene("로딩_1", new LoadingScene());
-	SceneManager::GetInstance()->AddScene("MainGameScene", new MainGameScene());
-	SceneManager::GetInstance()->ChangeScene("MainGameScene");
 
 	hdc = GetDC(g_hWnd);
 
@@ -55,7 +56,7 @@ void MainGame::Release()
 void MainGame::Update()
 {
 	SceneManager::GetInstance()->Update();
-	InvalidateRect(g_hWnd, NULL, false);
+	InvalidateRect(g_hWnd,NULL,false);
 }
 
 void MainGame::Render()

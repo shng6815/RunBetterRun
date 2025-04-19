@@ -33,9 +33,6 @@ public:
 	HRESULT Init();
 	void Release();
 	void Update();
-	//TODO: 길 찾기 알고리즘
-	void FindPlayer(FPOINT monsterPos, FPOINT targetPos, float deletaTime);
-
 
 	//TODO: 적이 플레이어를 잡았을 때의 메소드
 	void CatchPlayer();
