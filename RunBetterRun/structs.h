@@ -2,7 +2,10 @@
 #include "config.h"
 
 enum class RoomType
-{ NONE, WALL, FLOOR, START };
+{ NONE, WALL, FLOOR, START, GOAL };
+
+enum class SpriteType
+{ NONE, KEY, ITEM, MONSTER };
 
 enum class UIType
 {
@@ -44,6 +47,7 @@ typedef struct tagAnimationInfo
 
 typedef struct tagSprite
 {
+	SpriteType		type;
 	FPOINT			pos;
 	float			distance;
 	Texture*		texture;

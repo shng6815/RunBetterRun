@@ -17,6 +17,7 @@ HRESULT MainGameScene::Init()
 	}
 
 	MapManager::GetInstance()->Init();
+	SpriteManager::GetInstance()->Init();
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	MonsterManager::GetInstance()->Init();
 	ItemManager::GetInstance()->Init();

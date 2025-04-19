@@ -14,8 +14,7 @@ HRESULT MainGame::Init()
 {
 	ImageManager::GetInstance()->Init();
 	KeyManager::GetInstance()->Init();
-	SceneManager::GetInstance()->Init(); 
-	SpriteManager::GetInstance()->Init();
+	SceneManager::GetInstance()->Init();
 	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
 
 	SceneManager::GetInstance()->AddScene("MainGameScene",new MainGameScene());

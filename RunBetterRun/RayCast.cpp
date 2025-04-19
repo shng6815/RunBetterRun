@@ -88,14 +88,8 @@ void RayCast::Release(void)
 
 void RayCast::Update(void)
 {
-    float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
-
-    SpriteManager::GetInstance()->UpdatePlayerPosition(Player::GetInstance()->GetCameraPos());
-    SpriteManager::GetInstance()->SortSpritesByDistance();
-
-
     fpsCheckCounter++;
-    fpsCheckTime += deltaTime;
+    fpsCheckTime += TimerManager::GetInstance()->GetDeltaTime();;
 
     if (fpsCheckTime >= 1.0f) {
         currentFPS = fpsCheckCounter;
@@ -340,7 +334,7 @@ void RayCast::RenderCeilingFloor(Ray& ray, int column)
                        weight * floorTextureStartPos.y + (1.0f - weight) * Player::GetInstance()->GetCameraPos().y };
         MapData* md = MapManager::GetInstance()->GetMapData();
         DWORD mapIndex = INT(currentFloor.y) * md->width + INT(currentFloor.x);
-		mapIndex =  min(md->width * md->height - 1,mapIndex);
+		mapIndex = min(md->width * md->height - 1,mapIndex);
         DWORD tileIndex = md->tiles[mapIndex].tilePos;
         FPOINT texture = { INT(currentFloor.x * md->textureTileSize) % md->textureTileSize,
             INT(max(currentFloor.y, 0) * md->textureTileSize) % md->textureTileSize };
