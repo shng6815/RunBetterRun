@@ -7,7 +7,8 @@ class Sprite;
 enum class ItemType
 {
 	NONE,
-	ITEM
+	ITEM,
+	TRIGGER
 };
 
 class Item : public GameObject
@@ -17,9 +18,9 @@ private:
 	ItemType itemType;
 
 public:
-	virtual HRESULT Init();		// ¸â¹ö º¯¼öÀÇ ÃÊ±âÈ­, ¸Ş¸ğ¸® ÇÒ´ç
-	virtual void Release();		// ¸Ş¸ğ¸® ÇØÁ¦
-	virtual void Update();		// ÇÁ·¹ÀÓ ´ÜÀ§·Î °ÔÀÓ ·ÎÁ÷ ½ÇÇà(µ¥ÀÌÅÍ °è»ê)
-	virtual void Render(HDC hdc);	// ÇÁ·¹ÀÓ ´ÜÀ§·Î Ãâ·Â(ÀÌ¹ÌÁö, ÅØ½ºÆ® µî)
+	virtual HRESULT Init();		// ë©¤ë²„ ë³€ìˆ˜ì˜ ì´ˆê¸°í™”, ë©”ëª¨ë¦¬ í• ë‹¹
+	virtual void Release();		// ë©”ëª¨ë¦¬ í•´ì œ
+	virtual void Update();		// í”„ë ˆì„ ë‹¨ìœ„ë¡œ ê²Œì„ ë¡œì§ ì‹¤í–‰(ë°ì´í„° ê³„ì‚°)
+	virtual void Render(HDC hdc);	// í”„ë ˆì„ ë‹¨ìœ„ë¡œ ì¶œë ¥(ì´ë¯¸ì§€, í…ìŠ¤íŠ¸ ë“±)
 };
 
