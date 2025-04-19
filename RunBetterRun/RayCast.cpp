@@ -339,7 +339,8 @@ void RayCast::RenderCeilingFloor(Ray& ray, int column)
         FPOINT currentFloor = { weight * floorTextureStartPos.x + (1.0f - weight) * Player::GetInstance()->GetCameraPos().x,
                        weight * floorTextureStartPos.y + (1.0f - weight) * Player::GetInstance()->GetCameraPos().y };
         MapData* md = MapManager::GetInstance()->GetMapData();
-        DWORD mapIndex = min(md->width * md->height - 1, INT(currentFloor.y) * md->width + INT(currentFloor.x));
+        DWORD mapIndex = INT(currentFloor.y) * md->width + INT(currentFloor.x);
+		mapIndex =  min(md->width * md->height - 1,mapIndex);
         DWORD tileIndex = md->tiles[mapIndex].tilePos;
         FPOINT texture = { INT(currentFloor.x * md->textureTileSize) % md->textureTileSize,
             INT(max(currentFloor.y, 0) * md->textureTileSize) % md->textureTileSize };
