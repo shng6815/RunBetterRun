@@ -18,9 +18,6 @@ public:
     void AddSprite(Sprite& sprite);
     void DeleteSprite(Sprite& sprite);
 
-    void ClearMonsterSprites(LPCWCH path);
     void SortSpritesByDistance();
-    void UpdatePlayerPosition(FPOINT pos) { playerPos = pos; }
-    void UpdateMonsterPosition(LPCWCH path, FPOINT newPos);
     const list<Sprite*>& GetSprites() const { return sprites; }
 };

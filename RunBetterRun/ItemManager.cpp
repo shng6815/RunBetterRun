@@ -9,15 +9,15 @@ HRESULT ItemManager::LoadFile(LPCWCH path)
 
 HRESULT ItemManager::Init(void)
 {
-    texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/jewel.bmp"));
-    if (!texture)
-        return E_FAIL;
-    aniInfo = { 0.1f, 0.1f, {456, 488}, {10, 1}, {0, 0}};
+	keyCount = 0;
+	items.clear();
     return S_OK;
 }
 
 HRESULT ItemManager::Init(LPCWCH path)
 {
+	keyCount = 0;
+	items.clear();
     return S_OK;
 }
 
@@ -31,11 +31,8 @@ void ItemManager::Update(void)
     auto iter = items.begin();
     while (iter != items.end())
     {
-        if ((*iter).distance < 0.1f)
-        {
-            SpriteManager::GetInstance()->DeleteSprite(*iter);
+        if (iter->Update())
             iter = items.erase(iter);
-        }
         else
             iter++;
     }
@@ -43,7 +40,20 @@ void ItemManager::Update(void)
 
 void ItemManager::PutItem(FPOINT pos)
 {
-    Sprite item{ pos, 0, texture, aniInfo };
-    items.push_back(item);
-    SpriteManager::GetInstance()->AddSprite(items.back());
+    items.emplace_back();
+	items.back().Init(pos);
+}
+
+void ItemManager::PushKey(void)
+{
+	++keyCount;
+}
+
+void ItemManager::PopKey(void)
+{
+	if(--keyCount == 0)
+	{
+		keyCount;
+		// Escape Event
+	}
 }

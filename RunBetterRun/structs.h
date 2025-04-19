@@ -4,6 +4,9 @@
 enum class RoomType
 { NONE, WALL, FLOOR, START };
 
+enum class SpriteType
+{ NONE, KEY, ITEM, MONSTER };
+
 enum class UIType
 {
 	NONE, PLAYING, GAMEOVER, PAUSE, TITLE
@@ -44,6 +47,7 @@ typedef struct tagAnimationInfo
 
 typedef struct tagSprite
 {
+	SpriteType		type;
 	FPOINT			pos;
 	float			distance;
 	Texture*		texture;
