@@ -192,8 +192,8 @@ bool MapManager::CreateNewMap(int width, int height)
     int startY = height / 2;
     mapData.tiles[startY * width + startX].roomType = RoomType::START;
     mapData.tiles[startY * width + startX].tilePos = 3;
-
-    return true;  
+	
+	return true;  
 }
 
 bool MapManager::CreateMazeMap(int width, int height) {
@@ -228,6 +228,12 @@ bool MapManager::CreateMazeMap(int width, int height) {
         int y = 2 + rand() % (height - 4);
         SetTile(x, y, RoomType::FLOOR, 10);
     }
+
+	mapData.tiles[21 * width + 18].obstacle = new Obstacle;
+	mapData.tiles[21 * width + 18].obstacle->block = FALSE;
+	mapData.tiles[21 * width + 18].obstacle->dir = Direction::WEST;
+	mapData.tiles[21 * width + 18].obstacle->aniInfo = {0.1f,0.1f,{456,488},{10,1},{0,0}};
+	mapData.tiles[21 * width + 18].obstacle->texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/jewel.bmp"));
 
     return true;
 }

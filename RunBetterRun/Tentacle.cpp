@@ -9,7 +9,7 @@ void Tentacle::Action(void)
 
 void Tentacle::Catch(void)
 {
-	SceneManager::GetInstance()->ChangeScene("LossLifeScene");
+	//SceneManager::GetInstance()->ChangeScene("LossLifeScene");
 }
 
 HRESULT Tentacle::Init(FPOINT pos)

@@ -130,18 +130,33 @@ void RayCast::FillScreen(DWORD start, DWORD end)
     DWORD x = start;
     while (x < end)
     {
-        Ray ray = RayCasting(x);
-        ray.height = fabs(FLOAT(WINSIZE_Y) / ray.distance);
-
+        Ray ray = RayCastingWall(x);
         DWORD endX = min(x + renderScale, end);
         while (x < endX) {
             screenWidthRayDistance[x] = ray.distance;
             RenderWall(ray, x);
             if (ray.height < WINSIZE_Y)
                 RenderCeilingFloor(ray, x);
+
             ++x;
         }
     }
+
+	x = start;
+	while(x < end)
+	{
+		Ray ray = RayCastingObstacle(x);
+		DWORD endX = min(x + renderScale, end);
+		while(x < endX) {
+			if (ray.obstacle && screenWidthRayDistance[x] > ray.distance)
+			{
+				screenWidthRayDistance[x] = ray.distance;
+				RenderObstacle(ray, x);
+			}
+			++x;
+		}
+	}
+
     RenderSprites(start, end);
 }
 
@@ -233,15 +248,89 @@ void RayCast::RenderSprite(const Sprite* sprite, POINT renderX, POINT renderY, F
     }
 }
 
+BOOL RayCast::DetermineHit(POINT pos, Ray& ray)
+{
 
-Ray RayCast::RayCasting(int colume)
+	MapData* md = MapManager::GetInstance()->GetMapData();
+
+	if(pos.x < 0 || md->width <= pos.x || pos.y < 0 || md->height <= pos.y)
+		return TRUE;
+
+	if (ray.side && ray.dir.y < 0)
+	{
+		if (md->tiles[pos.y * md->width + pos.x].obstacle
+			&& md->tiles[pos.y * md->width + pos.x].obstacle->dir == Direction::NORTH)
+		{
+			ray.obstacle = md->tiles[pos.y * md->width + pos.x].obstacle;
+			return TRUE;
+		}
+		else if (pos.y + 1 < md->height &&
+			(md->tiles[(pos.y + 1) * md->width + pos.x].obstacle
+			&& md->tiles[(pos.y + 1) * md->width + pos.x].obstacle->dir == Direction::SOUTH))
+		{
+			ray.obstacle = md->tiles[(pos.y + 1) * md->width + pos.x].obstacle;
+			return TRUE;
+		}
+	}
+	else if(ray.side && ray.dir.y > 0)
+	{
+		if (md->tiles[pos.y * md->width + pos.x].obstacle
+			&& md->tiles[pos.y * md->width + pos.x].obstacle->dir == Direction::SOUTH)
+		{
+			ray.obstacle = md->tiles[pos.y * md->width + pos.x].obstacle;
+			return TRUE;
+		}
+		else if(pos.y > 0 &&
+			(md->tiles[(pos.y - 1) * md->width + pos.x].obstacle
+			&& md->tiles[(pos.y - 1) * md->width + pos.x].obstacle->dir == Direction::NORTH))
+		{
+			ray.obstacle = md->tiles[(pos.y - 1) * md->width + pos.x].obstacle;
+			return TRUE;
+		}
+	}
+	else if(!ray.side && ray.dir.x < 0)
+	{
+		if (md->tiles[pos.y * md->width + pos.x].obstacle
+			&& md->tiles[pos.y * md->width + pos.x].obstacle->dir == Direction::WEST)
+		{
+			ray.obstacle = md->tiles[pos.y * md->width + pos.x].obstacle;
+			return TRUE;
+		}
+		else if (pos.x + 1 < md->width &&
+			(md->tiles[pos.y * md->width + pos.x + 1].obstacle
+			&& md->tiles[pos.y * md->width + pos.x + 1].obstacle->dir ==  Direction::EAST))
+		{
+			ray.obstacle = md->tiles[pos.y * md->width + pos.x + 1].obstacle;
+			return TRUE;
+		}
+	}
+	else if(!ray.side && ray.dir.x > 0)
+	{
+		if (md->tiles[pos.y * md->width + pos.x].obstacle
+			&& md->tiles[pos.y * md->width + pos.x].obstacle->dir == Direction::EAST)
+		{
+			ray.obstacle = md->tiles[pos.y * md->width + pos.x].obstacle;
+			return TRUE;
+		}
+		else if(pos.x > 0 &&
+			(md->tiles[pos.y * md->width + pos.x - 1].obstacle
+			&& md->tiles[pos.y * md->width + pos.x - 1].obstacle->dir == Direction::WEST))
+		{
+			ray.obstacle = md->tiles[pos.y * md->width + pos.x - 1].obstacle;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+Ray RayCast::RayCastingWall(int column)
 {
     bool    hit = false;
     bool    nextSide = false;
     Ray     ray(Player::GetInstance()->GetCameraPos(),
                 Player::GetInstance()->GetPlane(),
                 Player::GetInstance()->GetCameraVerDir(),
-                screenWidthPixelUnitPos[colume]);
+                screenWidthPixelUnitPos[column]);
     MapData* md = MapManager::GetInstance()->GetMapData();
 
     while (!hit)
@@ -257,25 +346,60 @@ Ray RayCast::RayCasting(int colume)
         int x = INT(ray.mapPos.x);
         int y = INT(ray.mapPos.y);
 
-        if (x < 0 || md->width <= x || y < 0 || md->height <= y)
-            break;
-        int map_index = y * md->width + x;
-        if (md->tiles[y * md->width + x].roomType != RoomType::FLOOR)
-            hit = true;
+		if (md->tiles[y * md->width + x].roomType == RoomType::WALL)
+			hit = TRUE;
     }
 
     float pos;
     if (ray.side)
     {
-        pos = (ray.mapPos.y - Player::GetInstance()->GetCameraPos().y + (1.0f - ray.step.y) / 2.0f);
+        pos = (ray.mapPos.y - ray.pos.y + (1.0f - ray.step.y) / 2.0f);
         ray.distance = fabs(pos / ray.dir.y);
     }
     else
     {
-        pos = (ray.mapPos.x - Player::GetInstance()->GetCameraPos().x + (1.0f - ray.step.x) / 2.0f);
+        pos = (ray.mapPos.x - ray.pos.x + (1.0f - ray.step.x) / 2.0f);
         ray.distance = fabs(pos / ray.dir.x);
     }
+
+	ray.height = fabs(FLOAT(WINSIZE_Y) / ray.distance);
     return ray;
+}
+
+Ray RayCast::RayCastingObstacle(int column)
+{
+	bool    hit = false;
+	bool    nextSide = false;
+	Ray     obsRay(Player::GetInstance()->GetCameraPos(),
+				Player::GetInstance()->GetPlane(),
+				Player::GetInstance()->GetCameraVerDir(),
+				screenWidthPixelUnitPos[column]);
+
+	while(!hit)
+	{
+		nextSide = obsRay.sideDist.x < obsRay.sideDist.y;
+		obsRay.sideDist.x += nextSide * obsRay.deltaDist.x;
+		obsRay.mapPos.x += nextSide * obsRay.step.x;
+		obsRay.sideDist.y += (!nextSide) * obsRay.deltaDist.y;
+		obsRay.mapPos.y += (!nextSide) * obsRay.step.y;
+		obsRay.side = !nextSide;
+
+		hit = DetermineHit({INT(obsRay.mapPos.x), INT(obsRay.mapPos.y)},obsRay);
+	}
+	float pos;
+
+	if(obsRay.side)
+	{
+		pos = (obsRay.mapPos.y - obsRay.pos.y + (1.0f - obsRay.step.y) / 2.0f);
+		obsRay.distance = fabs(pos / obsRay.dir.y);
+	} else
+	{
+		pos = (obsRay.mapPos.x - obsRay.pos.x + (1.0f - obsRay.step.x) / 2.0f);
+		obsRay.distance = fabs(pos / obsRay.dir.x);
+	}
+
+	obsRay.height = fabs(FLOAT(WINSIZE_Y) / obsRay.distance);
+	return obsRay;
 }
 
 
@@ -313,6 +437,50 @@ void RayCast::RenderWall(Ray& ray, int column)
             RenderPixel(pixel, GetDistanceShadeColor(tile, texture, ray.distance));
         }
     }
+}
+
+void RayCast::RenderObstacle(Ray& ray, int column)
+{
+	FPOINT pixel = {column ,max(0,WINSIZE_Y / 2.0f - (ray.height / 2.0f))};
+
+	if(ray.side)
+		ray.wallTextureX = ray.pos.x
+		+ ray.distance
+		* ray.dir.x;
+	else
+		ray.wallTextureX = ray.pos.y
+		+ ray.distance
+		* ray.dir.y;
+	ray.wallTextureX -= INT(ray.wallTextureX);
+
+	Obstacle* obstacle = ray.obstacle;
+	Texture* texture = obstacle->texture;
+	FPOINT texturePos= {INT(ray.wallTextureX * obstacle->aniInfo.frameSize.x), 0.0f};
+
+	if((ray.side == 0 && ray.dir.x > 0.0f)
+		|| (ray.side == 1 && ray.dir.y < 0.0f))
+		texturePos.x = obstacle->aniInfo.frameSize.x - texturePos.x - 1.0f;
+
+	texturePos.x += obstacle->aniInfo.frameSize.x * obstacle->aniInfo.currentFrame.x;
+	int y = max(0, WINSIZE_Y / 2 - INT(ray.height / 2.0f));
+	int end = min(WINSIZE_Y, y + ray.height);
+	while(y < end)
+	{
+		texturePos.y = INT((y * 2.0f - WINSIZE_Y + ray.height)
+			* ((obstacle->aniInfo.frameSize.y / 2.0f) / ray.height));
+		texturePos.y += obstacle->aniInfo.frameSize.y * obstacle->aniInfo.currentFrame.y;
+		COLORREF color = texture->bmp[texturePos.y * texture->bmpWidth + texturePos.x];
+		if(color != 0x00FF00FF)
+		{
+			int endY = min(y + renderScale,end);
+			while(y < endY)
+			{
+				pixel.y = y++;
+				RenderPixel(pixel,GetDistanceShadeColor(color,ray.distance,SHADE_VALUE));
+			}
+		} else
+			++y;
+	}
 }
 
 void RayCast::RenderCeilingFloor(Ray& ray, int column)
@@ -418,9 +586,9 @@ int RayCast::GetRenderScaleBasedOnFPS(void)
 Ray::tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX)
 {
     this->pos = pos;
+	obstacle = nullptr;
     mapPos = { FLOAT(INT(pos.x)), FLOAT(INT(pos.y)) };
-    dir = { Player::GetInstance()->GetCameraVerDir().x + Player::GetInstance()->GetPlane().x * cameraX,
-        Player::GetInstance()->GetCameraVerDir().y + Player::GetInstance()->GetPlane().y * cameraX };
+    dir = {cameraDir.x + plane.x * cameraX, cameraDir.y + plane.y * cameraX };
     deltaDist = { fabs(1.0f / dir.x), fabs(1.0f / dir.y) };
     if (dir.x < 0)
     {

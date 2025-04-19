@@ -8,7 +8,7 @@ HRESULT LoadingScene::Init()
 		L"horrorloading/horror_loading7.bmp", WINSIZE_X, WINSIZE_Y);
 
 	loadingTime = 0.0f;
-	minLoadingTime = 3.0f;
+	minLoadingTime = 0.0f;
 	isLoadingComplete = false;
 
 	return S_OK;

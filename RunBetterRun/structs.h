@@ -1,32 +1,21 @@
 #pragma once
 #include "config.h"
 
-enum class RoomType
+enum class RoomType: BYTE
 { NONE, WALL, FLOOR, START, GOAL };
 
-enum class SpriteType
+enum class Direction: BYTE
+{
+	NORTH, SOUTH, WEST, EAST
+};
+
+enum class SpriteType: BYTE
 { NONE, KEY, ITEM, MONSTER };
 
-enum class UIType
+enum class UIType: BYTE
 {
 	NONE, PLAYING, GAMEOVER, PAUSE, TITLE
 };
-
-typedef struct tagRoom
-{
-	RoomType	roomType;
-	DWORD		tilePos;
-	tagRoom() :roomType(RoomType::FLOOR), tilePos(1) {}
-} Room;
-
-typedef struct tagLevel
-{
-	FPOINT	mosterPos;
-	FPOINT	cameraDir;
-	FPOINT	cameraPos;
-	DWORD	itemCount;
-	DWORD	monsterCount;
-} Level;
 
 typedef struct tagTexture
 {
@@ -44,6 +33,33 @@ typedef struct tagAnimationInfo
 	POINT	currentFrame;
 
 } AnimationInfo;
+
+typedef struct tagObstacle
+{
+	BOOL			block;
+	Direction		dir;
+	Texture*		texture;
+	AnimationInfo	aniInfo;
+} Obstacle;
+
+typedef struct tagRoom
+{
+	RoomType	roomType;
+	DWORD		tilePos;
+	Obstacle*	obstacle;
+	tagRoom() :roomType(RoomType::FLOOR),
+		tilePos(1), obstacle(nullptr) {}
+} Room;
+
+typedef struct tagLevel
+{
+	FPOINT	mosterPos;
+	FPOINT	cameraDir;
+	FPOINT	cameraPos;
+	DWORD	itemCount;
+	DWORD	monsterCount;
+} Level;
+
 
 typedef struct tagSprite
 {
@@ -66,7 +82,7 @@ typedef struct tagRay
 	FPOINT		deltaDist;
 	FPOINT		step;
 	float		wallTextureX;
-
+	Obstacle*	obstacle;
 	tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX);
 } Ray;
 

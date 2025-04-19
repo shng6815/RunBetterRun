@@ -51,8 +51,10 @@ private:
 	float	screenWidthRayDistance[WINSIZE_X];
 	float	screenHeightPixelDepths[WINSIZE_Y];
 
-	Ray RayCasting(int column);
+	Ray RayCastingWall(int column);
+	Ray RayCastingObstacle(int column);
 	void RenderWall(Ray& ray, int column);
+	void RenderObstacle(Ray & ray,int column);
 	void RenderCeilingFloor(Ray& ray, int column);
 	void RenderCeilingFloor(Ray& ray, int column, COLORREF ceiling, COLORREF floor);
 	void RenderPixel(FPOINT pixel, int color);
@@ -60,6 +62,7 @@ private:
 	COLORREF GetDistanceShadeColor(COLORREF color, float distance, float shade);
 	void RenderSprites(DWORD start, DWORD end);
 	void RenderSprite(const Sprite* sprite, POINT renderX, POINT renderY, FPOINT transform);
+	BOOL DetermineHit(POINT pos,Ray & ray);
 	int GetRenderScaleBasedOnFPS(void);
 
 public:
