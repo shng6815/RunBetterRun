@@ -27,7 +27,6 @@ HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 	stepTime = 0.5f;
 	runTime = 0.3f;
 
-	// ī�޶� ����
 	this->shakeFunc = shakeFunc;
 
 	return S_OK;

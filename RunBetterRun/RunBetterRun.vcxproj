@@ -137,6 +137,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainGame.cpp" />
     <ClCompile Include="MainGameScene.cpp" />
+    <ClCompile Include="MinimapUI.cpp" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="PhoneUI.cpp" />
     <ClCompile Include="MonsterManager.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="LoadingScene.h" />
     <ClInclude Include="MainGame.h" />
     <ClInclude Include="MainGameScene.h" />
+    <ClInclude Include="MinimapUI.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="MonsterManager.h" />
     <ClInclude Include="PhoneUI.h" />

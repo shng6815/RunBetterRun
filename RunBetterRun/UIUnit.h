@@ -17,7 +17,7 @@ public:
 
 protected:
 	UIType uiType;
-	//vector<UIUnit*> uiUnits;
+	vector<UIUnit*> uiUnits;
 	FPOINT pos;
 	FPOINT size;
 	INT layer;

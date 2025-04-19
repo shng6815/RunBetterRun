@@ -24,7 +24,7 @@ HRESULT MainGameScene::Init()
 	UIManager::GetInstance()->Init();
 	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
 	PhoneUI* uiUnit = new PhoneUI();
-	uiUnit->Init(UIType::PLAYING, FPOINT{ 300, WINSIZE_Y - 400 }, FPOINT{ 250, 250 }, 0);
+	uiUnit->Init(UIType::PLAYING, FPOINT{ 200, WINSIZE_Y - 400 }, FPOINT{ 200, 200 }, 0);
 	UIManager::GetInstance()->AddUIUnit("PhoneUI", uiUnit);
 
 	status = SceneStatus::IN_GAME;
@@ -40,7 +40,6 @@ HRESULT MainGameScene::Init()
 	ReleaseDC(g_hWnd, screenDC);
 
 	ItemManager::GetInstance()->PutItem({ 21.5, 10.5 });
-
 
 	return S_OK;
 }
@@ -115,7 +114,6 @@ void MainGameScene::Render(HDC hdc)
 
 	ApplyShake(hdc);
 
-	// 3. UI ������
 	UIManager::GetInstance()->Render(hdc);
 }
 

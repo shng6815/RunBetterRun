@@ -93,6 +93,9 @@
     <ClCompile Include="PhoneUI.cpp">
       <Filter>SHY</Filter>
     </ClCompile>
+    <ClCompile Include="MinimapUI.cpp">
+      <Filter>SHY</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h">
@@ -174,6 +177,9 @@
       <Filter>SHY</Filter>
     </ClInclude>
     <ClInclude Include="PhoneUI.h">
+      <Filter>SHY</Filter>
+    </ClInclude>
+    <ClInclude Include="MinimapUI.h">
       <Filter>SHY</Filter>
     </ClInclude>
   </ItemGroup>
