@@ -3,6 +3,7 @@
 #include "TextureManager.h"
 #include "Player.h"
 #include "MapManager.h"
+#include "SceneManager.h"
 #include <cmath>
 
 HRESULT MonsterManager::Init()
@@ -22,6 +23,7 @@ void MonsterManager::Release()
 
 void MonsterManager::Update()
 {
+    // 플레이어 위치 업데이트
     playerPos = Player::GetInstance()->GetCameraPos();
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
 
@@ -202,3 +204,12 @@ MonsterManager::PathNode* MonsterManager::GetNodeFromList(vector<PathNode*>& lis
 	}
 	return nullptr;
 }
+
+FPOINT MonsterManager::Move(FPOINT src, FPOINT dst)
+{
+    float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
+    FPOINT move = { dst.x - src.x, dst.y - src.y };
+    return { src.x + (move.x * MONSTER_SPEED * deltaTime),
+		src.y + (move.y * MONSTER_SPEED * deltaTime) };
+}
+

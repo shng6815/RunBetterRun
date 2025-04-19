@@ -41,5 +41,7 @@ public:
 	int CalculateHeuristic(int x1, int y1, int x2, int y2);
 	bool IsNodeInList(const vector<PathNode*>& list, int x, int y);
 	PathNode* GetNodeFromList(vector<PathNode*>& list, int x, int y);
+	FPOINT Move(FPOINT src, FPOINT dst);
+	void Reset();
 };
 

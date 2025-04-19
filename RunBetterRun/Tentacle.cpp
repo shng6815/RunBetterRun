@@ -9,7 +9,7 @@ void Tentacle::Action(void)
 
 void Tentacle::Catch(void)
 {
-	//MessageBox(g_hWnd, TEXT("YOU ARE DEAD"),TEXT("Run Better Run"),MB_OK);
+	SceneManager::GetInstance()->ChangeScene("LossLifeScene");
 }
 
 HRESULT Tentacle::Init(FPOINT pos)
@@ -23,6 +23,6 @@ HRESULT Tentacle::Init(FPOINT pos)
 	sprite.aniInfo = {0,0,{423,437},{1,1},{0,0}};
 	SpriteManager::GetInstance()->AddSprite(sprite);
 	targetPosition = pos;
-	speed = 2.2f;
+	speed = 0.5f;
 	return S_OK;
 }

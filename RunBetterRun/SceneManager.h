@@ -24,5 +24,7 @@ public:
 
 	GameObject* AddScene(string key, GameObject* scene);
 	GameObject* AddLoadingScene(string key, GameObject* scene);
+
+	void LoadingComplete();
 };
 

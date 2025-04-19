@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Button.cpp" />
+    <ClCompile Include="DeadScene.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameStartScene.cpp" />
     <ClCompile Include="Image.cpp" />
@@ -137,6 +138,7 @@
     <ClCompile Include="Key.cpp" />
     <ClCompile Include="KeyManager.cpp" />
     <ClCompile Include="LoadingScene.cpp" />
+    <ClCompile Include="LossLifeScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainGame.cpp" />
     <ClCompile Include="MainGameScene.cpp" />
@@ -160,6 +162,7 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="CommonFunction.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="DeadScene.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameStartScene.h" />
     <ClInclude Include="Image.h" />
@@ -169,6 +172,7 @@
     <ClInclude Include="Key.h" />
     <ClInclude Include="KeyManager.h" />
     <ClInclude Include="LoadingScene.h" />
+    <ClInclude Include="LossLifeScene.h" />
     <ClInclude Include="MainGame.h" />
     <ClInclude Include="MainGameScene.h" />
     <ClInclude Include="AMonster.h" />
