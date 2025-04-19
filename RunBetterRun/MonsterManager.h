@@ -1,7 +1,7 @@
 #pragma once
 #include "Singleton.h"
 #include "config.h"
-#include "Monster.h"
+#include "AMonster.h"
 #include "MapManager.h"
 #include <vector>
 
@@ -25,8 +25,7 @@ private:
 
 private:
 	FPOINT playerPos;
-	vector<Monster> monsters;
-	bool isCatchPlayer;
+	vector<AMonster*> monsters;
 	MapData* mapData;
 
 public:
@@ -34,28 +33,13 @@ public:
 	void Release();
 	void Update();
 
-	//TODO: 적이 플레이어를 잡았을 때의 메소드
-	void CatchPlayer();
-
-	//TODO:
-	void SetisCatchPlayer(bool SetisCatchPlayer) { this->isCatchPlayer = isCatchPlayer; }
-	bool GetisCatchPlayer() { return this->isCatchPlayer; }
-
 	// 몬스터 생성 및 관리
-	Monster &CreateMonster(FPOINT position, float speed = 0.5f);
-	void RemoveMonster(int index);
-	void RemoveAllMonsters();
-
-	// 간단한 경로 찾기 (직선 이동)
-	FPOINT GetDirectionToPlayer(const FPOINT& monsterPos);
-	bool CanMoveToPosition(const FPOINT& pos);
+	void PutMonster(AMonster* monster);
 
 	// TODO: Astar
 	vector<FPOINT> FindPath(FPOINT start, FPOINT end);
 	int CalculateHeuristic(int x1, int y1, int x2, int y2);
 	bool IsNodeInList(const vector<PathNode*>& list, int x, int y);
 	PathNode* GetNodeFromList(vector<PathNode*>& list, int x, int y);
-
-	FPOINT Move(FPOINT src, FPOINT dst);
 };
 
