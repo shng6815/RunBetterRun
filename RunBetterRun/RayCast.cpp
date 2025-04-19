@@ -88,14 +88,8 @@ void RayCast::Release(void)
 
 void RayCast::Update(void)
 {
-    float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
-
-    SpriteManager::GetInstance()->UpdatePlayerPosition(Player::GetInstance()->GetCameraPos());
-    SpriteManager::GetInstance()->SortSpritesByDistance();
-
-
     fpsCheckCounter++;
-    fpsCheckTime += deltaTime;
+    fpsCheckTime += TimerManager::GetInstance()->GetDeltaTime();;
 
     if (fpsCheckTime >= 1.0f) {
         currentFPS = fpsCheckCounter;
