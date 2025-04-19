@@ -3,11 +3,11 @@
 #include "config.h"
 #include "MainGame.h"
 
-HINSTANCE g_hInstance;	// ÇÁ·Î±×·¥ ÀÎ½ºÅÏ½º ÇÚµé
+HINSTANCE g_hInstance;	// í”„ë¡œê·¸ë¨ ì¸ìŠ¤í„´ìŠ¤ í•¸ë“¤
 HWND g_hWnd;
 LPCWSTR g_lpszClassName = (LPCWSTR)TEXT("RayCast");
 MainGame g_mainGame;
-POINT g_ptMouse;	// ¸¶¿ì½º ÁÂÇ¥
+POINT g_ptMouse;	// ë§ˆìš°ìŠ¤ ì¢Œí‘œ
 
 // Init
 
@@ -51,7 +51,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 
 
-	//// À©µµ¿ì¸¦ »ı¼ºÇÏ±â À§ÇÑ µ¥ÀÌÅÍ ¼ÂÆÃ
+	//// ìœˆë„ìš°ë¥¼ ìƒì„±í•˜ê¸° ìœ„í•œ ë°ì´í„° ì…‹íŒ…
 	//WNDCLASS wndClass;
 	//wndClass.cbClsExtra = 0;
 	//wndClass.cbWndExtra = 0;
@@ -59,10 +59,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	//wndClass.hCursor = LoadCursor(g_hInstance, IDC_ARROW);
 	//wndClass.hIcon = LoadIcon(g_hInstance, IDI_APPLICATION);
 	//wndClass.hInstance = g_hInstance;
-	//wndClass.lpfnWndProc = WndProc;		// ÇÔ¼öÀÇ ÀÌ¸§Àº ¸Ş¸ğ¸®ÁÖ¼ÒÀÌ´Ù.
+	//wndClass.lpfnWndProc = WndProc;		// í•¨ìˆ˜ì˜ ì´ë¦„ì€ ë©”ëª¨ë¦¬ì£¼ì†Œì´ë‹¤.
 	//wndClass.lpszClassName = g_lpszClassName;
 	//wndClass.lpszMenuName = NULL;
-	//wndClass.style = CS_HREDRAW | CS_VREDRAW;	// | : ºñÆ®¿¬»êÀÚ
+	//wndClass.style = CS_HREDRAW | CS_VREDRAW;	// | : ë¹„íŠ¸ì—°ì‚°ì
 
 	//RegisterClass(&wndClass);
 	RegisterClassEx(&wndClass);
