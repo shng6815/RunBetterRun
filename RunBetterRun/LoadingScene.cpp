@@ -4,7 +4,7 @@
 
 HRESULT LoadingScene::Init()
 {
-	bg = ImageManager::GetInstance()->AddImage("loading",
+	bg = ImageManager::GetInstance()->AddImage("loadingImage",
 		L"horrorloading/horror_loading7.bmp", WINSIZE_X, WINSIZE_Y);
 
 	loadingTime = 0.0f;

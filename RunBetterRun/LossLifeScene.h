@@ -1,8 +1,13 @@
 #pragma once
 
 #include "GameObject.h"
+
+class Image;
 class LossLifeScene : public GameObject
 {
+private:
+	Image* bg;
+	float delayTime;
 
 public:
 	virtual HRESULT Init() override;

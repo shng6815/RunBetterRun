@@ -3,6 +3,7 @@
 #include "TextureManager.h"
 #include "Player.h"
 #include "MapManager.h"
+#include "SceneManager.h"
 #include <cmath>
 
 HRESULT MonsterManager::Init()
@@ -80,6 +81,7 @@ void MonsterManager::Update()
 
 			// 플레이어 잡힐 때 이번트 발생 - 나중 필요
 			SetisCatchPlayer(true);
+			SceneManager::GetInstance()->ChangeScene("LossLifeScene");
 			//PostQuitMessage(0);
         }
         else {
@@ -327,4 +329,16 @@ FPOINT MonsterManager::Move(FPOINT src, FPOINT dst)
     FPOINT move = { dst.x - src.x, dst.y - src.y };
     return { src.x + (move.x * MONSTER_SPEED * deltaTime),
 		src.y + (move.y * MONSTER_SPEED * deltaTime) };
+}
+
+void MonsterManager::Reset()
+{
+	// 모든 몬스터 제거
+	for(auto& monster : monsters)
+	{
+		monster.Release();
+	}
+	monsters.clear();
+
+	Init();
 }

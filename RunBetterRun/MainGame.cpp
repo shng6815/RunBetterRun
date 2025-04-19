@@ -9,6 +9,7 @@
 #include "MapManager.h"
 #include "MainGameScene.h"
 #include "GameStartScene.h"
+#include "LossLifeScene.h"
 
 HRESULT MainGame::Init()
 {
@@ -19,6 +20,7 @@ HRESULT MainGame::Init()
 
 	SceneManager::GetInstance()->AddScene("MainGameScene",new MainGameScene());
 	SceneManager::GetInstance()->AddScene("GameStartScene",new GameStartScene());
+	SceneManager::GetInstance()->AddScene("LossLifeScene",new LossLifeScene());
 	SceneManager::GetInstance()->AddLoadingScene("LoadingScene",new LoadingScene());
 	SceneManager::GetInstance()->ChangeScene("GameStartScene");
 

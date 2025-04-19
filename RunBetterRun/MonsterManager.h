@@ -57,5 +57,7 @@ public:
 	PathNode* GetNodeFromList(vector<PathNode*>& list, int x, int y);
 
 	FPOINT Move(FPOINT src, FPOINT dst);
+
+	void Reset();
 };
 
