@@ -1,14 +1,15 @@
 #include "GameStartScene.h"
 #include "SceneManager.h"
-
+#include "MapManager.h"
 
 HRESULT GameStartScene::Init()
 {
 	titleText = TEXT("HorrorGame");
 	InitButtons();
+	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
 	while(ShowCursor(TRUE) < 0);
 	return S_OK;
-}
+} 
 
 void GameStartScene::Release()
 {
@@ -138,7 +139,7 @@ void GameStartScene::HandleButtonClick(Button & button)
 		break;
 	
 	case ButtonType::MAP_EDITOR:
-		SceneManager::GetInstance()->ChangeScene("MapEditerScene");
+		SceneManager::GetInstance()->ChangeScene("MapEditorScene");
 		break;
 	case ButtonType::EXIT:
 		DestroyWindow(g_hWnd);	

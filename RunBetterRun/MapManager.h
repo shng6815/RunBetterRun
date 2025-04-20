@@ -2,8 +2,8 @@
 #include "Singleton.h"
 #include "structs.h"
 
-#define MAP_COLUME 24
-#define MAP_ROW 24
+#define MAP_COLUME 100
+#define MAP_ROW 100
 
 class MapManager : public Singleton<MapManager>
 {
@@ -20,6 +20,7 @@ public:
 	bool CreateNewMap(int width, int height); //새로운 맵 생성
 	bool CreateMazeMap(int width, int height);
 	HRESULT InitializeTexture();
+	//HRESULT InitializeTexture(Texture* texture);
 	void SetTile(int x, int y, RoomType tileType, int index); //특정타입의 타일 설정
 
 	MapData* GetMapData();
