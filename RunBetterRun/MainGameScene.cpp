@@ -94,7 +94,7 @@ void MainGameScene::Update()
 		if (rayCasting)
 			rayCasting->Update();
 		SpriteManager::GetInstance()->SortSpritesByDistance();
-		MonsterManager::GetInstance()->Update();
+		//MonsterManager::GetInstance()->Update();
 		ItemManager::GetInstance()->Update();
 		//UIManager::GetInstance()->Update();
 		break;

@@ -299,20 +299,40 @@ void RayCast::RenderWall(Ray& ray, int column)
         || (ray.side == 1 && ray.dir.y < 0.0f))
         texture.x = md->textureTileSize - texture.x - 1.0f;
 
-    int tile = md->tiles[INT(ray.mapPos.y) * md->width + INT(ray.mapPos.x)].tilePos;
-    int y = max(0, WINSIZE_Y / 2 - INT(ray.height / 2.0f));
-	int end = min(WINSIZE_Y, y + ray.height);
-    while (y < end)
-    {
-        texture.y = INT((y * 2.0f - WINSIZE_Y + ray.height)
-            * ((md->textureTileSize / 2.0f) / ray.height));
-        int endY = min(y + renderScale, end);
-        while (y < endY)
-        {
-            pixel.y = y++;
-            RenderPixel(pixel, GetDistanceShadeColor(tile, texture, ray.distance));
-        }
-    }
+	int mapX = INT(ray.mapPos.x);
+	int mapY = INT(ray.mapPos.y);
+	if (mapX < 0 || md->width <= mapX || mapY < 0 || md->height <= mapY)
+	{
+		COLORREF black = 0;
+		int y = max(0,WINSIZE_Y / 2 - INT(ray.height / 2.0f));
+		int end = min(WINSIZE_Y,y + ray.height);
+		while(y < end)
+		{
+			int endY = min(y + renderScale,end);
+			while(y < endY)
+			{
+				pixel.y = y++;
+				RenderPixel(pixel,GetDistanceShadeColor(black,ray.distance, SHADE_VALUE));
+			}
+		}
+	}
+	else
+	{
+		int tile = md->tiles[INT(ray.mapPos.y) * md->width + INT(ray.mapPos.x)].tilePos;
+		int y = max(0,WINSIZE_Y / 2 - INT(ray.height / 2.0f));
+		int end = min(WINSIZE_Y,y + ray.height);
+		while(y < end)
+		{
+			texture.y = INT((y * 2.0f - WINSIZE_Y + ray.height)
+				* ((md->textureTileSize / 2.0f) / ray.height));
+			int endY = min(y + renderScale,end);
+			while(y < endY)
+			{
+				pixel.y = y++;
+				RenderPixel(pixel,GetDistanceShadeColor(tile,texture,ray.distance));
+			}
+		}
+	}
 }
 
 void RayCast::RenderCeilingFloor(Ray& ray, int column)
