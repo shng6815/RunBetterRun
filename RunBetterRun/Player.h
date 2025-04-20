@@ -6,14 +6,15 @@
 typedef class Player : public Singleton<Player>
 {
 public:
-	virtual HRESULT Init(function<void(float, float, bool)> shakeFunc);                   // ¸â¹ö º¯¼öÀÇ ÃÊ±âÈ­, ¸Ş¸ğ¸® ÇÒ´ç
-	virtual void Release();                   // ¸Ş¸ğ¸® ÇØÁ¦
-	virtual void Update();                    // ÇÁ·¹ÀÓ ´ÜÀ§·Î °ÔÀÓ ·ÎÁ÷ ½ÇÇà(µ¥ÀÌÅÍ °è»ê)
-	virtual void Render(HDC hdc);             // ÇÁ·¹ÀÓ ´ÜÀ§·Î Ãâ·Â(ÀÌ¹ÌÁö, ÅØ½ºÆ® µî)
+	virtual HRESULT Init(function<void(float, float, bool)> shakeFunc);                   // ë©¤ë²„ ë³€ìˆ˜ì˜ ì´ˆê¸°í™”, ë©”ëª¨ë¦¬ í• ë‹¹
+	virtual void Release();                   // ë©”ëª¨ë¦¬ í•´ì œ
+	virtual void Update();                    // í”„ë ˆì„ ë‹¨ìœ„ë¡œ ê²Œì„ ë¡œì§ ì‹¤í–‰(ë°ì´í„° ê³„ì‚°)
+	virtual void Render(HDC hdc);             // í”„ë ˆì„ ë‹¨ìœ„ë¡œ ì¶œë ¥(ì´ë¯¸ì§€, í…ìŠ¤íŠ¸ ë“±)
 
 	void KeyInput(void);
 	void MouseInput(void);
 	void MoveCamera(float deltaTime);
+	void Move(FPOINT pos);
 	void RotateCamera(float deltaTime);
 	void UpdateFOV();
 
@@ -22,28 +23,28 @@ public:
 	FPOINT GetPlane() { return plane; }
 
 private:
-	FPOINT cameraPos;                         // Ä«¸Ş¶ó À§Ä¡
-	FPOINT cameraVerDir;                      // Ä«¸Ş¶ó ¹æÇâ
-	FPOINT cameraHorDir;                      // Ä«¸Ş¶ó ¼öÁ÷ ¹æÇâ
-	FPOINT plane;                             // Ä«¸Ş¶ó Æò¸é
+	FPOINT cameraPos;                         // ì¹´ë©”ë¼ ìœ„ì¹˜
+	FPOINT cameraVerDir;                      // ì¹´ë©”ë¼ ë°©í–¥
+	FPOINT cameraHorDir;                      // ì¹´ë©”ë¼ ìˆ˜ì§ ë°©í–¥
+	FPOINT plane;                             // ì¹´ë©”ë¼ í‰ë©´
 
-	FPOINT moveInput;                         // Ä«¸Ş¶ó ÀÌµ¿ ¹æÇâ
-	FLOAT moveSpeed;                          // Ä«¸Ş¶ó ÀÌµ¿ ¼Óµµ
-	FLOAT stepElapsedTime;                   // Ä«¸Ş¶ó ÀÌµ¿ ½Ã°£
-	FLOAT stepTime;                           // Ä«¸Ş¶ó ÀÌµ¿ ½Ã°£
-	FLOAT runTime;                           // Ä«¸Ş¶ó ÀÌµ¿ ½Ã°£
+	FPOINT moveInput;                         // ì¹´ë©”ë¼ ì´ë™ ë°©í–¥
+	FLOAT moveSpeed;                          // ì¹´ë©”ë¼ ì´ë™ ì†ë„
+	FLOAT stepElapsedTime;                   // ì¹´ë©”ë¼ ì´ë™ ì‹œê°„
+	FLOAT stepTime;                           // ì¹´ë©”ë¼ ì´ë™ ì‹œê°„
+	FLOAT runTime;                           // ì¹´ë©”ë¼ ì´ë™ ì‹œê°„
 
 	FLOAT runSpeed;
 	FLOAT defaultSpeed;
 
-	FPOINT rotate;                            // Ä«¸Ş¶ó È¸Àü
-	FLOAT rotateSpeed;                        // Ä«¸Ş¶ó È¸Àü ¼Óµµ
+	FPOINT rotate;                            // ì¹´ë©”ë¼ íšŒì „
+	FLOAT rotateSpeed;                        // ì¹´ë©”ë¼ íšŒì „ ì†ë„
 
-	float fov;                                // ½Ã¾ß°¢
+	float fov;                                // ì‹œì•¼ê°
 	float targetFOV;
 	float fovLerpSpeed = 5.0f;
 
-	// Ä«¸Ş¶ó Èçµé±â
+	// ì¹´ë©”ë¼ í”ë“¤ê¸°
 	function<void(float, float, bool)> shakeFunc;
 	void Save();
 	void Load();

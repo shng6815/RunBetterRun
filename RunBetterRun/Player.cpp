@@ -137,16 +137,83 @@ void Player::MoveCamera(float deltaTime)
         pos.x += (moveLeft ? -1 : 1) * (cameraHorDir.x * moveSpeed * deltaTime);
         pos.y += (moveLeft ? -1 : 1) * (cameraHorDir.y * moveSpeed * deltaTime);
     }
+	
+	Move(pos);
+}
 
+void Player::Move(FPOINT pos)
+{
+	int x = INT(pos.x);
+	int y = INT(pos.y);
+	BOOL result = FALSE;
+	MapData* md = MapManager::GetInstance()->GetMapData();
 
-    int x = INT(pos.x);
-    int y = INT(pos.y);
-    MapData* md = MapManager::GetInstance()->GetMapData();
-    if ((0 <= x && x < md->width && 0 <= y && y < md->height)
-        && md->tiles[y * md->width + x].roomType == RoomType::FLOOR)
-    {
-        cameraPos = pos;
-    }
+	if((0 <= x && x < md->width && 0 <= y && y < md->height)
+		&& md->tiles[y * md->width + x].roomType == RoomType::FLOOR)
+	{
+		int oldX = INT(cameraPos.x);
+		int oldY = INT(cameraPos.y);
+		if (md->tiles[y * md->width + x].obstacle
+				&& md->tiles[y * md->width + x].obstacle->block)
+		{
+			if(oldX < x && md->tiles[y * md->width + x].obstacle->dir == Direction::EAST)
+				result = FALSE;
+			else if(oldX > x && md->tiles[y * md->width + x].obstacle->dir == Direction::WEST)
+			{
+
+			}
+			if(oldY < y && md->tiles[y * md->width + x].obstacle->dir == Direction::SOUTH)
+			{
+
+			}
+			else if(oldY > y && md->tiles[y * md->width + x].obstacle->dir == Direction::NORTH)
+			{
+
+			}
+		}
+		else if (md->tiles[oldY * md->width + oldX].obstacle
+				&& md->tiles[oldY * md->width + oldX].obstacle->block)
+		{
+			if(oldX < x)
+			{
+				if((md->tiles[y * md->width + x].obstacle
+						&& (md->tiles[y * md->width + x].obstacle->block
+						|| md->tiles[y * md->width + x].obstacle->dir == Direction::EAST))
+					|| (md->tiles[oldY * md->width + oldX].obstacle
+						&& md->tiles[oldY * md->width + oldX].obstacle->block
+						&& md->tiles[oldY * md->width + oldX].obstacle->dir == Direction::WEST))
+					cameraPos = pos;
+			} else if(oldX > x)
+			{
+				if((md->tiles[y * md->width + x].obstacle
+						&& md->tiles[y * md->width + x].obstacle->block
+						&& md->tiles[y * md->width + x].obstacle->dir == Direction::WEST)
+					|| (md->tiles[oldY * md->width + oldX].obstacle
+						&& !md->tiles[oldY * md->width + oldX].obstacle->block
+						&& md->tiles[oldY * md->width + oldX].obstacle->dir == Direction::EAST))
+					cameraPos = pos;
+			}
+			if(oldY < y)
+			{
+				if((md->tiles[y * md->width + x].obstacle
+						&& md->tiles[y * md->width + x].obstacle->block
+						&& md->tiles[y * md->width + x].obstacle->dir == Direction::SOUTH)
+					|| (md->tiles[oldY * md->width + oldX].obstacle
+						&& md->tiles[oldY * md->width + oldX].obstacle->block
+						&& md->tiles[oldY * md->width + oldX].obstacle->dir == Direction::NORTH))
+					cameraPos = pos;
+			} else if(oldY > y)
+			{
+				if((md->tiles[y * md->width + x].obstacle
+						&& md->tiles[y * md->width + x].obstacle->block
+						&& md->tiles[y * md->width + x].obstacle->dir == Direction::NORTH)
+					|| (md->tiles[oldY * md->width + oldX].obstacle
+						&& md->tiles[oldY * md->width + oldX].obstacle->block
+						&& md->tiles[oldY * md->width + oldX].obstacle->dir == Direction::SOUTH))
+					cameraPos = pos;
+			}
+		}
+	}
 }
 
 void Player::RotateCamera(float deltaTime)

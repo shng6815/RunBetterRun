@@ -230,7 +230,7 @@ bool MapManager::CreateMazeMap(int width, int height) {
     }
 
 	mapData.tiles[21 * width + 18].obstacle = new Obstacle;
-	mapData.tiles[21 * width + 18].obstacle->block = FALSE;
+	mapData.tiles[21 * width + 18].obstacle->block = TRUE;
 	mapData.tiles[21 * width + 18].obstacle->dir = Direction::WEST;
 	mapData.tiles[21 * width + 18].obstacle->aniInfo = {0.1f,0.1f,{456,488},{10,1},{0,0}};
 	mapData.tiles[21 * width + 18].obstacle->texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/jewel.bmp"));
