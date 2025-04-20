@@ -8,5 +8,6 @@ class Key: public AItem
 public:
 	Key(FPOINT pos) { Init(pos); }
 	virtual HRESULT Init(FPOINT pos) override;
+	void SetAnimInfo(AnimationInfo info) {sprite.aniInfo = info;}
 };
 

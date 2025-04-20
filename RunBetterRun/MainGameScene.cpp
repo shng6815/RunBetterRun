@@ -142,7 +142,8 @@ void MainGameScene::LoadMapItems(LPCWCH filePath)
 		filePath,GENERIC_READ,0,NULL,
 		OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
 
-	if(hFile == INVALID_HANDLE_VALUE) {
+	if(hFile == INVALID_HANDLE_VALUE)
+	{
 		return;
 	}
 
@@ -162,12 +163,18 @@ void MainGameScene::LoadMapItems(LPCWCH filePath)
 	ReadFile(hFile,&itemCount,sizeof(int),&bytesRead,NULL);
 
 	// 아이템 위치 정보 읽고 생성
-	for(int i = 0; i < itemCount; i++) {
+	for(int i = 0; i < itemCount; i++)
+	{
 		FPOINT pos;
+		AnimationInfo aniInfo;
+
 		ReadFile(hFile,&pos,sizeof(FPOINT),&bytesRead,NULL);
+		ReadFile(hFile,&aniInfo,sizeof(AnimationInfo),&bytesRead,NULL);
 
 		// Key 아이템 생성
-		ItemManager::GetInstance()->PutItem(new Key(pos));
+		Key* key = new Key(pos);
+		key->SetAnimInfo(aniInfo); // 애니메이션 정보 설정 (Key 클래스에 추가 필요)
+		ItemManager::GetInstance()->PutItem(key);
 	}
 
 	// 몬스터 개수 읽기
@@ -175,12 +182,18 @@ void MainGameScene::LoadMapItems(LPCWCH filePath)
 	ReadFile(hFile,&monsterCount,sizeof(int),&bytesRead,NULL);
 
 	// 몬스터 위치 정보 읽고 생성
-	for(int i = 0; i < monsterCount; i++) {
+	for(int i = 0; i < monsterCount; i++)
+	{
 		FPOINT pos;
+		AnimationInfo aniInfo;
+
 		ReadFile(hFile,&pos,sizeof(FPOINT),&bytesRead,NULL);
+		ReadFile(hFile,&aniInfo,sizeof(AnimationInfo),&bytesRead,NULL);
 
 		// Tentacle 몬스터 생성
-		MonsterManager::GetInstance()->PutMonster(new Tentacle(pos));
+		Tentacle* tentacle = new Tentacle(pos);
+		tentacle->SetAnimInfo(aniInfo); // 애니메이션 정보 설정 (Tentacle 클래스에 추가 필요)
+		MonsterManager::GetInstance()->PutMonster(tentacle);
 	}
 
 	CloseHandle(hFile);
