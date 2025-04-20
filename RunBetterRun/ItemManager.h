@@ -21,5 +21,9 @@ public:
 	void	PutItem(AItem* item);
 	void	PushKey(void);
 	void	PopKey(void);
+
+	const list<AItem*>& GetItems() const {
+		return items;
+	}
 };
 

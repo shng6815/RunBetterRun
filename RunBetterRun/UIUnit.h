@@ -13,7 +13,10 @@ public:
 
 	UIType GetUIType() { return uiType; }
 	void SetActive(bool isActive) { this->isActive = isActive; }
-	void ToggleActive() { isActive = !isActive; }
+	virtual void ToggleActive() { isActive = !isActive; }
+	void SetPosition(FPOINT newPos) {
+		pos = newPos;
+	}
 
 protected:
 	UIType uiType;
@@ -24,4 +27,3 @@ protected:
 
 	bool isActive;
 };
-

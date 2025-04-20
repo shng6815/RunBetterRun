@@ -6,7 +6,7 @@ HRESULT GameStartScene::Init()
 {
 	titleText = TEXT("HorrorGame");
 	InitButtons();
-	ShowCursor(true);
+	//while(ShowCursor(TRUE)<0);
 
 	return S_OK;
 }

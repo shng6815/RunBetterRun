@@ -9,4 +9,17 @@ public:
 	void Release() override;
 	void Update() override;
 	void Render(HDC hdc) override;
+
+	virtual void ToggleActive() override;
+	void UpdateUIUnitsPosition();
+
+private:
+	Image* phoneImage;
+	float toggleTime;
+	float toggleDelay;
+
+	bool toggleActive;
+	bool isSlideIn;
+	FPOINT defaultPos;
+	FPOINT screenOutPos;
 };

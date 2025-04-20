@@ -11,6 +11,8 @@ HRESULT LoadingScene::Init()
 	minLoadingTime = 3.0f;
 	isLoadingComplete = false;
 
+	while(ShowCursor(FALSE)>=0);
+
 	return S_OK;
 }
 

@@ -3,6 +3,8 @@
 #include "MinimapUI.h"
 #include "MapManager.h"
 #include "Player.h"
+#include "ItemManager.h"
+#include "Key.h"
 
 void MinimapUI::DrawMiniMapWithRotation(HDC hdc,int drawSize,float angle)
 {
@@ -98,8 +100,9 @@ void MinimapUI::Render(HDC hdc)
 	if(!isActive)
 		return;
 
-	int clippedSize = static_cast<int>(ceilf(max(size.x,size.y)));
-	int squareSize = static_cast<int>(ceilf(clippedSize * 1.4142f));
+	// 최대 크기를 기준으로 충분히 큰 정사각형 미니맵을 생성
+	int maxSize = static_cast<int>(ceilf(max(size.x,size.y)));
+	int squareSize = static_cast<int>(ceilf(maxSize * 1.4142f)); // 회전을 고려한 대각선 길이
 
 	HDC memDC = CreateCompatibleDC(hdc);
 	HBITMAP memBmp = CreateCompatibleBitmap(hdc,squareSize,squareSize);
@@ -116,16 +119,23 @@ void MinimapUI::Render(HDC hdc)
 	auto dir = Player::GetInstance()->GetCameraVerDir();
 	float angle = atan2f(dir.y,dir.x) + DEG_TO_RAD(-90);
 
+	// 기존 함수를 그대로 사용하여 정사각형 미니맵을 그림
 	DrawMiniMapWithRotation(memDC,squareSize,angle);
 
-	// 위치 계산 후 출력
-	int drawX = static_cast<int>(pos.x + (size.x - clippedSize) / 2);
-	int drawY = static_cast<int>(pos.y + (size.y - clippedSize) / 2);
-	int srcOffset = (squareSize - clippedSize) / 2;
+	// 위치 계산 후 원하는 사이즈로 출력 (직사각형으로 클리핑)
+	int drawX = static_cast<int>(pos.x);
+	int drawY = static_cast<int>(pos.y);
 
-	TransparentBlt(hdc,drawX,drawY,clippedSize,clippedSize,
-				   memDC,srcOffset,srcOffset,clippedSize,clippedSize,
-				   kMaskColor);
+	// 중앙 정렬을 위한 오프셋 계산
+	int srcX = (squareSize - static_cast<int>(size.x)) / 2;
+	int srcY = (squareSize - static_cast<int>(size.y)) / 2;
+
+	// 원하는 직사각형 크기로 클리핑하여 출력
+	TransparentBlt(hdc,drawX,drawY,
+				  static_cast<int>(size.x),static_cast<int>(size.y),
+				  memDC,srcX,srcY,
+				  static_cast<int>(size.x),static_cast<int>(size.y),
+				  kMaskColor);
 
 	SelectObject(memDC,oldBmp);
 	DeleteObject(memBmp);
@@ -181,8 +191,38 @@ void MinimapUI::DrawMiniMapToDC(HDC hdc,int drawSize)
 		}
 	}
 
-	DeleteObject(floorBrush);
-	SelectObject(hdc,oldPen);
+	// 아이템(키) 그리기
+	HBRUSH keyBrush = CreateSolidBrush(RGB(238,130,238)); // 키 표시용 보라색
+	HPEN oldKeyPen = (HPEN)SelectObject(hdc,GetStockObject(NULL_PEN));
+	SelectObject(hdc,keyBrush);
+
+	for(const auto& item : ItemManager::GetInstance()->GetItems())
+	{
+		Key* key = dynamic_cast<Key*>(item);
+		if(key)
+		{
+			FPOINT keyPos = key->GetPos();
+
+			// 상대적 위치 계산
+			float relX = (keyPos.x - pPos.x) * tileSize + drawSize / 2.0f;
+			float relY = (-keyPos.y + pPos.y) * tileSize + drawSize / 2.0f;
+
+			// 미니맵 범위 체크
+			if(relX >= 0 && relX < drawSize && relY >= 0 && relY < drawSize)
+			{
+				// 키 그리기
+				int keySize = 6;
+				Rectangle(hdc,
+					static_cast<int>(relX - keySize),
+					static_cast<int>(relY - keySize),
+					static_cast<int>(relX + keySize),
+					static_cast<int>(relY + keySize));
+			}
+		}
+	}
+
+	SelectObject(hdc,oldKeyPen);
+	DeleteObject(keyBrush);
 
 	// 플레이어 아이콘
 	HBRUSH playerBrush = CreateSolidBrush(RGB(255,50,50)); // 눈에 띄는 색상

@@ -132,6 +132,9 @@
     <ClCompile Include="LossLifeScene.cpp">
       <Filter>InGame\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="MinimapUI.cpp">
+      <Filter>InGame\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h">
@@ -232,6 +235,12 @@
     </ClInclude>
     <ClInclude Include="config.h">
       <Filter>InGame</Filter>
+    </ClInclude>
+    <ClInclude Include="Monster.h">
+      <Filter>Core\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="MinimapUI.h">
+      <Filter>InGame\UI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -27,11 +27,10 @@ HRESULT MainGameScene::Init()
 	UIManager::GetInstance()->Init();
 	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
 	PhoneUI* uiUnit = new PhoneUI();
-	uiUnit->Init(UIType::PLAYING, FPOINT{ 200, WINSIZE_Y - 400 }, FPOINT{ 200, 200 }, 0);
+	uiUnit->Init(UIType::PLAYING, FPOINT{ 200, WINSIZE_Y - 400 }, FPOINT{ 200, 300 }, 0);
 	UIManager::GetInstance()->AddUIUnit("PhoneUI", uiUnit);
 
-	status = SceneStatus::IN_GAME;
-	ShowCursor(FALSE);
+	while(ShowCursor(FALSE)>=0);
 
 	RECT rc;
 	GetClientRect(g_hWnd, &rc);
@@ -80,7 +79,7 @@ void MainGameScene::Update()
 	{
 	case MainGameScene::SceneStatus::IN_GAME:
 		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {
-			ShowCursor(TRUE);
+			while(ShowCursor(TRUE)<0);
 			status = SceneStatus::PAUSE;
 		}
 
@@ -98,7 +97,7 @@ void MainGameScene::Update()
 		break;
 	case MainGameScene::SceneStatus::PAUSE:
 		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {
-			ShowCursor(FALSE);
+			while(ShowCursor(FALSE)>=0);
 			status = SceneStatus::IN_GAME;
 		}
 
@@ -129,6 +128,7 @@ void MainGameScene::ShakeScreen(float shakePower, float time, bool isStepShake)
 void MainGameScene::ApplyShake(HDC hdc)
 {
 	screenShake.Update(TimerManager::GetInstance()->GetDeltaTime());
+
 	POINT offset = screenShake.GetOffset();
 
 	BitBlt(hdc, offset.x, offset.y, WINSIZE_X, WINSIZE_Y, backBufferDC, 0, 0, SRCCOPY);

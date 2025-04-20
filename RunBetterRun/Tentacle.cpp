@@ -23,6 +23,6 @@ HRESULT Tentacle::Init(FPOINT pos)
 	sprite.aniInfo = {0,0,{423,437},{1,1},{0,0}};
 	SpriteManager::GetInstance()->AddSprite(sprite);
 	targetPosition = pos;
-	speed = 2.5f;
+	speed = .0f;
 	return S_OK;
 }
