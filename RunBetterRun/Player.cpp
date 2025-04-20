@@ -27,6 +27,14 @@ HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 	stepTime = 0.5f;
 	runTime = 0.3f;
 
+	static bool isFirstInit = true;
+
+	if(isFirstInit)
+	{
+		playerLife = 3;
+		isFirstInit = false;
+	}
+
 	// ī�޶� ����
 	this->shakeFunc = shakeFunc;
 
@@ -178,6 +186,11 @@ void Player::UpdateFOV()
 {
 	plane.x = cameraVerDir.y * this->fov;
 	plane.y = -cameraVerDir.x * this->fov;
+}
+
+void Player::LossPlayerLife()
+{
+	if(playerLife > 0) playerLife -= 1;
 }
 
 void Player::Save()

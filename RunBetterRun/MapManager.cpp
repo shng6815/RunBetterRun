@@ -10,9 +10,9 @@ HRESULT MapManager::Init()
 	mapData.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/horrorMapTiles.bmp"));
 	if (!mapData.texture)
 		return E_FAIL;
-    mapData.textureTileSize = 32;
-    mapData.textureTileRowSize = 20;
-    mapData.textureTileColumnSize = 9;
+    mapData.textureTileSize = 128;
+    mapData.textureTileRowSize = 11;
+    mapData.textureTileColumnSize = 11;
 	// 기본 맵 생성
 	//return CreateNewMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;
     return CreateMazeMap(MAP_COLUME, MAP_ROW) ? S_OK : E_FAIL;

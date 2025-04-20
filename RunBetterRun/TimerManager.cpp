@@ -22,11 +22,11 @@ void TimerManager::Update()
 
 void TimerManager::Render(HDC hdc)
 {
-	if (timer)
+	/*if (timer)
 	{
 		wsprintf(szText, TEXT("FPS : %d"), timer->GetFPS());
 		TextOut(hdc, WINSIZE_X - 130, 20, szText, wcslen(szText));
-	}
+	}*/
 }
 
 float TimerManager::GetDeltaTime()

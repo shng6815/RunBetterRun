@@ -1,5 +1,6 @@
 #include "GameStartScene.h"
 #include "SceneManager.h"
+#include "Player.h"
 
 
 HRESULT GameStartScene::Init()
@@ -7,6 +8,8 @@ HRESULT GameStartScene::Init()
 	titleText = TEXT("HorrorGame");
 	InitButtons();
 	ShowCursor(true);
+
+	//Player::GetInstance()->InitPlayerLife(3);
 
 	return S_OK;
 }
