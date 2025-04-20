@@ -18,13 +18,20 @@ enum class EditorMode
 	MONSTER     // 몬스터 배치 모드
 };
 
-// 에디터용 타일 구조체
+// 에디터용 구조체
 typedef struct EditorTile
 {
 	RECT rc;                // 타일 영역
 	int tileIndex;          // 타일 인덱스
 	RoomType type;          // 타일 유형
 } editTile;
+
+typedef struct UILayout {
+	RECT mapViewArea;       // 맵이 보여지는 영역
+	RECT sampleTileArea;    // 샘플 타일이 보여지는 영역
+	RECT controlPanel;      // 버튼 등 컨트롤이 위치한 영역
+	RECT statusBar;         // 상태 정보를 보여주는 영역
+};
 
 class Image;
 class Button;
@@ -45,6 +52,10 @@ private:
 	vector<Button*> buttons;
 	POINT mousePos;
 
+	UILayout layout;
+	POINT mapOffset;  // 맵 스크롤 오프셋 (맵의 어느 부분이 보이는지)
+	float zoomLevel = 1.0f;
+
 public:
 	virtual HRESULT Init() override;
 	virtual void Release() override;
@@ -53,8 +64,7 @@ public:
 
 	void InitTiles();
 	void InitButtons();
-
-	// 기본 기능
+	void InitLayout(); 
 	void HandleTileSelect();
 	void HandleMapEdit();
 	void HandleShortcut();
@@ -77,4 +87,11 @@ public:
 	void SaveMap();
 	void LoadMap();
 	void ClearMap();
+
+	void HandleScroll();              // 맵 스크롤 처리
+	void HandleZoom();                // 확대/축소 처리
+	POINT ScreenToMapCoord(POINT screenPos); // 화면 좌표를 맵 좌표로 변환
+
+	int GetVisibleMapColumns();
+	int GetVisibleMapRows();
 };

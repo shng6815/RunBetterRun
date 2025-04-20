@@ -85,6 +85,10 @@ void MainGameScene::Update()
 			while(ShowCursor(TRUE) < 0);
 			status = SceneStatus::PAUSE;
 		}
+		/*if(KeyManager::GetInstance()->IsOnceKeyDown('T'))
+		{
+			SceneManager::GetInstance()->ChangeScene("MapEditorScene");
+		}*/
 
 		if (KeyManager::GetInstance()->IsOnceKeyDown('M')) {
 			UIManager::GetInstance()->ToggleActiveUIUnit("PhoneUI");
@@ -94,9 +98,9 @@ void MainGameScene::Update()
 		if (rayCasting)
 			rayCasting->Update();
 		SpriteManager::GetInstance()->SortSpritesByDistance();
-		//MonsterManager::GetInstance()->Update();
+		MonsterManager::GetInstance()->Update();
 		ItemManager::GetInstance()->Update();
-		//UIManager::GetInstance()->Update();
+		UIManager::GetInstance()->Update();
 		break;
 	case MainGameScene::SceneStatus::PAUSE:
 		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {

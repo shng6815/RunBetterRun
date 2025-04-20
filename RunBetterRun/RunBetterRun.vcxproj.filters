@@ -40,6 +40,9 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="Core\MapEditor">
+      <UniqueIdentifier>{21372f2c-5f93-4218-9d29-29e33327c4eb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Button.cpp">
@@ -129,11 +132,11 @@
     <ClCompile Include="GameStartScene.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="MapEditor.cpp">
-      <Filter>Core\Source</Filter>
-    </ClCompile>
     <ClCompile Include="LoadingScene.cpp">
       <Filter>InGame\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="MapEditor.cpp">
+      <Filter>Core\MapEditor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -237,7 +240,7 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="MapEditor.h">
-      <Filter>Core\Header</Filter>
+      <Filter>Core\MapEditor</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
