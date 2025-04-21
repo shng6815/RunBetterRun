@@ -1,5 +1,6 @@
 #include "GameStartScene.h"
 #include "SceneManager.h"
+#include "Player.h"
 #include "MapManager.h"
 
 HRESULT GameStartScene::Init()
