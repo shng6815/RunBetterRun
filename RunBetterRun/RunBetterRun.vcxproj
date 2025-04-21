@@ -102,12 +102,13 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_WIN32_WINNT=0x0602;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -150,6 +151,7 @@
     <ClCompile Include="MapManager.cpp" />
     <ClCompile Include="RayCast.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="SpriteManager.cpp" />
     <ClCompile Include="Tentacle.cpp" />
     <ClCompile Include="TextureManager.cpp" />
@@ -186,6 +188,7 @@
     <ClInclude Include="RayCast.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Singleton.h" />
+    <ClInclude Include="SoundManager.h" />
     <ClInclude Include="structs.h" />
     <ClInclude Include="SpriteManager.h" />
     <ClInclude Include="Tentacle.h" />

@@ -18,6 +18,10 @@ public:
 		pos = newPos;
 	}
 
+	void SetSize(FPOINT newSize) {
+		size = newSize;
+	}
+
 protected:
 	UIType uiType;
 	vector<UIUnit*> uiUnits;

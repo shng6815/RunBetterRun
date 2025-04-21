@@ -1,5 +1,7 @@
 #include "Player.h"
 #include "MapManager.h"
+#include "UIManager.h"
+#include "PhoneUI.h"
 
 HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 {
@@ -57,38 +59,62 @@ void Player::Render(HDC hdc)
 
 void Player::KeyInput(void)
 {
-    KeyManager* km = KeyManager::GetInstance();
+	KeyManager* km = KeyManager::GetInstance();
+	bool wasMoving = (moveInput.x != 0 || moveInput.y != 0);
+	bool wasRunning = (moveSpeed == runSpeed);
 
-	moveInput = { 0, 0 };
+	// 이동 입력 초기화
+	moveInput = {0,0};
 
-    if (km->IsStayKeyDown('W'))
-        moveInput.x = -1;
+	// 방향키 입력 처리
+	if(km->IsStayKeyDown('W'))
+		moveInput.x = -1;
+	if(km->IsStayKeyDown('S'))
+		moveInput.x = 1;
+	if(km->IsStayKeyDown('A'))
+		moveInput.y = -1;
+	if(km->IsStayKeyDown('D'))
+		moveInput.y = 1;
 
-    if (km->IsStayKeyDown('S'))
-        moveInput.x = 1;
+	// 현재 움직이는 중인지 확인
+	bool isMoving = (moveInput.x != 0 || moveInput.y != 0);
 
-    if (km->IsStayKeyDown('A'))
-        moveInput.y = -1;
+	// SHIFT 키 입력 처리 (달리기)
+	if(km->IsStayKeyDown(VK_SHIFT) && isMoving)
+	{
+		targetFOV = 0.5f;
+		moveSpeed = runSpeed;
+	} else if(!km->IsStayKeyDown(VK_SHIFT))
+	{
+		targetFOV = 0.66f;
+		moveSpeed = defaultSpeed;
+	}
 
-    if (km->IsStayKeyDown('D'))
-        moveInput.y = 1;
-    
-    if (km->IsOnceKeyDown(VK_SHIFT))
-    {
-        targetFOV = 0.5f;
-        moveSpeed = runSpeed;
-    }
+	// 현재 달리는 중인지 확인
+	bool isRunning = (moveSpeed == runSpeed && isMoving);
 
-    if (km->IsOnceKeyUp(VK_SHIFT))
-    {
-        targetFOV = 0.66f;
-        moveSpeed = defaultSpeed;
-    }
-    if (km->IsOnceKeyDown('O'))
-        Save();
+	// PhoneUI 가져오기
+	PhoneUI* phoneUI = static_cast<PhoneUI*>(UIManager::GetInstance()->GetUIUnit("PhoneUI"));
+	if(phoneUI)
+	{
+		// 상태 업데이트
+		if(!isMoving)
+		{
+			phoneUI->UpdateByPlayerState(PlayerState::IDLE);
+		} else if(isRunning)
+		{
+			phoneUI->UpdateByPlayerState(PlayerState::RUNNING);
+		} else
+		{
+			phoneUI->UpdateByPlayerState(PlayerState::WALKING);
+		}
+	}
 
-    if (km->IsOnceKeyDown('P'))
-        Load();
+	// 기타 키 입력 처리
+	if(km->IsOnceKeyDown('O'))
+		Save();
+	if(km->IsOnceKeyDown('P'))
+		Load();
 }
 
 void Player::MouseInput(void)
