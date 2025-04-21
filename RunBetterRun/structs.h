@@ -19,15 +19,6 @@ typedef struct tagRoom
 	tagRoom() :roomType(RoomType::FLOOR), tilePos(1) {}
 } Room;
 
-typedef struct tagLevel
-{
-	FPOINT	mosterPos;
-	FPOINT	cameraDir;
-	FPOINT	cameraPos;
-	DWORD	itemCount;
-	DWORD	monsterCount;
-} Level;
-
 typedef struct tagTexture
 {
 	vector<COLORREF>	bmp;
@@ -80,3 +71,53 @@ typedef struct tagMapData
 	DWORD textureTileRowSize;
 	DWORD textureTileColumnSize;
 } MapData;
+
+// 저장용 데이터
+typedef struct tagFileHeader
+{
+	char signature[4];      // 파일타입구분
+	int version;            // 파일 포맷 버전
+	int mapWidth;          
+	int mapHeight;          
+	int tileCount;          // 전체 타일 수
+	int itemCount;         
+	int monsterCount;       
+	FPOINT startPos;        
+
+	// 텍스처 정보
+	wchar_t texturePath[MAX_PATH];  // 텍스처 경로
+	DWORD textureTileSize;          // 타일 크기
+	DWORD textureTileRowSize;       // 가로 타일 수
+	DWORD textureTileColumnSize;    // 세로 타일 수
+
+	tagFileHeader()
+	{
+		signature[0] = 'M'; signature[1] = 'P';
+		signature[2] = 'D'; signature[3] = 'T';
+		version = 1;
+		mapWidth = 0;
+		mapHeight = 0;
+		tileCount = 0;
+		itemCount = 0;
+		monsterCount = 0;
+		startPos = {0.0f,0.0f};
+		texturePath[0] = L'\0';
+		textureTileSize = 0;
+		textureTileRowSize = 0;
+		textureTileColumnSize = 0;
+	}
+}FileHeader;
+
+typedef struct tagItemSaveData
+{
+	FPOINT pos;             // 위치
+	AnimationInfo aniInfo;  // 애니메이션 정보
+	int itemType;           // 아이템 타입 - 0: Key
+}ItemData;
+
+typedef struct tagMonsterSaveData
+{
+	FPOINT pos;             // 위치
+	AnimationInfo aniInfo;  // 애니메이션 정보
+	int monsterType;        // 몬스터 타입 - 0: Tentacle
+}MonsterData;

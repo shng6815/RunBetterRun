@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Button.cpp" />
+    <ClCompile Include="DataManager.cpp" />
     <ClCompile Include="DeadScene.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameStartScene.cpp" />
@@ -162,6 +163,7 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="CommonFunction.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="DataManager.h" />
     <ClInclude Include="DeadScene.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameStartScene.h" />

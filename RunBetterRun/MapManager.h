@@ -5,23 +5,22 @@
 #define MAP_COLUME 100
 #define MAP_ROW 100
 
-class MapManager : public Singleton<MapManager>
+class MapManager: public Singleton<MapManager>
 {
 private:
 	MapData mapData;
 
 public:
-	HRESULT Init();					//기본	   맵 생성
-	HRESULT Init(LPCWCH filePath);  //파일경로 맵 로드
+	HRESULT Init();                     // 기본 맵 생성
+	HRESULT Init(LPCWCH filePath);      // 파일 경로로 맵 로드
 	void Release();
 
 	bool LoadMap(const LPCWCH filePath);
-	bool SaveMap(const LPCWCH filePath);
-	bool CreateNewMap(int width, int height); //새로운 맵 생성
-	bool CreateMazeMap(int width, int height);
+	bool SaveMap(const LPCWCH filePath); 
+	bool CreateNewMap(int width,int height);
+	bool CreateMazeMap(int width,int height);
 	HRESULT InitializeTexture();
-	//HRESULT InitializeTexture(Texture* texture);
-	void SetTile(int x, int y, RoomType tileType, int index); //특정타입의 타일 설정
+	void SetTile(int x,int y,RoomType tileType,int index);
 
-	MapData* GetMapData();
+	MapData* GetMapData(); 
 };

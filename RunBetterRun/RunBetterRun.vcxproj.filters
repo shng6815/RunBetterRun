@@ -40,8 +40,11 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Core\MapEditor">
+    <Filter Include="Core\Editor">
       <UniqueIdentifier>{21372f2c-5f93-4218-9d29-29e33327c4eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Data">
+      <UniqueIdentifier>{5bf577db-5bda-4690-9566-8318306cafa6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -136,7 +139,10 @@
       <Filter>InGame\Scene</Filter>
     </ClCompile>
     <ClCompile Include="MapEditor.cpp">
-      <Filter>Core\MapEditor</Filter>
+      <Filter>Core\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="DataManager.cpp">
+      <Filter>Core\Data</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -240,7 +246,10 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="MapEditor.h">
-      <Filter>Core\MapEditor</Filter>
+      <Filter>Core\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="DataManager.h">
+      <Filter>Core\Data</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

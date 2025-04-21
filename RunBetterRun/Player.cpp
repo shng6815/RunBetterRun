@@ -1,12 +1,23 @@
 #include "Player.h"
 #include "MapManager.h"
+#include "DataManager.h"
 
 HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 {
     fov = 0.66f;
     targetFOV = fov;
 
-	cameraPos = { 22, 12 };
+	FPOINT startPos = DataManager::GetInstance()->GetStartPosition();
+
+	if(startPos.x != 0.0f || startPos.y != 0.0f)
+	{
+		cameraPos = startPos;
+	} 
+	else
+	{
+		cameraPos = {22,12};
+	}
+
 
 	cameraVerDir = { -1, 0 };
 	cameraHorDir = { 0, 1.f };
