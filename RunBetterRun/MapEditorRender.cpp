@@ -1,26 +1,19 @@
-#include "MapEditorRenderer.h"
+#include "MapEditorRender.h"
 #include "MapEditor.h" 
 
-MapEditorRenderer::MapEditorRenderer(): sampleTileImage(nullptr),tileSize(TILE_SIZE)
-{}
-
-MapEditorRenderer::~MapEditorRenderer()
-{
-}
-
-void MapEditorRenderer::Init(Image* sampleTileImage,int tileSize)
+void MapEditorRender::Init(Image* sampleTileImage,int tileSize)
 {
 	this->sampleTileImage = sampleTileImage;
 	this->tileSize = tileSize;
 }
 
-void MapEditorRenderer::RenderTiles(HDC hdc,const vector<Room>& tiles,int mapWidth,int mapHeight,
+void MapEditorRender::RenderTiles(HDC hdc,const vector<Room>& tiles,int mapWidth,int mapHeight,
 								  RECT mapArea,POINT mousePos,bool mouseInMapArea)
 {
 	if(!sampleTileImage) return;
 
-	int visibleWidth = min(mapWidth,VISIBLE_MAP_WIDTH);
-	int visibleHeight = min(mapHeight,VISIBLE_MAP_HEIGHT);
+	int visibleWidth = VISIBLE_MAP_WIDTH;
+	int visibleHeight = VISIBLE_MAP_HEIGHT;
 
 	int tileWidth = (mapArea.right - mapArea.left) / visibleWidth;
 	int tileHeight = (mapArea.bottom - mapArea.top) / visibleHeight;
@@ -34,12 +27,16 @@ void MapEditorRenderer::RenderTiles(HDC hdc,const vector<Room>& tiles,int mapWid
 			int screenX = mapArea.left + x * tileWidth + (tileWidth / 2);
 			int screenY = mapArea.top + y * tileHeight + (tileHeight / 2);
 
+			// 1차원 배열에서 해당 타일의 인덱스 계산
 			int index = y * mapWidth + x;
-			if(index >= tiles.size()) continue;
+			if(index >= tiles.size()) continue;  // 타일 범위를 벗어나면 건너뜀
 
+			// 해당 타일의 타입 정보 가져오기
 			int tileIndex = tiles[index].tilePos;
-			int frameX = tileIndex % SAMPLE_TILE_X;
-			int frameY = tileIndex / SAMPLE_TILE_X;
+
+			// 타일시트에서의 프레임 좌표 계산
+			int frameX = tileIndex % SAMPLE_TILE_X;  // 열(X) 계산
+			int frameY = tileIndex / SAMPLE_TILE_X;  // 행(Y) 계산
 
 			// 타일 이미지 렌더
 			sampleTileImage->FrameRender(
@@ -48,7 +45,7 @@ void MapEditorRenderer::RenderTiles(HDC hdc,const vector<Room>& tiles,int mapWid
 				screenY,
 				frameX,frameY,
 				false,
-				true  
+				true
 			);
 
 			// 현재 편집 중인 타일 표시 (마우스 위치에 있는 타일)
@@ -58,59 +55,56 @@ void MapEditorRenderer::RenderTiles(HDC hdc,const vector<Room>& tiles,int mapWid
 				int mouseMapX = (mousePos.x - mapArea.left) * visibleWidth / (mapArea.right - mapArea.left);
 				int mouseMapY = (mousePos.y - mapArea.top) * visibleHeight / (mapArea.bottom - mapArea.top);
 
-				if(x == mouseMapX && y == mouseMapY)
+				bool isEdge = (x == 0 || x == mapWidth - 1 || y == 0 || y == mapHeight - 1);
+
+				if(isEdge)
 				{
-					RECT hoverRect = {
+					HPEN edgePen = CreatePen(PS_SOLID,2,RGB(255,0,0));  // 빨간색 테두리
+					HPEN oldPen = (HPEN)SelectObject(hdc,edgePen);
+					SelectObject(hdc,GetStockObject(NULL_BRUSH));
+
+					RECT edgeRect = {
 						screenX - tileWidth/2,
 						screenY - tileHeight/2,
 						screenX + tileWidth/2,
 						screenY + tileHeight/2
 					};
 
-					HPEN hoverPen = CreatePen(PS_DOT,1,RGB(255,255,0)); 
-					HPEN oldPen = (HPEN)SelectObject(hdc,hoverPen);
-					SelectObject(hdc,GetStockObject(NULL_BRUSH));
-
-					Rectangle(hdc,
-							 hoverRect.left,
-							 hoverRect.top,
-							 hoverRect.right,
-							 hoverRect.bottom);
+					Rectangle(hdc,edgeRect.left,edgeRect.top,edgeRect.right,edgeRect.bottom);
 
 					SelectObject(hdc,oldPen);
-					DeleteObject(hoverPen);
+					DeleteObject(edgePen);
 				}
 			}
 		}
 	}
 }
 
-void MapEditorRenderer::RenderSampleTiles(HDC hdc,RECT sampleArea,POINT selectedTile)
+void MapEditorRender::RenderSampleTiles(HDC hdc,RECT sampleArea,POINT selectedTile)
 {
 	if(!sampleTileImage) return;
 
-	int sampleTileSize = (sampleArea.right - sampleArea.left) / SAMPLE_TILE_X;
-
-	// 샘플 타일 섹션 제목 추가
-	HFONT titleFont = CreateFont(20,0,0,0,FW_BOLD,FALSE,FALSE,FALSE,
-						 DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
-						 DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Arial"));
-	HFONT oldFont = (HFONT)SelectObject(hdc,titleFont);
-	SetTextColor(hdc,RGB(0,0,0));
-
-	TextOut(hdc,sampleArea.left,sampleArea.top - 25,TEXT("Tile Palette"),
-		   lstrlen(TEXT("Tile Palette")));
-
-	SelectObject(hdc,oldFont);
-	DeleteObject(titleFont);
+	// 타일 크기 계산 수정
+	int sampleTileWidth = (sampleArea.right - sampleArea.left) / SAMPLE_TILE_X;
+	int sampleTileHeight = (sampleArea.bottom - sampleArea.top) / SAMPLE_TILE_Y;
+	// 디버깅 메시지
+	TCHAR szDebug[128];
+	wsprintf(szDebug,TEXT("Sample area: (%d,%d) - (%d,%d), Tile size: %dx%d\n"),
+			 sampleArea.left,sampleArea.top,sampleArea.right,sampleArea.bottom,
+			 sampleTileWidth,sampleTileHeight);
+	OutputDebugString(szDebug);
 
 	// 타일 렌더링
 	for(int y = 0; y < SAMPLE_TILE_Y; y++)
 	{
 		for(int x = 0; x < SAMPLE_TILE_X; x++)
 		{
-			int posX = sampleArea.left + x * sampleTileSize + (sampleTileSize / 2);
-			int posY = sampleArea.top + y * sampleTileSize + (sampleTileSize / 2);
+			// 타일 중앙 좌표 계산
+			int posX = sampleArea.left + x * sampleTileWidth + (sampleTileWidth / 2);
+			int posY = sampleArea.top + y * sampleTileHeight + (sampleTileHeight / 2);
+
+			// 타일 렌더링
+			sampleTileImage->FrameRender(hdc,posX,posY,x,y,false,true);
 
 			// 선택된 타일 강조 표시
 			if(x == selectedTile.x && y == selectedTile.y)
@@ -123,10 +117,10 @@ void MapEditorRenderer::RenderSampleTiles(HDC hdc,RECT sampleArea,POINT selected
 				HBRUSH oldBrush = (HBRUSH)SelectObject(hdc,selectBrush);
 
 				Rectangle(hdc,
-						 posX - (sampleTileSize / 2) - 2,
-						 posY - (sampleTileSize / 2) - 2,
-						 posX + (sampleTileSize / 2) + 2,
-						 posY + (sampleTileSize / 2) + 2);
+						 posX - (sampleTileWidth / 2) - 2,
+						 posY - (sampleTileHeight / 2) - 2,
+						 posX + (sampleTileWidth / 2) + 2,
+						 posY + (sampleTileHeight / 2) + 2);
 
 				SelectObject(hdc,oldPen);
 				SelectObject(hdc,oldBrush);
@@ -140,7 +134,7 @@ void MapEditorRenderer::RenderSampleTiles(HDC hdc,RECT sampleArea,POINT selected
 	}
 }
 
-void MapEditorRenderer::RenderSprites(HDC hdc,const vector<Sprite>& sprites,RECT mapArea)
+void MapEditorRender::RenderSprites(HDC hdc,const vector<Sprite>& sprites,RECT mapArea)
 {
 	int visibleWidth = VISIBLE_MAP_WIDTH;
 	int visibleHeight = VISIBLE_MAP_HEIGHT;
@@ -189,7 +183,7 @@ void MapEditorRenderer::RenderSprites(HDC hdc,const vector<Sprite>& sprites,RECT
 	TextOut(hdc,mapArea.left,mapArea.bottom + 10,szCount,lstrlen(szCount));
 }
 
-void MapEditorRenderer::RenderObstacles(HDC hdc,const vector<EditorObstacle>& obstacles,RECT mapArea)
+void MapEditorRender::RenderObstacles(HDC hdc,const vector<Obstacle>& obstacles,RECT mapArea)
 {
 	int visibleWidth = VISIBLE_MAP_WIDTH;
 	int visibleHeight = VISIBLE_MAP_HEIGHT;
@@ -253,7 +247,7 @@ void MapEditorRenderer::RenderObstacles(HDC hdc,const vector<EditorObstacle>& ob
 	}
 }
 
-void MapEditorRenderer::RenderStartPosition(HDC hdc,FPOINT startPos,const vector<Room>& tiles,
+void MapEditorRender::RenderStartPosition(HDC hdc,FPOINT startPos,const vector<Room>& tiles,
 										   int mapWidth,RECT mapArea)
 {
 	int visibleWidth = VISIBLE_MAP_WIDTH;
@@ -309,7 +303,7 @@ void MapEditorRenderer::RenderStartPosition(HDC hdc,FPOINT startPos,const vector
 	}
 }
 
-void MapEditorRenderer::RenderModeInfo(HDC hdc,EditorMode mode)
+void MapEditorRender::RenderModeInfo(HDC hdc,EditorMode mode)
 {
 	TCHAR szText[128];
 	LPCWSTR modeName = TEXT("Tile");
@@ -347,7 +341,7 @@ void MapEditorRenderer::RenderModeInfo(HDC hdc,EditorMode mode)
 	SetTextColor(hdc,RGB(0,0,0)); // 기본 색상으로 복원
 }
 
-void MapEditorRenderer::RenderControlGuide(HDC hdc)
+void MapEditorRender::RenderControlGuide(HDC hdc)
 {
 	// 조작 설명 표시 (하단에 명확하게)
 	HFONT guideFont = CreateFont(18,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,
@@ -371,7 +365,7 @@ void MapEditorRenderer::RenderControlGuide(HDC hdc)
 	DeleteObject(guideFont);
 }
 
-void MapEditorRenderer::RenderSelectedTilePreview(HDC hdc,POINT selectedTile,RECT sampleArea)
+void MapEditorRender::RenderSelectedTilePreview(HDC hdc,POINT selectedTile,RECT sampleArea)
 {
 	if(!sampleTileImage) return;
 
@@ -394,3 +388,9 @@ void MapEditorRenderer::RenderSelectedTilePreview(HDC hdc,POINT selectedTile,REC
 		(selectedTileRect.top + selectedTileRect.bottom) / 2,
 		selectedTile.x,selectedTile.y);
 }
+
+MapEditorRender::MapEditorRender(): sampleTileImage(nullptr),tileSize(TILE_SIZE)
+{}
+
+MapEditorRender::~MapEditorRender()
+{}

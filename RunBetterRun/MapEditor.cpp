@@ -1,14 +1,15 @@
 #include "MapEditor.h"
 #include "MapEditorUI.h"
-#include "MapEditorRenderer.h"
+#include "MapEditorRender.h"
 #include "TextureManager.h"
 #include "KeyManager.h"
 #include "DataManager.h"
 #include "SceneManager.h"
+#include "CommonFunction.h"
 
 MapEditor::MapEditor()
-	: ui(nullptr),renderer(nullptr),mode(EditorMode::TILE),
-	selectedRoomType(RoomType::FLOOR),selectedObstacleDir(Direction::EAST),
+	: ui(nullptr),render(nullptr),mode(EditorMode::TILE),
+	selectedRoomType(RoomType::WALL),selectedObstacleDir(Direction::EAST),
 	sampleTileImage(nullptr),mapWidth(VISIBLE_MAP_WIDTH),mapHeight(VISIBLE_MAP_HEIGHT)
 {}
 
@@ -19,9 +20,9 @@ MapEditor::~MapEditor()
 
 HRESULT MapEditor::Init()
 {
-	// 기본 상태 초기화
+	// 에디터신 들어갈때 초기화 호출
 	mode = EditorMode::TILE;
-	selectedRoomType = RoomType::FLOOR;
+	selectedRoomType = RoomType::WALL;
 	selectedObstacleDir = Direction::EAST;
 	startPosition = {VISIBLE_MAP_WIDTH / 2.0f + 0.5f,VISIBLE_MAP_HEIGHT / 2.0f + 0.5f};
 
@@ -31,7 +32,8 @@ HRESULT MapEditor::Init()
 		1408,1408,SAMPLE_TILE_X,SAMPLE_TILE_Y,
 		true,RGB(255,0,255));
 
-	if(!sampleTileImage) {
+	if(!sampleTileImage)
+	{
 		MessageBox(g_hWnd,TEXT("Failed to load tile image"),TEXT("Error"),MB_OK);
 		return E_FAIL;
 	}
@@ -52,7 +54,7 @@ HRESULT MapEditor::Init()
 
 	// 맵 영역 설정 - 왼쪽 영역을 최대한 활용
 	int mapAreaWidth = rightPanelLeft - (uiPadding * 2);
-	int mapTileSize = min(TILE_SIZE,mapAreaWidth / VISIBLE_MAP_WIDTH);
+	int mapTileSize = 128;
 
 	mapArea.left = uiPadding;
 	mapArea.top = uiPadding * 3;
@@ -61,15 +63,18 @@ HRESULT MapEditor::Init()
 
 	// UI 및 렌더러 초기화
 	ui = new MapEditorUI();
-	renderer = new MapEditorRenderer();
+	render = new MapEditorRender();
 
 	ui->Init(sampleArea,mapArea);
-	renderer->Init(sampleTileImage,mapTileSize);
+	render->Init(sampleTileImage,mapTileSize);
 
 	// 기존 맵 로드 시도
-	if(DataManager::GetInstance()->LoadMapFile(L"Map/EditorMap.dat")) {
+	if(DataManager::GetInstance()->LoadMapFile(L"Map/EditorMap.dat")) 
+	{
 		LoadFromDataManager();
-	} else {
+	} 
+	else 
+	{
 		InitTiles();
 	}
 
@@ -81,14 +86,16 @@ HRESULT MapEditor::Init()
 
 void MapEditor::Release()
 {
-	if(ui) {
+	if(ui)
+	{
 		delete ui;
 		ui = nullptr;
 	}
 
-	if(renderer) {
-		delete renderer;
-		renderer = nullptr;
+	if(render)
+	{
+		delete render;
+		render = nullptr;
 	}
 
 	// 벡터 비우기
@@ -123,25 +130,28 @@ void MapEditor::Render(HDC hdc)
 			 sampleArea.right + 1,sampleArea.bottom + 1);
 
 	// 맵 요소 렌더링
-	renderer->RenderTiles(hdc,tiles,mapWidth,mapHeight,mapArea,ui->GetMousePos(),ui->IsMouseInMapArea());
-	renderer->RenderSprites(hdc,editorSprites,mapArea);
-	renderer->RenderObstacles(hdc,editorObstacles,mapArea);
-	renderer->RenderStartPosition(hdc,startPosition,tiles,mapWidth,mapArea);
+	render->RenderTiles(hdc,tiles,mapWidth,mapHeight,mapArea,ui->GetMousePos(),ui->IsMouseInMapArea());
+	render->RenderSprites(hdc,editorSprites,mapArea);
+	render->RenderObstacles(hdc,editorObstacles,mapArea);
+	render->RenderStartPosition(hdc,startPosition,tiles,mapWidth,mapArea);
 
 	// UI 요소 렌더링
-	renderer->RenderSampleTiles(hdc,sampleArea,ui->GetSelectedTile());
-	renderer->RenderModeInfo(hdc,mode);
-	renderer->RenderControlGuide(hdc);
-	renderer->RenderSelectedTilePreview(hdc,ui->GetSelectedTile(),sampleArea);
+	render->RenderSampleTiles(hdc,sampleArea,ui->GetSelectedTile());
+	render->RenderModeInfo(hdc,mode);
+	render->RenderControlGuide(hdc);
+	render->RenderSelectedTilePreview(hdc,ui->GetSelectedTile(),sampleArea);
 }
 
 void MapEditor::TileSelect()
 {
 	if(ui->HandleTileSelection(ui->GetMousePos(),sampleArea)) {
 		int tileIndex = ui->GetSelectedTile().y * SAMPLE_TILE_X + ui->GetSelectedTile().x;
-		if(tileIndex < 5) {
+		if(tileIndex < 5)
+		{
 			selectedRoomType = RoomType::WALL;
-		} else {
+		} 
+		else 
+		{
 			selectedRoomType = RoomType::FLOOR;
 		}
 	}
@@ -152,51 +162,64 @@ void MapEditor::MapEdit()
 	if(ui->IsMouseInMapArea())
 	{
 		// 마우스 위치를 맵 타일 위치로 변환
-		POINT mapPos = ui->ScreenToMap(ui->GetMousePos(),mapArea,mapWidth,mapHeight);
+		POINT mousePos = ui->GetMousePos();
+		POINT mapPos = ui->ScreenToMap(mousePos,mapArea,mapWidth,mapHeight);
 		int tileX = mapPos.x;
 		int tileY = mapPos.y;
 
-		if(KeyManager::GetInstance()->IsStayKeyDown(VK_LBUTTON))
+		// 타일의 중앙 화면 좌표 계산
+		POINT screenPos = ui->MapToScreen({tileX,tileY},mapArea,mapWidth,mapHeight);
+
+		// GetRectAtCenter를 사용하여 타일 영역 계산
+		int tileWidth = (mapArea.right - mapArea.left) / mapWidth;
+		int tileHeight = (mapArea.bottom - mapArea.top) / mapHeight;
+		RECT tileRect = GetRectAtCenter(screenPos.x,screenPos.y,tileWidth,tileHeight);
+
+		if(PtInRect(&tileRect,ui->GetMousePos()))
 		{
-			if(tileX >= 0 && tileX < mapWidth && tileY >= 0 && tileY < mapHeight)
+
+			if(KeyManager::GetInstance()->IsStayKeyDown(VK_LBUTTON))
 			{
-				switch(mode)
+				if(tileX >= 0 && tileX < mapWidth && tileY >= 0 && tileY < mapHeight)
 				{
-				case EditorMode::TILE:
-				PlaceTile(tileX,tileY);
-				break;
-				case EditorMode::START:
-				PlaceStartPoint(tileX,tileY);
-				break;
-				case EditorMode::ITEM:
-				PlaceItem(tileX,tileY);
-				break;
-				case EditorMode::MONSTER:
-				PlaceMonster(tileX,tileY);
-				break;
-				case EditorMode::OBSTACLE:
-				PlaceObstacle(tileX,tileY);
-				break;
+					switch(mode)
+					{
+					case EditorMode::TILE:
+						PlaceTile(tileX,tileY);
+						break;
+					case EditorMode::START:
+						PlaceStartPoint(tileX,tileY);
+						break;
+					case EditorMode::ITEM:
+						PlaceItem(tileX,tileY);
+						break;
+					case EditorMode::MONSTER:
+						PlaceMonster(tileX,tileY);
+						break;
+					case EditorMode::OBSTACLE:
+						PlaceObstacle(tileX,tileY);
+						break;
+					}
 				}
 			}
-		}
 
-		if(KeyManager::GetInstance()->IsStayKeyDown(VK_RBUTTON))
-		{
-			if(tileX >= 0 && tileX < mapWidth && tileY >= 0 && tileY < mapHeight)
+			if(KeyManager::GetInstance()->IsStayKeyDown(VK_RBUTTON))
 			{
-				if(mode == EditorMode::ITEM || mode == EditorMode::MONSTER)
+				if(tileX >= 0 && tileX < mapWidth && tileY >= 0 && tileY < mapHeight)
 				{
-					RemoveSprite(tileX,tileY);
-				} else if(mode == EditorMode::OBSTACLE)
-				{
-					RemoveObstacle(tileX,tileY);
-				} else if(mode == EditorMode::TILE)
-				{
-					int index = tileY * mapWidth + tileX;
-					if(index < tiles.size()) {
-						tiles[index].roomType = RoomType::FLOOR;
-						tiles[index].tilePos = 10;
+					if(mode == EditorMode::ITEM || mode == EditorMode::MONSTER)
+					{
+						RemoveSprite(tileX,tileY);
+					} else if(mode == EditorMode::OBSTACLE)
+					{
+						RemoveObstacle(tileX,tileY);
+					} else if(mode == EditorMode::TILE)
+					{
+						int index = tileY * mapWidth + tileX;
+						if(index < tiles.size()) {
+							tiles[index].roomType = RoomType::FLOOR;
+							tiles[index].tilePos = 10;
+						}
 					}
 				}
 			}
@@ -216,16 +239,20 @@ void MapEditor::Shortcut()
 	if(km->IsOnceKeyDown('1'))
 	{
 		ChangeMode(EditorMode::TILE);
-	} else if(km->IsOnceKeyDown('2'))
+	} 
+	else if(km->IsOnceKeyDown('2'))
 	{
 		ChangeMode(EditorMode::START);
-	} else if(km->IsOnceKeyDown('3'))
+	} 
+	else if(km->IsOnceKeyDown('3'))
 	{
 		ChangeMode(EditorMode::ITEM);
-	} else if(km->IsOnceKeyDown('4'))
+	} 
+	else if(km->IsOnceKeyDown('4'))
 	{
 		ChangeMode(EditorMode::MONSTER);
-	} else if(km->IsOnceKeyDown('5'))
+	} 
+	else if(km->IsOnceKeyDown('5'))
 	{
 		ChangeMode(EditorMode::OBSTACLE);
 	}
@@ -233,10 +260,12 @@ void MapEditor::Shortcut()
 	if(km->IsOnceKeyDown('S'))
 	{
 		SaveMap();
-	} else if(km->IsOnceKeyDown('L'))
+	} 
+	else if(km->IsOnceKeyDown('L'))
 	{
 		LoadMap();
-	} else if(km->IsOnceKeyDown('C'))
+	} 
+	else if(km->IsOnceKeyDown('C'))
 	{
 		ClearMap();
 	}
@@ -246,13 +275,16 @@ void MapEditor::Shortcut()
 		if(km->IsOnceKeyDown(VK_UP))
 		{
 			ChangeObstacleDirection(Direction::NORTH);
-		} else if(km->IsOnceKeyDown(VK_DOWN))
+		}
+		else if(km->IsOnceKeyDown(VK_DOWN))
 		{
 			ChangeObstacleDirection(Direction::SOUTH);
-		} else if(km->IsOnceKeyDown(VK_LEFT))
+		}
+		else if(km->IsOnceKeyDown(VK_LEFT))
 		{
 			ChangeObstacleDirection(Direction::WEST);
-		} else if(km->IsOnceKeyDown(VK_RIGHT))
+		} 
+		else if(km->IsOnceKeyDown(VK_RIGHT))
 		{
 			ChangeObstacleDirection(Direction::EAST);
 		}
@@ -365,10 +397,12 @@ void MapEditor::AddSprite(FPOINT position,Texture* texture,SpriteType type)
 	if(type == SpriteType::KEY)
 	{
 		newSprite.aniInfo = {0.1f,0.1f,{456,488},{10,1},{0,0}};
-	} else if(type == SpriteType::MONSTER)
+	} 
+	else if(type == SpriteType::MONSTER)
 	{
 		newSprite.aniInfo = {0.1f,0.1f,{423,437},{1,1},{0,0}};
-	} else
+	}
+	else
 	{
 		newSprite.aniInfo = {0.1f,0.1f,{0,0},{1,1},{0,0}};
 	}
@@ -399,7 +433,7 @@ int MapEditor::FindObstacle(int x,int y)
 
 void MapEditor::AddObstacle(POINT position,Texture* texture,Direction dir)
 {
-	EditorObstacle newObstacle;
+	Obstacle newObstacle;
 	newObstacle.pos = position;
 	newObstacle.texture = texture;
 	newObstacle.dir = dir;
@@ -431,7 +465,8 @@ void MapEditor::InitTiles()
 			{
 				tiles[index].tilePos = 4;
 				tiles[index].roomType = RoomType::WALL;
-			} else
+			}
+			else
 			{
 				tiles[index].tilePos = 10;
 				tiles[index].roomType = RoomType::FLOOR;
@@ -447,20 +482,53 @@ void MapEditor::InitTiles()
 
 void MapEditor::SaveMap()
 {
-	// DataManager 활용하여 저장
-	DataManager::GetInstance()->ClearAllData();
+	PrepareDataForSave();
 
+	// 파일 저장 호출 추가
+	if(DataManager::GetInstance()->SaveMapFile(L"Map/EditorMap.dat")) {
+		MessageBox(g_hWnd,TEXT("Map Saved Successfully"),TEXT("Success"),MB_OK);
+	} else {
+		MessageBox(g_hWnd,TEXT("Failed to Save Map"),TEXT("Error"),MB_OK);
+	}
+}
+
+void MapEditor::LoadMap()
+{
+	// 파일 불러오기 호출 추가
+	if(DataManager::GetInstance()->LoadMapFile(L"Map/EditorMap.dat")) {
+		LoadFromDataManager();
+		MessageBox(g_hWnd,TEXT("Map Loaded Successfully"),TEXT("Success"),MB_OK);
+	} else {
+		MessageBox(g_hWnd,TEXT("Failed to Load Map"),TEXT("Error"),MB_OK);
+	}
+}
+
+void MapEditor::PrepareDataForSave()
+{
+	// 가장자리를 벽으로 강제 설정
+	for(int y = 0; y < mapHeight; y++)
+	{
+		for(int x = 0; x < mapWidth; x++)
+		{
+			if(x == 0 || y == 0 || x == mapWidth - 1 || y == mapHeight - 1)
+			{
+				int index = y * mapWidth + x;
+				tiles[index].roomType = RoomType::WALL;
+				tiles[index].tilePos = 4;  // 벽 타일 인덱스
+			}
+		}
+	}
+
+	// DataManager에 저장할 데이터 준비
+	DataManager::GetInstance()->ClearAllData();
 	// 맵 데이터 설정
 	DataManager::GetInstance()->SetMapData(tiles,mapWidth,mapHeight);
-
 	// 텍스처 정보 설정
 	DataManager::GetInstance()->SetTextureInfo(L"Image/horrorMapTiles.bmp",
 											 128,SAMPLE_TILE_X,SAMPLE_TILE_Y);
-
 	// 시작 위치 설정
 	DataManager::GetInstance()->SetStartPosition(startPosition);
-
-	// 아이템 데이터 추가
+	// 아이템, 몬스터, 장애물 데이터 추가
 	for(const auto& sprite : editorSprites)
 	{
 		if(sprite.type == SpriteType::KEY)
@@ -470,13 +538,8 @@ void MapEditor::SaveMap()
 			item.aniInfo = sprite.aniInfo;
 			item.itemType = 0;  // Key
 			DataManager::GetInstance()->AddItemData(item);
-		}
-	}
-
-	// 몬스터 데이터 추가
-	for(const auto& sprite : editorSprites)
-	{
-		if(sprite.type == SpriteType::MONSTER)
+		} 
+		else if(sprite.type == SpriteType::MONSTER)
 		{
 			MonsterData monster;
 			monster.pos = sprite.pos;
@@ -486,35 +549,12 @@ void MapEditor::SaveMap()
 		}
 	}
 
-	// 장애물 데이터 추가
 	for(const auto& obstacle : editorObstacles)
 	{
 		ObstacleData obsData;
 		obsData.pos = obstacle.pos;
 		obsData.dir = obstacle.dir;
-		obsData.obstacleType = 0;  // Pile
 		DataManager::GetInstance()->AddObstacleData(obsData);
-	}
-
-	// 파일로 저장
-	if(DataManager::GetInstance()->SaveMapFile(L"Map/EditorMap.dat"))
-	{
-		MessageBox(g_hWnd,TEXT("Map Saved"),TEXT("Success"),MB_OK);
-	} else
-	{
-		MessageBox(g_hWnd,TEXT("Failed to save map"),TEXT("Error"),MB_OK);
-	}
-}
-
-void MapEditor::LoadMap()
-{
-	if(DataManager::GetInstance()->LoadMapFile(L"Map/EditorMap.dat"))
-	{
-		LoadFromDataManager();
-		MessageBox(g_hWnd,TEXT("Map Loaded"),TEXT("Success"),MB_OK);
-	} else
-	{
-		MessageBox(g_hWnd,TEXT("Failed to load map"),TEXT("Error"),MB_OK);
 	}
 }
 
@@ -532,7 +572,7 @@ void MapEditor::LoadFromDataManager()
 	// 시작 위치 복원
 	startPosition = DataManager::GetInstance()->GetStartPosition();
 
-	// 엔티티들 초기화
+	//데이터 초기화
 	editorSprites.clear();
 	editorObstacles.clear();
 
@@ -563,7 +603,7 @@ void MapEditor::LoadFromDataManager()
 	// 장애물 복원 
 	const auto& obstacles = DataManager::GetInstance()->GetObstacles();
 	for(const auto& obstacle : obstacles) {
-		EditorObstacle editorObstacle;
+		Obstacle editorObstacle;
 		editorObstacle.pos = obstacle.pos;
 		editorObstacle.dir = obstacle.dir;
 		editorObstacle.texture = TextureManager::GetInstance()->GetTexture(L"Image/jewel.bmp");

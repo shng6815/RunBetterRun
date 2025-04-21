@@ -2,7 +2,6 @@
 #include "CommonFunction.h"
 #include "Image.h"
 #include "Timer.h"
-#include "MapEditor.h"
 #include "LoadingScene.h"
 #include "RayCast.h"
 #include "SpriteManager.h"
@@ -13,6 +12,7 @@
 #include "DeadScene.h"
 #include "VideoManager.h"
 #include "DataManager.h"
+#include "MapEditor.h"
 
 HRESULT MainGame::Init()
 {
@@ -21,7 +21,7 @@ HRESULT MainGame::Init()
 	SceneManager::GetInstance()->Init();
 	VideoManager::Init();
 	DataManager::GetInstance()->Init();	
-	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
+	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
 	SceneManager::GetInstance()->AddScene("MapEditorScene",new MapEditor());
 	SceneManager::GetInstance()->AddScene("MainGameScene",new MainGameScene());
 	SceneManager::GetInstance()->AddScene("GameStartScene",new GameStartScene());

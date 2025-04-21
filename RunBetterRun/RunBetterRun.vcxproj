@@ -149,7 +149,7 @@ mf.lib
     <ClCompile Include="MainGameScene.cpp" />
     <ClCompile Include="AMonster.cpp" />
     <ClCompile Include="MapEditor.cpp" />
-    <ClCompile Include="MapEditorRenderer.cpp" />
+    <ClCompile Include="MapEditorRender.cpp" />
     <ClCompile Include="MapEditorUI.cpp" />
     <ClCompile Include="ObstacleManager.cpp" />
     <ClCompile Include="PhoneUI.cpp" />
@@ -189,7 +189,7 @@ mf.lib
     <ClInclude Include="MainGameScene.h" />
     <ClInclude Include="AMonster.h" />
     <ClInclude Include="MapEditor.h" />
-    <ClInclude Include="MapEditorRenderer.h" />
+    <ClInclude Include="MapEditorRender.h" />
     <ClInclude Include="MapEditorUI.h" />
     <ClInclude Include="MonsterManager.h" />
     <ClInclude Include="ObstacleManager.h" />

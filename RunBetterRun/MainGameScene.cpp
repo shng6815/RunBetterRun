@@ -95,11 +95,6 @@ void MainGameScene::Update()
 			status = SceneStatus::PAUSE;
 		}
 
-		if(KeyManager::GetInstance()->IsOnceKeyDown('T'))
-		{
-			SceneManager::GetInstance()->ChangeScene("MapEditorScene");
-		}
-
 		if (KeyManager::GetInstance()->IsOnceKeyDown('M')) {
 			UIManager::GetInstance()->ToggleActiveUIUnit("PhoneUI");
 		}
@@ -117,6 +112,11 @@ void MainGameScene::Update()
 		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {
 			while(ShowCursor(FALSE) >= 0);
 			status = SceneStatus::IN_GAME;
+		}
+
+		if(KeyManager::GetInstance()->IsOnceKeyDown('T'))
+		{
+			SceneManager::GetInstance()->ChangeScene("MapEditorScene");
 		}
 
 		break;

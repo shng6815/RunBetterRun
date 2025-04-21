@@ -58,13 +58,17 @@ POINT MapEditorUI::ScreenToMap(POINT screenPos,RECT mapArea,int mapWidth,int map
 	if(screenPos.x >= mapArea.left && screenPos.x < mapArea.right &&
 		screenPos.y >= mapArea.top && screenPos.y < mapArea.bottom)
 	{
-		// 맵 영역 크기 계산
-		int mapAreaWidth = mapArea.right - mapArea.left;
-		int mapAreaHeight = mapArea.bottom - mapArea.top;
+		// 맵 영역 내 상대 좌표 계산
+		int relX = screenPos.x - mapArea.left;
+		int relY = screenPos.y - mapArea.top;
 
-		// 스크린 좌표를 맵 좌표로 변환
-		result.x = (screenPos.x - mapArea.left) * mapWidth / mapAreaWidth;
-		result.y = (screenPos.y - mapArea.top) * mapHeight / mapAreaHeight;
+		// 타일 크기 계산
+		int tileWidth = (mapArea.right - mapArea.left) / VISIBLE_MAP_WIDTH;
+		int tileHeight = (mapArea.bottom - mapArea.top) / VISIBLE_MAP_HEIGHT;
+
+		// 타일 좌표 직접 계산
+		result.x = relX / tileWidth;
+		result.y = relY / tileHeight;
 
 		// 범위를 벗어나지 않도록 보정
 		result.x = max(0,min(result.x,mapWidth - 1));
@@ -82,18 +86,15 @@ POINT MapEditorUI::MapToScreen(POINT mapPos,RECT mapArea,int mapWidth,int mapHei
 	if(mapPos.x >= 0 && mapPos.x < mapWidth &&
 		mapPos.y >= 0 && mapPos.y < mapHeight)
 	{
-		// 맵 영역 크기 계산
-		int mapAreaWidth = mapArea.right - mapArea.left;
-		int mapAreaHeight = mapArea.bottom - mapArea.top;
-
 		// 타일 크기 계산
-		int tileWidth = mapAreaWidth / mapWidth;
-		int tileHeight = mapAreaHeight / mapHeight;
+		int tileWidth = (mapArea.right - mapArea.left) / VISIBLE_MAP_WIDTH;
+		int tileHeight = (mapArea.bottom - mapArea.top) / VISIBLE_MAP_HEIGHT;
 
 		// 맵 좌표를 스크린 좌표로 변환 (타일 중앙 기준)
 		result.x = mapArea.left + mapPos.x * tileWidth + (tileWidth / 2);
 		result.y = mapArea.top + mapPos.y * tileHeight + (tileHeight / 2);
-	} else
+	}
+	else
 	{
 		// 유효하지 않은 맵 좌표인 경우 맵 영역 밖으로 설정
 		result.x = mapArea.left - 100;

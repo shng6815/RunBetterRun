@@ -18,31 +18,18 @@ public:
 
 	// 마우스 관련 기능
 	void UpdateMousePosition(POINT mousePos);
-	bool IsMouseInMapArea() const {
-		return mouseInMapArea;
-	}
+	bool IsMouseInMapArea() const {	return mouseInMapArea;	}
 
 	// 타일 선택 관련
-	POINT GetSelectedTile() const {
-		return selectedTile;
-	}
-	void SetSelectedTile(POINT tile) {
-		selectedTile = tile;
-	}
+	POINT GetSelectedTile() const {	return selectedTile; }
+	void SetSelectedTile(POINT tile) { selectedTile = tile;	}
 	bool HandleTileSelection(POINT mousePos,RECT sampleArea);
 
 	// 좌표 변환 기능
 	POINT ScreenToMap(POINT screenPos,RECT mapArea,int mapWidth,int mapHeight) const;
 	POINT MapToScreen(POINT mapPos,RECT mapArea,int mapWidth,int mapHeight) const;
 
-	// Getter/Setter
-	RECT GetSampleArea() const {
-		return sampleArea;
-	}
-	RECT GetMapArea() const {
-		return mapArea;
-	}
-	POINT GetMousePos() const {
-		return mousePos;
-	}
+	RECT GetSampleArea() const { return sampleArea;	}
+	RECT GetMapArea() const { return mapArea; }
+	POINT GetMousePos() const { return mousePos; }
 };

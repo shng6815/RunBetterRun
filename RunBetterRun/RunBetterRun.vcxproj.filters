@@ -156,7 +156,7 @@
     <ClCompile Include="MapEditor.cpp">
       <Filter>Core\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="MapEditorRenderer.cpp">
+    <ClCompile Include="MapEditorRender.cpp">
       <Filter>Core\Editor</Filter>
     </ClCompile>
     <ClCompile Include="MapEditorUI.cpp">
@@ -281,7 +281,7 @@
     <ClInclude Include="MapEditor.h">
       <Filter>Core\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="MapEditorRenderer.h">
+    <ClInclude Include="MapEditorRender.h">
       <Filter>Core\Editor</Filter>
     </ClInclude>
     <ClInclude Include="MapEditorUI.h">

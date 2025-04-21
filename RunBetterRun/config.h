@@ -19,14 +19,16 @@ using namespace std;
 /*
 	컴파일러에서 해당 코드를 뒤에 정의된 코드로 변경한다. 
 */
-#define WINSIZE_X	1920
-#define WINSIZE_Y	1080
-#define TILEMAPTOOL_X	1920
-#define TILEMAPTOOL_Y	1080
+#define WINSIZE_X	1600
+#define WINSIZE_Y	900
+
+//타일맵 관련 상수
+#define TILEMAPTOOL_X	1600
+#define TILEMAPTOOL_Y	900
 
 #define VISIBLE_MAP_WIDTH  40       
 #define VISIBLE_MAP_HEIGHT 40
-#define TILE_SIZE 24
+#define TILE_SIZE 32
 #define SAMPLE_TILE_X 11            
 #define SAMPLE_TILE_Y 11
 

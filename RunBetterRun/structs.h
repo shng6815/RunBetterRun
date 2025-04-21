@@ -159,10 +159,3 @@ typedef struct tagObstacleSaveData
 	AnimationInfo aniInfo; // 애니메이션 정보
 	int obstacleType;      // 장애물 타입 - 0: Pile, 1: 다른 장애물 타입 등
 }ObstacleData;
-
-typedef struct tagEditorObstacle
-{
-	POINT pos;
-	Direction dir;
-	Texture* texture;
-} EditorObstacle;

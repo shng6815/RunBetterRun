@@ -2,11 +2,9 @@
 #include "GameObject.h"
 #include "structs.h"
 
-// 전방 선언
 class MapEditorUI;
-class MapEditorRenderer;
+class MapEditorRender;
 
-// 맵 에디터 모드
 enum class EditorMode {
 	TILE,
 	START,
@@ -19,7 +17,7 @@ class MapEditor: public GameObject {
 private:
 	// 컴포넌트
 	MapEditorUI* ui;
-	MapEditorRenderer* renderer;
+	MapEditorRender* render;
 
 	// 에디터 상태
 	EditorMode mode;
@@ -31,12 +29,15 @@ private:
 	vector<Room> tiles;
 	int mapWidth,mapHeight;
 	vector<Sprite> editorSprites;
-	vector<EditorObstacle> editorObstacles;
+	vector<Obstacle> editorObstacles;
 
 	// UI 리소스
 	Image* sampleTileImage;
 	RECT sampleArea;
 	RECT mapArea;
+
+	float tileScaleRatio;  // 타일 스케일 비율
+	int mapTileSize;       // 화면에 표시되는 타일 크기
 
 	// 내부 기능 함수들
 	void TileSelect();
@@ -67,7 +68,7 @@ public:
 	void ChangeMode(EditorMode newMode);
 	void ChangeObstacleDirection(Direction dir);
 
-	// 엔티티 관리
+	// 스프라이트 관리
 	int FindSprite(int x,int y);
 	void AddSprite(FPOINT position,Texture* texture,SpriteType type);
 	void RemoveSprite(int x,int y);
@@ -81,4 +82,5 @@ public:
 	void SaveMap();
 	void LoadMap();
 	void ClearMap();
+	void TestPlaceTile(int screenX,int screenY);
 };
