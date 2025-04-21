@@ -19,24 +19,21 @@ HRESULT MainGame::Init()
 	SceneManager::GetInstance()->Init();
 	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
 
-	
-	if(FAILED(SoundManager::GetInstance()->Init()))
+	SoundManager::GetInstance()->Init();
+
+	if(FAILED(SoundManager::GetInstance()->LoadMusic("BGM","Sounds/bgm_main.wav")))
 	{
-		MessageBox(g_hWnd,L"사운드 시스템 초기화 실패",L"오류",MB_OK);
+		MessageBox(g_hWnd,TEXT("BGM Load Failed"),TEXT("Error"),MB_OK);
+		return E_FAIL;
 	}
 
-	if(FAILED(SoundManager::GetInstance()->LoadSound("bgm_main",L"Sounds/bgm_main.wav")))
+	if(FAILED(SoundManager::GetInstance()->LoadSound("Step","Sounds/SFX_Step.wav")))
 	{
-		MessageBox(g_hWnd,L"배경음악 로드 실패",L"오류",MB_OK);
+		MessageBox(g_hWnd,TEXT("SFX Load Failed"),TEXT("Error"),MB_OK);
+		return E_FAIL;
 	}
 
-	/*HRESULT hr = SoundManager::GetInstance()->PlaySound("bgm_main",SoundType::BGM,true,0.5f);
-	if(FAILED(hr))
-	{
-		wchar_t errMsg[100];
-		swprintf_s(errMsg,L"배경음악 재생 실패: 0x%08X",hr);
-		MessageBox(g_hWnd,errMsg,L"오류",MB_OK);
-	}*/
+	SoundManager::GetInstance()->PlayMusic("BGM",true,0.8f);
 
 	SceneManager::GetInstance()->AddScene("MainGameScene",new MainGameScene());
 	SceneManager::GetInstance()->AddScene("GameStartScene",new GameStartScene());

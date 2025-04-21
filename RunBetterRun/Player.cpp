@@ -2,6 +2,7 @@
 #include "MapManager.h"
 #include "UIManager.h"
 #include "PhoneUI.h"
+#include "SoundManager.h"
 
 HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 {
@@ -131,47 +132,58 @@ void Player::MouseInput(void)
 
 void Player::MoveCamera(float deltaTime)
 {
-    if (!moveInput.x && !moveInput.y)
-    {
+	if(!moveInput.x && !moveInput.y)
+	{
 		stepElapsedTime = 0;
 		return;
-    }
+	}
 
 	stepElapsedTime += deltaTime;
 
-    float interval = (runSpeed == moveSpeed ? runTime : stepTime);
-    if (stepElapsedTime > interval)
-    {
-        shakeFunc(moveSpeed * 10 + 3, 0.2f, true);
-        stepElapsedTime = 0;
-    }
+	float interval = (moveSpeed == runSpeed ? runTime : stepTime);
+	if(stepElapsedTime > interval)
+	{
+		// 카메라 흔들기 효과
+		shakeFunc(moveSpeed * 10 + 3,0.2f,true);
 
-    bool moveForward = moveInput.x > 0;
-    bool moveBackward = moveInput.x < 0;
-    bool moveLeft = moveInput.y < 0;
-    bool moveRight = moveInput.y > 0;
+		// 발소리 재생 - 걷기/뛰기에 따라 다른 볼륨으로 재생
+		if(moveSpeed == runSpeed) {
+			// 뛰는 소리 (더 큰 볼륨)
+			SoundManager::GetInstance()->PlaySound("Step",false,1.0f);
+		} else {
+			// 걷는 소리 (약간 작은 볼륨)
+			SoundManager::GetInstance()->PlaySound("Step",false,0.7f);
+		}
 
-    FPOINT pos = cameraPos;
+		stepElapsedTime = 0;
+	}
 
-    if (moveForward || moveBackward) {
-        pos.x += (moveForward ? -1 : 1) * (cameraVerDir.x * moveSpeed * deltaTime);
-        pos.y += (moveForward ? -1 : 1) * (cameraVerDir.y * moveSpeed * deltaTime);
-    }
+	bool moveForward = moveInput.x > 0;
+	bool moveBackward = moveInput.x < 0;
+	bool moveLeft = moveInput.y < 0;
+	bool moveRight = moveInput.y > 0;
 
-    if (moveLeft || moveRight) {
-        pos.x += (moveLeft ? -1 : 1) * (cameraHorDir.x * moveSpeed * deltaTime);
-        pos.y += (moveLeft ? -1 : 1) * (cameraHorDir.y * moveSpeed * deltaTime);
-    }
+	FPOINT pos = cameraPos;
+
+	if(moveForward || moveBackward) {
+		pos.x += (moveForward ? -1 : 1) * (cameraVerDir.x * moveSpeed * deltaTime);
+		pos.y += (moveForward ? -1 : 1) * (cameraVerDir.y * moveSpeed * deltaTime);
+	}
+
+	if(moveLeft || moveRight) {
+		pos.x += (moveLeft ? -1 : 1) * (cameraHorDir.x * moveSpeed * deltaTime);
+		pos.y += (moveLeft ? -1 : 1) * (cameraHorDir.y * moveSpeed * deltaTime);
+	}
 
 
-    int x = INT(pos.x);
-    int y = INT(pos.y);
-    MapData* md = MapManager::GetInstance()->GetMapData();
-    if ((0 <= x && x < md->width && 0 <= y && y < md->height)
-        && md->tiles[y * md->width + x].roomType == RoomType::FLOOR)
-    {
-        cameraPos = pos;
-    }
+	int x = INT(pos.x);
+	int y = INT(pos.y);
+	MapData* md = MapManager::GetInstance()->GetMapData();
+	if((0 <= x && x < md->width && 0 <= y && y < md->height)
+		&& md->tiles[y * md->width + x].roomType == RoomType::FLOOR)
+	{
+		cameraPos = pos;
+	}
 }
 
 void Player::RotateCamera(float deltaTime)
