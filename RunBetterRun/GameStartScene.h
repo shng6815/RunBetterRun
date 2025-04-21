@@ -35,6 +35,7 @@ struct Button {
 class GameStartScene : public GameObject
 {
 private:
+	Image* image;
 	HBITMAP backgroundBitmap;  // 배경 이미지
 	vector<Button> buttons;    // 버튼 배열
 	LPCWSTR titleText;         // 제목 텍스트
