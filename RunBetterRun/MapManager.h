@@ -2,8 +2,8 @@
 #include "Singleton.h"
 #include "structs.h"
 
-#define MAP_COLUME 100
-#define MAP_ROW 100
+#define MAP_COLUME 80
+#define MAP_ROW 80
 
 class MapManager: public Singleton<MapManager>
 {

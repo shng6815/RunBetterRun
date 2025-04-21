@@ -2,13 +2,13 @@
 #include "GameObject.h"
 #include "structs.h"
 
-#define MAP_EDITOR_WIDTH  60       
-#define MAP_EDITOR_HEIGHT 60     
+#define MAP_EDITOR_WIDTH  80       
+#define MAP_EDITOR_HEIGHT 80     
 
-#define VISIBLE_MAP_WIDTH  60       
-#define VISIBLE_MAP_HEIGHT 60
+#define VISIBLE_MAP_WIDTH  40       
+#define VISIBLE_MAP_HEIGHT 40
 
-#define TILE_SIZE 16               
+#define TILE_SIZE 24               
 #define SAMPLE_TILE_X 11            
 #define SAMPLE_TILE_Y 11            
 
@@ -28,7 +28,6 @@ typedef struct EditorTile
 } editTile;
 
 class Image;
-class Button;
 
 class MapEditor: public GameObject
 {
@@ -43,7 +42,6 @@ private:
 
 	editTile mapTiles[MAP_EDITOR_HEIGHT][MAP_EDITOR_WIDTH];
 	vector<Sprite> editorSprites;
-	vector<Button*> buttons;
 	POINT mousePos;
 	FPOINT startPosition; 
 
@@ -54,7 +52,6 @@ public:
 	virtual void Render(HDC hdc) override;
 
 	void InitTiles();
-	void InitButtons();
 
 	// 기본 기능
 	void TileSelect();
