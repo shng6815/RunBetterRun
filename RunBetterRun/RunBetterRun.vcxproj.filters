@@ -144,6 +144,15 @@
     <ClCompile Include="DataManager.cpp">
       <Filter>Core\Data</Filter>
     </ClCompile>
+    <ClCompile Include="ObstacleManager.cpp">
+      <Filter>InGame\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="AObstacle.cpp">
+      <Filter>InGame\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Pile.cpp">
+      <Filter>InGame\Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h">
@@ -250,6 +259,15 @@
     </ClInclude>
     <ClInclude Include="DataManager.h">
       <Filter>Core\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="ObstacleManager.h">
+      <Filter>InGame\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="AObstacle.h">
+      <Filter>InGame\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Pile.h">
+      <Filter>InGame\Map</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

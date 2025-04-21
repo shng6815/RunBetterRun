@@ -156,16 +156,44 @@ void Player::MoveCamera(float deltaTime)
         pos.x += (moveLeft ? -1 : 1) * (cameraHorDir.x * moveSpeed * deltaTime);
         pos.y += (moveLeft ? -1 : 1) * (cameraHorDir.y * moveSpeed * deltaTime);
     }
+	
+	Move(pos);
+}
 
+void Player::Move(FPOINT pos)
+{
+	int x = INT(pos.x);
+	int y = INT(pos.y);
+	BOOL result = TRUE;
+	MapData* md = MapManager::GetInstance()->GetMapData();
 
-    int x = INT(pos.x);
-    int y = INT(pos.y);
-    MapData* md = MapManager::GetInstance()->GetMapData();
-    if ((0 <= x && x < md->width && 0 <= y && y < md->height)
-        && md->tiles[y * md->width + x].roomType == RoomType::FLOOR)
-    {
-        cameraPos = pos;
-    }
+	if ((0 <= x && x < md->width && 0 <= y && y < md->height)
+		&& md->tiles[y * md->width + x].roomType == RoomType::FLOOR)
+	{
+		int oldX = INT(cameraPos.x);
+		int oldY = INT(cameraPos.y);
+		Obstacle* newMove = md->tiles[y * md->width + x].obstacle;
+		Obstacle* oldMove = md->tiles[oldY * md->width + oldX].obstacle;
+		if (newMove && newMove->block)
+		{
+			if ((oldX < x && newMove->dir == Direction::EAST)
+				|| (oldX > x && newMove->dir == Direction::WEST)
+				|| (oldY < y && newMove->dir == Direction::SOUTH)
+				|| (oldY > y && newMove->dir == Direction::NORTH))
+				result = FALSE;
+		}
+		if(oldMove && oldMove->block)
+		{
+			if ((oldX < x && oldMove->dir == Direction::WEST)
+				|| (oldX > x && oldMove->dir == Direction::EAST)
+				|| (oldY < y && oldMove->dir == Direction::NORTH)
+				|| (oldY > y && oldMove->dir == Direction::SOUTH))
+				result = FALSE;
+		}
+	} else
+		result = FALSE;
+	if (result)
+		cameraPos = pos;
 }
 
 void Player::RotateCamera(float deltaTime)

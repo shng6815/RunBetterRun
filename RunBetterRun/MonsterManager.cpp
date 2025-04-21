@@ -129,14 +129,17 @@ vector<FPOINT> MonsterManager::FindPath(FPOINT start, FPOINT end)
             int nx = current->x + dx[i];
             int ny = current->y + dy[i];
 
-            // 맵 경계 확인
-            if (nx < 0 || nx >= mapData->width || ny < 0 || ny >= mapData->height)
-                continue;
+            //// 맵 경계 확인
+            //if (nx < 0 || nx >= mapData->width || ny < 0 || ny >= mapData->height)
+            //    continue;
 
-            // 이동 가능한 타일인지 확인 (FLOOR 또는 START)
-            Room& tile = mapData->tiles[ny * mapData->width + nx];
-            if (tile.roomType != RoomType::FLOOR && tile.roomType != RoomType::START)
-                continue;
+            //// 이동 가능한 타일인지 확인 (FLOOR 또는 START)
+            //Room& tile = mapData->tiles[ny * mapData->width + nx];
+            //if (tile.roomType != RoomType::FLOOR && tile.roomType != RoomType::START)
+            //    continue;
+
+			if(!Move({current->x,current->y},{nx,ny}))
+				continue;
 
             // 이미 닫힌 목록에 있는지 확인
             if (IsNodeInList(closedList, nx, ny))
@@ -205,11 +208,37 @@ MonsterManager::PathNode* MonsterManager::GetNodeFromList(vector<PathNode*>& lis
 	return nullptr;
 }
 
-FPOINT MonsterManager::Move(FPOINT src, FPOINT dst)
+BOOL MonsterManager::Move(POINT src, POINT dst)
 {
-    float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
-    FPOINT move = { dst.x - src.x, dst.y - src.y };
-    return { src.x + (move.x * MONSTER_SPEED * deltaTime),
-		src.y + (move.y * MONSTER_SPEED * deltaTime) };
+	if(dst.x < 0 || dst.x >= mapData->width
+		|| dst.y < 0 || dst.y >= mapData->height)
+		return FALSE;
+
+	Room& tile = mapData->tiles[dst.y * mapData->width + dst.x];
+	if (tile.roomType != RoomType::FLOOR && tile.roomType != RoomType::START)
+		return FALSE;
+
+	Obstacle* newMove = mapData->tiles[dst.y * mapData->width + dst.x].obstacle;
+	Obstacle* oldMove = mapData->tiles[src.y * mapData->width + src.x].obstacle;
+	
+	if(newMove && newMove->block)
+	{
+		if((src.x < dst.x && newMove->dir == Direction::EAST)
+			|| (src.x > dst.x && newMove->dir == Direction::WEST)
+			|| (src.y < dst.y && newMove->dir == Direction::SOUTH)
+			|| (src.y > dst.y && newMove->dir == Direction::NORTH))
+			return FALSE;
+	}
+	
+	if(oldMove && oldMove->block)
+	{
+		if((src.x < dst.x && oldMove->dir == Direction::WEST)
+			|| (src.x > dst.x && oldMove->dir == Direction::EAST)
+			|| (src.y < dst.y && oldMove->dir == Direction::NORTH)
+			|| (src.y > dst.y && oldMove->dir == Direction::SOUTH))
+			return FALSE;
+	}
+
+	return TRUE;
 }
 

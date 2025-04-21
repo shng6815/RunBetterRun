@@ -6,7 +6,7 @@
 HRESULT LoadingScene::Init()
 {
 	loadingTime = 0.0f;
-	minLoadingTime = 3.0f;
+	minLoadingTime = 0.0f;
 	isLoadingComplete = false;
 
 	// 로딩 애니메이션 초기화

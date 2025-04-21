@@ -8,6 +8,8 @@
 #include "PhoneUI.h"
 #include "Key.h"
 #include "Tentacle.h"
+#include "ObstacleManager.h"
+#include "Pile.h"
 
 HRESULT MainGameScene::Init()
 {
@@ -27,6 +29,7 @@ HRESULT MainGameScene::Init()
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	MonsterManager::GetInstance()->Init();
 	ItemManager::GetInstance()->Init();
+	ObstacleManager::GetInstance()->Init();
 
 	UIManager::GetInstance()->Init();
 	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
@@ -48,7 +51,10 @@ HRESULT MainGameScene::Init()
 
 	ItemManager::GetInstance()->PutItem(new Key({ 21.5, 10.5 }));
 	MonsterManager::GetInstance()->PutMonster(new Tentacle({ 21.5, 8.5 }));
-
+	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,21},Direction::WEST));
+	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,19},Direction::EAST));
+	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,20},Direction::NORTH));
+	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,18},Direction::SOUTH));
 
 	return S_OK;
 }
@@ -105,6 +111,7 @@ void MainGameScene::Update()
 		MonsterManager::GetInstance()->Update();
 		ItemManager::GetInstance()->Update();
 		UIManager::GetInstance()->Update();
+		ObstacleManager::GetInstance()->Update();
 		break;
 	case MainGameScene::SceneStatus::PAUSE:
 		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {
@@ -157,20 +164,20 @@ void MainGameScene::LoadMapItems(LPCWCH filePath)
 
 	DWORD bytesRead = 0;
 
-	// 맵 데이터 건너뛰기
+	// �� ������ �ǳʶٱ�
 	int mapWidth,mapHeight,tileCount;
 	ReadFile(hFile,&mapWidth,sizeof(int),&bytesRead,NULL);
 	ReadFile(hFile,&mapHeight,sizeof(int),&bytesRead,NULL);
 	ReadFile(hFile,&tileCount,sizeof(int),&bytesRead,NULL);
 
-	// 타일 데이터 건너뛰기
+	// Ÿ�� ������ �ǳʶٱ�
 	SetFilePointer(hFile,sizeof(Room) * tileCount,NULL,FILE_CURRENT);
 
-	// 아이템 개수 읽기
+	// ������ ���� �б�
 	int itemCount = 0;
 	ReadFile(hFile,&itemCount,sizeof(int),&bytesRead,NULL);
 
-	// 아이템 위치 정보 읽고 생성
+	// ������ ��ġ ���� �а� ����
 	for(int i = 0; i < itemCount; i++)
 	{
 		FPOINT pos;
@@ -179,17 +186,17 @@ void MainGameScene::LoadMapItems(LPCWCH filePath)
 		ReadFile(hFile,&pos,sizeof(FPOINT),&bytesRead,NULL);
 		ReadFile(hFile,&aniInfo,sizeof(AnimationInfo),&bytesRead,NULL);
 
-		// Key 아이템 생성
+		// Key ������ ����
 		Key* key = new Key(pos);
-		key->SetAnimInfo(aniInfo); // 애니메이션 정보 설정 (Key 클래스에 추가 필요)
+		key->SetAnimInfo(aniInfo); // �ִϸ��̼� ���� ���� (Key Ŭ������ �߰� �ʿ�)
 		ItemManager::GetInstance()->PutItem(key);
 	}
 
-	// 몬스터 개수 읽기
+	// ���� ���� �б�
 	int monsterCount = 0;
 	ReadFile(hFile,&monsterCount,sizeof(int),&bytesRead,NULL);
 
-	// 몬스터 위치 정보 읽고 생성
+	// ���� ��ġ ���� �а� ����
 	for(int i = 0; i < monsterCount; i++)
 	{
 		FPOINT pos;
@@ -198,9 +205,9 @@ void MainGameScene::LoadMapItems(LPCWCH filePath)
 		ReadFile(hFile,&pos,sizeof(FPOINT),&bytesRead,NULL);
 		ReadFile(hFile,&aniInfo,sizeof(AnimationInfo),&bytesRead,NULL);
 
-		// Tentacle 몬스터 생성
+		// Tentacle ���� ����
 		Tentacle* tentacle = new Tentacle(pos);
-		tentacle->SetAnimInfo(aniInfo); // 애니메이션 정보 설정 (Tentacle 클래스에 추가 필요)
+		tentacle->SetAnimInfo(aniInfo); // �ִϸ��̼� ���� ���� (Tentacle Ŭ������ �߰� �ʿ�)
 		MonsterManager::GetInstance()->PutMonster(tentacle);
 	}
 

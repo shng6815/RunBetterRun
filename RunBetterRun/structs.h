@@ -1,23 +1,21 @@
 #pragma once
 #include "config.h"
 
-enum class RoomType
+enum class RoomType: BYTE
 { NONE, WALL, FLOOR, START, GOAL };
 
-enum class SpriteType
+enum class Direction: BYTE
+{
+	NORTH, SOUTH, WEST, EAST
+};
+
+enum class SpriteType: BYTE
 { NONE, KEY, ITEM, MONSTER };
 
-enum class UIType
+enum class UIType: BYTE
 {
 	NONE, PLAYING, GAMEOVER, PAUSE, TITLE
 };
-
-typedef struct tagRoom
-{
-	RoomType	roomType;
-	DWORD		tilePos;
-	tagRoom() :roomType(RoomType::FLOOR), tilePos(1) {}
-} Room;
 
 typedef struct tagTexture
 {
@@ -36,6 +34,35 @@ typedef struct tagAnimationInfo
 
 } AnimationInfo;
 
+typedef struct tagObstacle
+{
+	POINT			pos;
+	BOOL			block;
+	Direction		dir;
+	float			distance;
+	Texture*		texture;
+	AnimationInfo	aniInfo;
+} Obstacle;
+
+typedef struct tagRoom
+{
+	RoomType	roomType;
+	DWORD		tilePos;
+	Obstacle*	obstacle;
+	tagRoom() :roomType(RoomType::FLOOR),
+		tilePos(1), obstacle(nullptr) {}
+} Room;
+
+typedef struct tagLevel
+{
+	FPOINT	mosterPos;
+	FPOINT	cameraDir;
+	FPOINT	cameraPos;
+	DWORD	itemCount;
+	DWORD	monsterCount;
+} Level;
+
+
 typedef struct tagSprite
 {
 	SpriteType		type;
@@ -52,12 +79,13 @@ typedef struct tagRay
 	int			height;
 	FPOINT		pos;
 	FPOINT		dir;
-	FPOINT		mapPos;
+	POINT		mapPos;
+	DWORD		mapCoordinate;
 	FPOINT		sideDist;
 	FPOINT		deltaDist;
-	FPOINT		step;
+	POINT		step;
 	float		wallTextureX;
-
+	Obstacle*	obstacle;
 	tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX);
 } Ray;
 
@@ -72,23 +100,23 @@ typedef struct tagMapData
 	DWORD textureTileColumnSize;
 } MapData;
 
-// 저장용 데이터
+// ����� ������
 typedef struct tagFileHeader
 {
-	char signature[4];      // 파일타입구분
-	int version;            // 파일 포맷 버전
+	char signature[4];      // ����Ÿ�Ա���
+	int version;            // ���� ���� ����
 	int mapWidth;          
 	int mapHeight;          
-	int tileCount;          // 전체 타일 수
+	int tileCount;          // ��ü Ÿ�� ��
 	int itemCount;         
 	int monsterCount;       
 	FPOINT startPos;        
 
-	// 텍스처 정보
-	wchar_t texturePath[MAX_PATH];  // 텍스처 경로
-	DWORD textureTileSize;          // 타일 크기
-	DWORD textureTileRowSize;       // 가로 타일 수
-	DWORD textureTileColumnSize;    // 세로 타일 수
+	// �ؽ�ó ����
+	wchar_t texturePath[MAX_PATH];  // �ؽ�ó ���
+	DWORD textureTileSize;          // Ÿ�� ũ��
+	DWORD textureTileRowSize;       // ���� Ÿ�� ��
+	DWORD textureTileColumnSize;    // ���� Ÿ�� ��
 
 	tagFileHeader()
 	{
@@ -110,14 +138,14 @@ typedef struct tagFileHeader
 
 typedef struct tagItemSaveData
 {
-	FPOINT pos;             // 위치
-	AnimationInfo aniInfo;  // 애니메이션 정보
-	int itemType;           // 아이템 타입 - 0: Key
+	FPOINT pos;             // ��ġ
+	AnimationInfo aniInfo;  // �ִϸ��̼� ����
+	int itemType;           // ������ Ÿ�� - 0: Key
 }ItemData;
 
 typedef struct tagMonsterSaveData
 {
-	FPOINT pos;             // 위치
-	AnimationInfo aniInfo;  // 애니메이션 정보
-	int monsterType;        // 몬스터 타입 - 0: Tentacle
+	FPOINT pos;             // ��ġ
+	AnimationInfo aniInfo;  // �ִϸ��̼� ����
+	int monsterType;        // ���� Ÿ�� - 0: Tentacle
 }MonsterData;

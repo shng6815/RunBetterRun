@@ -14,6 +14,7 @@ public:
 	void KeyInput(void);
 	void MouseInput(void);
 	void MoveCamera(float deltaTime);
+	void Move(FPOINT pos);
 	void RotateCamera(float deltaTime);
 	void UpdateFOV();
 
