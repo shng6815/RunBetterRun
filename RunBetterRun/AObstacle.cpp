@@ -26,20 +26,10 @@ void AObstacle::Release(void)
 		md->tiles[mapCoordinate].obstacle = nullptr;
 }
 
-BOOL AObstacle::Update(void)
-{
-	BOOL result = FALSE;
-	if(obstacle.distance <= OBSTACLE_SIZE)
-		result = Action();
-	UpdateOthers();
-    return result;
-}
-
-void AObstacle::UpdateOthers(void)
+void AObstacle::Update(void)
 {
 	// Update things... ex: Animation or Opening door things
 }
-
 
 void AObstacle::Distance(FPOINT player)
 {
