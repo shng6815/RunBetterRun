@@ -1,10 +1,11 @@
 #pragma once
 
 #pragma once
+#include "Singleton.h"
 #include <Windows.h>
 #include <mfplay.h>
 
-class VideoManager
+class VideoManager : public Singleton<VideoManager>
 {
 private:
 	static HWND videoWindow;

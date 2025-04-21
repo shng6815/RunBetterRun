@@ -25,20 +25,12 @@ HRESULT DeadScene::Init()
 
 void DeadScene::Release()
 {
-	// 비디오 플레이어 정리
-	if(pPlayer) {
-		pPlayer->Stop();         // 재생 중지
-		pPlayer->Shutdown();     // 플레이어 종료
-		pPlayer->Release();      // 객체 해제
-		pPlayer = nullptr;       // 포인터 초기화
-	}
-
-	MFShutdown();
+	
 }
 
 void DeadScene::Update()
 {
-	VideoManager::Update();
+	VideoManager::GetInstance()->Update();
 
 	// 비디오 종료 확인
 	if(VideoManager::IsFinished()) {
