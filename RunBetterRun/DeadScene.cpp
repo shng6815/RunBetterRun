@@ -35,7 +35,7 @@ void DeadScene::Update()
 	// 비디오 종료 확인
 	if(VideoManager::IsFinished()) {
 		Player::GetInstance()->InitPlayerLife();
-		SceneManager::GetInstance()->ChangeScene("GameStartScene");
+		SceneManager::GetInstance()->ChangeScene("GameStartScene","LoadingScene");
 	}
 }
 
