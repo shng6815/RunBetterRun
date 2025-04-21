@@ -168,93 +168,93 @@ void LoadingScene::DrawBloodEffect(HDC hdc)
 	}
 }
 
-void LoadingScene::DrawLoadingVisual(HDC hdc,int centerX,int centerY,int yOffset)
+void LoadingScene::DrawLoadingVisual(HDC hdc, int centerX, int centerY, int yOffset)
 {
-	// "LOADING..." 텍스트를 시각적으로 표시 (직접 그리기)
-	int textY = centerY + yOffset;
-	int letterSpacing = 25; // 글자 간격 넓게
-	int letterHeight = 20;  // 글자 높이
-	int letterWidth = 15;   // 글자 너비
-	int startX = centerX - (letterSpacing * 3); // "LOADING" 중앙 정렬
-	int dotCount = (int)(loadingTime * 2) % 4; // 주기적으로 점 개수 변경 (0-3)
-
-	HPEN textPen = CreatePen(PS_SOLID,3,RGB(180,0,0)); // 진한 붉은색, 더 굵게
-	HGDIOBJ oldPen = SelectObject(hdc,textPen);
-
-	// L 그리기
-	MoveToEx(hdc,startX,textY - letterHeight,NULL);
-	LineTo(hdc,startX,textY + letterHeight);
-	LineTo(hdc,startX + letterWidth,textY + letterHeight);
-
-	// O 그리기
-	Ellipse(hdc,startX + letterSpacing - letterWidth,textY - letterHeight,
-			startX + letterSpacing + letterWidth,textY + letterHeight);
-
-	// A 그리기
-	MoveToEx(hdc,startX + letterSpacing*2 - letterWidth,textY + letterHeight,NULL);
-	LineTo(hdc,startX + letterSpacing*2,textY - letterHeight);
-	LineTo(hdc,startX + letterSpacing*2 + letterWidth,textY + letterHeight);
-	// A의 가로선
-	MoveToEx(hdc,startX + letterSpacing*2 - letterWidth/2,textY,NULL);
-	LineTo(hdc,startX + letterSpacing*2 + letterWidth/2,textY);
-
-	// D 그리기
-	MoveToEx(hdc,startX + letterSpacing*3 - letterWidth/2,textY - letterHeight,NULL);
-	LineTo(hdc,startX + letterSpacing*3 - letterWidth/2,textY + letterHeight);
-
-	// 반원 그리기 (D의 오른쪽 부분)
-	HBRUSH nullBrush = (HBRUSH)GetStockObject(NULL_BRUSH);
-	HBRUSH oldBrush = (HBRUSH)SelectObject(hdc,nullBrush);
-
-	Ellipse(hdc,
-			startX + letterSpacing*3 - letterWidth/2,
-			textY - letterHeight,
-			startX + letterSpacing*3 + letterWidth + letterWidth/2,
-			textY + letterHeight);
-
-	SelectObject(hdc,oldBrush);
-
-	// I 그리기
-	MoveToEx(hdc,startX + letterSpacing*4,textY - letterHeight,NULL);
-	LineTo(hdc,startX + letterSpacing*4,textY + letterHeight);
-
-	// N 그리기
-	MoveToEx(hdc,startX + letterSpacing*5 - letterWidth/2,textY + letterHeight,NULL);
-	LineTo(hdc,startX + letterSpacing*5 - letterWidth/2,textY - letterHeight);
-	LineTo(hdc,startX + letterSpacing*5 + letterWidth,textY + letterHeight);
-	LineTo(hdc,startX + letterSpacing*5 + letterWidth,textY - letterHeight);
-
-	// G 그리기
-	// 반원 그리기
-	Arc(hdc,
-		startX + letterSpacing*6 - letterWidth,
-		textY - letterHeight,
-		startX + letterSpacing*6 + letterWidth,
-		textY + letterHeight,
-		startX + letterSpacing*6 + letterWidth,textY - letterHeight/2,
-		startX + letterSpacing*6 - letterWidth,textY - letterHeight/2);
-
-	// G의 아래쪽 가로선
-	MoveToEx(hdc,startX + letterSpacing*6 + letterWidth/2,textY,NULL);
-	LineTo(hdc,startX + letterSpacing*6 + letterWidth,textY);
-
-	// G의 오른쪽 세로선
-	MoveToEx(hdc,startX + letterSpacing*6 + letterWidth,textY,NULL);
-	LineTo(hdc,startX + letterSpacing*6 + letterWidth,textY + letterHeight);
-
-	// 점 그리기 (애니메이션)
-	HBRUSH dotBrush = CreateSolidBrush(RGB(180,0,0));
-	SelectObject(hdc,dotBrush);
-
-	for(int i = 0; i < dotCount; i++) {
-		Ellipse(hdc,
-				startX + letterSpacing*7 + i*10 - 3,textY + 10,
-				startX + letterSpacing*7 + i*10 + 3,textY + 16);
-	}
-
-	DeleteObject(dotBrush);
-
-	// 자원 해제
-	SelectObject(hdc,oldPen);
-	DeleteObject(textPen);
+    // "LOADING..." 텍스트를 시각적으로 표시 (직접 그리기)
+    int textY = centerY + yOffset;
+    int letterSpacing = 25; // 글자 간격 넓게
+    int letterHeight = 20;  // 글자 높이
+    int letterWidth = 15;   // 글자 너비
+    int startX = centerX - (letterSpacing * 3); // "LOADING" 중앙 정렬
+    int dotCount = (int)(loadingTime * 2) % 4; // 주기적으로 점 개수 변경 (0-3)
+    
+    HPEN textPen = CreatePen(PS_SOLID, 3, RGB(180, 0, 0)); // 진한 붉은색, 더 굵게
+    HGDIOBJ oldPen = SelectObject(hdc, textPen);
+    
+    // L 그리기
+    MoveToEx(hdc, startX, textY - letterHeight, NULL);
+    LineTo(hdc, startX, textY + letterHeight);
+    LineTo(hdc, startX + letterWidth, textY + letterHeight);
+    
+    // O 그리기
+    Ellipse(hdc, startX + letterSpacing - letterWidth, textY - letterHeight, 
+            startX + letterSpacing + letterWidth, textY + letterHeight);
+    
+    // A 그리기
+    MoveToEx(hdc, startX + letterSpacing*2 - letterWidth, textY + letterHeight, NULL);
+    LineTo(hdc, startX + letterSpacing*2, textY - letterHeight);
+    LineTo(hdc, startX + letterSpacing*2 + letterWidth, textY + letterHeight);
+    // A의 가로선
+    MoveToEx(hdc, startX + letterSpacing*2 - letterWidth/2, textY, NULL);
+    LineTo(hdc, startX + letterSpacing*2 + letterWidth/2, textY);
+    
+    // D 그리기
+    MoveToEx(hdc, startX + letterSpacing*3 - letterWidth/2, textY - letterHeight, NULL);
+    LineTo(hdc, startX + letterSpacing*3 - letterWidth/2, textY + letterHeight);
+    
+    // 반원 그리기 (D의 오른쪽 부분)
+    HBRUSH nullBrush = (HBRUSH)GetStockObject(NULL_BRUSH);
+    HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, nullBrush);
+    
+    Ellipse(hdc, 
+            startX + letterSpacing*3 - letterWidth/2,
+            textY - letterHeight, 
+            startX + letterSpacing*3 + letterWidth + letterWidth/2, 
+            textY + letterHeight);
+    
+    SelectObject(hdc, oldBrush);
+    
+    // I 그리기
+    MoveToEx(hdc, startX + letterSpacing*4, textY - letterHeight, NULL);
+    LineTo(hdc, startX + letterSpacing*4, textY + letterHeight);
+    
+    // N 그리기
+    MoveToEx(hdc, startX + letterSpacing*5 - letterWidth/2, textY + letterHeight, NULL);
+    LineTo(hdc, startX + letterSpacing*5 - letterWidth/2, textY - letterHeight);
+    LineTo(hdc, startX + letterSpacing*5 + letterWidth, textY + letterHeight);
+    LineTo(hdc, startX + letterSpacing*5 + letterWidth, textY - letterHeight);
+    
+    // G 그리기
+    // 반원 그리기
+    Arc(hdc, 
+        startX + letterSpacing*6 - letterWidth, 
+        textY - letterHeight,
+        startX + letterSpacing*6 + letterWidth, 
+        textY + letterHeight,
+        startX + letterSpacing*6 + letterWidth, textY - letterHeight/2,
+        startX + letterSpacing*6 - letterWidth, textY - letterHeight/2);
+    
+    // G의 아래쪽 가로선
+    MoveToEx(hdc, startX + letterSpacing*6 + letterWidth/2, textY, NULL);
+    LineTo(hdc, startX + letterSpacing*6 + letterWidth, textY);
+    
+    // G의 오른쪽 세로선
+    MoveToEx(hdc, startX + letterSpacing*6 + letterWidth, textY, NULL);
+    LineTo(hdc, startX + letterSpacing*6 + letterWidth, textY + letterHeight);
+    
+    // 점 그리기 (애니메이션)
+    HBRUSH dotBrush = CreateSolidBrush(RGB(180, 0, 0));
+    SelectObject(hdc, dotBrush);
+    
+    for (int i = 0; i < dotCount; i++) {
+        Ellipse(hdc, 
+                startX + letterSpacing*7 + i*10 - 3, textY + 10, 
+                startX + letterSpacing*7 + i*10 + 3, textY + 16);
+    }
+    
+    DeleteObject(dotBrush);
+    
+    // 자원 해제
+    SelectObject(hdc, oldPen);
+    DeleteObject(textPen);
 }
