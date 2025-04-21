@@ -40,11 +40,11 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Core\Editor">
-      <UniqueIdentifier>{21372f2c-5f93-4218-9d29-29e33327c4eb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Core\Data">
       <UniqueIdentifier>{5bf577db-5bda-4690-9566-8318306cafa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Editor">
+      <UniqueIdentifier>{21372f2c-5f93-4218-9d29-29e33327c4eb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -138,9 +138,6 @@
     <ClCompile Include="LoadingScene.cpp">
       <Filter>InGame\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="MapEditor.cpp">
-      <Filter>Core\Editor</Filter>
-    </ClCompile>
     <ClCompile Include="DataManager.cpp">
       <Filter>Core\Data</Filter>
     </ClCompile>
@@ -152,6 +149,18 @@
     </ClCompile>
     <ClCompile Include="Pile.cpp">
       <Filter>InGame\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="VideoManager.cpp">
+      <Filter>Core\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="MapEditor.cpp">
+      <Filter>Core\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="MapEditorRenderer.cpp">
+      <Filter>Core\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="MapEditorUI.cpp">
+      <Filter>Core\Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -254,9 +263,6 @@
     <ClInclude Include="GameStartScene.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="MapEditor.h">
-      <Filter>Core\Editor</Filter>
-    </ClInclude>
     <ClInclude Include="DataManager.h">
       <Filter>Core\Data</Filter>
     </ClInclude>
@@ -268,6 +274,18 @@
     </ClInclude>
     <ClInclude Include="Pile.h">
       <Filter>InGame\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="VideoManager.h">
+      <Filter>Core\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="MapEditor.h">
+      <Filter>Core\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="MapEditorRenderer.h">
+      <Filter>Core\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="MapEditorUI.h">
+      <Filter>Core\Editor</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,27 +1,37 @@
 #include "MapEditor.h"
-#include "Image.h"
-#include "Button.h"
+#include "MapEditorUI.h"
+#include "MapEditorRenderer.h"
 #include "TextureManager.h"
-#include "SpriteManager.h"
-#include "MapManager.h"
-#include "DataManager.h"  
-#include "CommonFunction.h"
+#include "KeyManager.h"
+#include "DataManager.h"
+#include "SceneManager.h"
+
+MapEditor::MapEditor()
+	: ui(nullptr),renderer(nullptr),mode(EditorMode::TILE),
+	selectedRoomType(RoomType::FLOOR),selectedObstacleDir(Direction::EAST),
+	sampleTileImage(nullptr),mapWidth(VISIBLE_MAP_WIDTH),mapHeight(VISIBLE_MAP_HEIGHT)
+{}
+
+MapEditor::~MapEditor()
+{
+	Release();
+}
 
 HRESULT MapEditor::Init()
 {
+	// 기본 상태 초기화
 	mode = EditorMode::TILE;
-	selectedTile = {0,0};
 	selectedRoomType = RoomType::FLOOR;
+	selectedObstacleDir = Direction::EAST;
 	startPosition = {VISIBLE_MAP_WIDTH / 2.0f + 0.5f,VISIBLE_MAP_HEIGHT / 2.0f + 0.5f};
 
-	// 타일 이미지 로드
+	// 샘플 타일 이미지 로드
 	sampleTileImage = ImageManager::GetInstance()->AddImage(
 		"EditorSampleTile",L"Image/horrorMapTiles.bmp",
 		1408,1408,SAMPLE_TILE_X,SAMPLE_TILE_Y,
 		true,RGB(255,0,255));
 
-	if(!sampleTileImage)
-	{
+	if(!sampleTileImage) {
 		MessageBox(g_hWnd,TEXT("Failed to load tile image"),TEXT("Error"),MB_OK);
 		return E_FAIL;
 	}
@@ -29,7 +39,7 @@ HRESULT MapEditor::Init()
 	// UI 레이아웃 계산
 	int rightPanelWidth = 400;  // 오른쪽 패널 너비
 	int uiPadding = 20;         // UI 요소 간 여백
-	int sampleTileSize = 32;    // 샘플 타일 크기 (32x32 픽셀로 증가)
+	int sampleTileSize = 32;    // 샘플 타일 크기 
 
 	// 오른쪽 패널 영역 설정
 	int rightPanelLeft = WINSIZE_X - rightPanelWidth - uiPadding;
@@ -49,148 +59,145 @@ HRESULT MapEditor::Init()
 	mapArea.right = mapArea.left + (VISIBLE_MAP_WIDTH * mapTileSize);
 	mapArea.bottom = mapArea.top + (VISIBLE_MAP_HEIGHT * mapTileSize);
 
+	// UI 및 렌더러 초기화
+	ui = new MapEditorUI();
+	renderer = new MapEditorRenderer();
+
+	ui->Init(sampleArea,mapArea);
+	renderer->Init(sampleTileImage,mapTileSize);
+
 	// 기존 맵 로드 시도
-	if(DataManager::GetInstance()->LoadMapFile(L"Map/EditorMap.dat"))
-	{
+	if(DataManager::GetInstance()->LoadMapFile(L"Map/EditorMap.dat")) {
 		LoadFromDataManager();
-	} else
-	{
+	} else {
 		InitTiles();
 	}
 
+	// 커서 표시
 	while(ShowCursor(TRUE) < 0);
+
 	return S_OK;
 }
 
 void MapEditor::Release()
 {
-	editorSprites.clear();
-}
-
-void MapEditor::InitTiles()
-{
-	for(int y = 0; y < MAP_EDITOR_HEIGHT; y++)
-	{
-		for(int x = 0; x < MAP_EDITOR_WIDTH; x++)
-		{
-			mapTiles[y][x].rc.left = (x * TILE_SIZE);
-			mapTiles[y][x].rc.top = (y * TILE_SIZE);
-			mapTiles[y][x].rc.right = mapTiles[y][x].rc.left + TILE_SIZE;
-			mapTiles[y][x].rc.bottom = mapTiles[y][x].rc.top + TILE_SIZE;
-
-			if(x == 0 || y == 0 || x == MAP_EDITOR_WIDTH - 1 ||
-				y == MAP_EDITOR_HEIGHT - 1)
-			{
-				mapTiles[y][x].tileIndex = 4;
-				mapTiles[y][x].type = RoomType::WALL;
-			} else
-			{
-				mapTiles[y][x].tileIndex = 10;
-				mapTiles[y][x].type = RoomType::FLOOR;
-			}
-		}
+	if(ui) {
+		delete ui;
+		ui = nullptr;
 	}
 
-	int centerX = MAP_EDITOR_WIDTH / 2;
-	int centerY = MAP_EDITOR_HEIGHT / 2;
-	mapTiles[centerY][centerX].type = RoomType::START;
-	startPosition = {centerX + 0.5f,centerY + 0.5f};
-}
+	if(renderer) {
+		delete renderer;
+		renderer = nullptr;
+	}
 
-//업데이트 및 렌더
+	// 벡터 비우기
+	tiles.clear();
+	editorSprites.clear();
+	editorObstacles.clear();
+}
 
 void MapEditor::Update()
 {
+	// 마우스 위치 업데이트
+	POINT mousePos;
 	GetCursorPos(&mousePos);
 	ScreenToClient(g_hWnd,&mousePos);
+	ui->UpdateMousePosition(mousePos);
 
+	// UI 입력 처리
 	TileSelect();
 	MapEdit();
 	Shortcut();
 }
 
+void MapEditor::Render(HDC hdc)
+{
+	// 배경 채우기
+	PatBlt(hdc,0,0,WINSIZE_X,WINSIZE_Y,WHITENESS);
+
+	// 영역 경계 그리기
+	Rectangle(hdc,mapArea.left - 1,mapArea.top - 1,
+			 mapArea.right + 1,mapArea.bottom + 1);
+	Rectangle(hdc,sampleArea.left - 1,sampleArea.top - 1,
+			 sampleArea.right + 1,sampleArea.bottom + 1);
+
+	// 맵 요소 렌더링
+	renderer->RenderTiles(hdc,tiles,mapWidth,mapHeight,mapArea,ui->GetMousePos(),ui->IsMouseInMapArea());
+	renderer->RenderSprites(hdc,editorSprites,mapArea);
+	renderer->RenderObstacles(hdc,editorObstacles,mapArea);
+	renderer->RenderStartPosition(hdc,startPosition,tiles,mapWidth,mapArea);
+
+	// UI 요소 렌더링
+	renderer->RenderSampleTiles(hdc,sampleArea,ui->GetSelectedTile());
+	renderer->RenderModeInfo(hdc,mode);
+	renderer->RenderControlGuide(hdc);
+	renderer->RenderSelectedTilePreview(hdc,ui->GetSelectedTile(),sampleArea);
+}
+
 void MapEditor::TileSelect()
 {
-	if(PtInRect(&sampleArea,mousePos))
-	{
-		if(KeyManager::GetInstance()->IsOnceKeyDown(VK_LBUTTON))
-		{
-			int relX = mousePos.x - sampleArea.left;
-			int relY = mousePos.y - sampleArea.top;
-
-			int sampleTileSize = (sampleArea.right - sampleArea.left) / SAMPLE_TILE_X;
-
-			selectedTile.x = relX / sampleTileSize;
-			selectedTile.y = relY / sampleTileSize;
-
-			selectedTile.x = max(0,min(selectedTile.x,SAMPLE_TILE_X - 1));
-			selectedTile.y = max(0,min(selectedTile.y,SAMPLE_TILE_Y - 1));
-
-			int tileIndex = selectedTile.y * SAMPLE_TILE_X + selectedTile.x;
-			if(tileIndex < 5)
-			{
-				selectedRoomType = RoomType::WALL;
-			}
-			else
-			{
-				selectedRoomType = RoomType::FLOOR;
-			}
+	if(ui->HandleTileSelection(ui->GetMousePos(),sampleArea)) {
+		int tileIndex = ui->GetSelectedTile().y * SAMPLE_TILE_X + ui->GetSelectedTile().x;
+		if(tileIndex < 5) {
+			selectedRoomType = RoomType::WALL;
+		} else {
+			selectedRoomType = RoomType::FLOOR;
 		}
 	}
 }
 
 void MapEditor::MapEdit()
 {
-	if(PtInRect(&mapArea,mousePos))
+	if(ui->IsMouseInMapArea())
 	{
+		// 마우스 위치를 맵 타일 위치로 변환
+		POINT mapPos = ui->ScreenToMap(ui->GetMousePos(),mapArea,mapWidth,mapHeight);
+		int tileX = mapPos.x;
+		int tileY = mapPos.y;
+
 		if(KeyManager::GetInstance()->IsStayKeyDown(VK_LBUTTON))
 		{
-			int relX = mousePos.x - mapArea.left;
-			int relY = mousePos.y - mapArea.top;
-
-			int tileX = relX / TILE_SIZE;
-			int tileY = relY / TILE_SIZE;
-
-			if(tileX >= 0 && tileX < VISIBLE_MAP_WIDTH &&
-			   tileY >= 0 && tileY < VISIBLE_MAP_HEIGHT)
+			if(tileX >= 0 && tileX < mapWidth && tileY >= 0 && tileY < mapHeight)
 			{
 				switch(mode)
 				{
 				case EditorMode::TILE:
-					PlaceTile(tileX,tileY);
-					break;
+				PlaceTile(tileX,tileY);
+				break;
 				case EditorMode::START:
-					PlaceStartPoint(tileX,tileY);
-					break;
+				PlaceStartPoint(tileX,tileY);
+				break;
 				case EditorMode::ITEM:
-					PlaceItem(tileX,tileY);
-					break;
+				PlaceItem(tileX,tileY);
+				break;
 				case EditorMode::MONSTER:
-					PlaceMonster(tileX,tileY);
-					break;
+				PlaceMonster(tileX,tileY);
+				break;
+				case EditorMode::OBSTACLE:
+				PlaceObstacle(tileX,tileY);
+				break;
 				}
 			}
 		}
 
 		if(KeyManager::GetInstance()->IsStayKeyDown(VK_RBUTTON))
 		{
-			int relX = mousePos.x - mapArea.left;
-			int relY = mousePos.y - mapArea.top;
-
-			int tileX = relX / TILE_SIZE;
-			int tileY = relY / TILE_SIZE;
-
-			if(tileX >= 0 && tileX < VISIBLE_MAP_WIDTH &&
-			   tileY >= 0 && tileY < VISIBLE_MAP_HEIGHT)
+			if(tileX >= 0 && tileX < mapWidth && tileY >= 0 && tileY < mapHeight)
 			{
 				if(mode == EditorMode::ITEM || mode == EditorMode::MONSTER)
 				{
 					RemoveSprite(tileX,tileY);
-				} 
-				else if(mode == EditorMode::TILE)
+				} else if(mode == EditorMode::OBSTACLE)
 				{
-					mapTiles[tileY][tileX].tileIndex = 10;
-					mapTiles[tileY][tileX].type = RoomType::FLOOR;
+					RemoveObstacle(tileX,tileY);
+				} else if(mode == EditorMode::TILE)
+				{
+					int index = tileY * mapWidth + tileX;
+					if(index < tiles.size()) {
+						tiles[index].roomType = RoomType::FLOOR;
+						tiles[index].tilePos = 10;
+					}
 				}
 			}
 		}
@@ -199,326 +206,86 @@ void MapEditor::MapEdit()
 
 void MapEditor::Shortcut()
 {
-	if(KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE))
+	KeyManager* km = KeyManager::GetInstance();
+
+	if(km->IsOnceKeyDown(VK_ESCAPE))
 	{
 		SceneManager::GetInstance()->ChangeScene("MainGameScene");
 	}
 
-	if(KeyManager::GetInstance()->IsOnceKeyDown('1'))
+	if(km->IsOnceKeyDown('1'))
 	{
 		ChangeMode(EditorMode::TILE);
-	} 
-	else if(KeyManager::GetInstance()->IsOnceKeyDown('2'))
+	} else if(km->IsOnceKeyDown('2'))
 	{
 		ChangeMode(EditorMode::START);
-	} 
-	else if(KeyManager::GetInstance()->IsOnceKeyDown('3'))
+	} else if(km->IsOnceKeyDown('3'))
 	{
 		ChangeMode(EditorMode::ITEM);
-	}
-	else if(KeyManager::GetInstance()->IsOnceKeyDown('4'))
+	} else if(km->IsOnceKeyDown('4'))
 	{
 		ChangeMode(EditorMode::MONSTER);
+	} else if(km->IsOnceKeyDown('5'))
+	{
+		ChangeMode(EditorMode::OBSTACLE);
 	}
 
-	if(KeyManager::GetInstance()->IsOnceKeyDown('S'))
+	if(km->IsOnceKeyDown('S'))
 	{
 		SaveMap();
-	} 
-	else if(KeyManager::GetInstance()->IsOnceKeyDown('L'))
+	} else if(km->IsOnceKeyDown('L'))
 	{
 		LoadMap();
-	}
-}
-
-void MapEditor::Render(HDC hdc)
-{
-	// 배경 흰색으로 지우기
-	PatBlt(hdc,0,0,WINSIZE_X,WINSIZE_Y,WHITENESS);
-
-	// 맵 영역과 테두리 그리기
-	Rectangle(hdc,mapArea.left - 1,mapArea.top - 1,
-			 mapArea.right + 1,mapArea.bottom + 1);
-	RenderTiles(hdc);
-	RenderSprites(hdc);
-
-	// 샘플 타일 영역과 테두리 그리기
-	Rectangle(hdc,sampleArea.left - 1,sampleArea.top - 1,
-			 sampleArea.right + 1,sampleArea.bottom + 1);
-	RenderSampleTiles(hdc);
-
-	// 현재 선택된 타일 표시 (크기 2배 증가)
-	int selectedPreviewSize = 64; // 선택된 타일 미리보기 크기
-	RECT selectedTileRect = {
-		sampleArea.left,
-		sampleArea.bottom + 20, // 여백 증가
-		sampleArea.left + selectedPreviewSize,
-		sampleArea.bottom + 20 + selectedPreviewSize
-	};
-
-	// 선택된 타일 배경 및 테두리
-	Rectangle(hdc,selectedTileRect.left - 1,selectedTileRect.top - 1,
-			selectedTileRect.right + 1,selectedTileRect.bottom + 1);
-
-	// 선택된 타일 렌더링
-	if(sampleTileImage) {
-		sampleTileImage->FrameRender(
-			hdc,
-			(selectedTileRect.left + selectedTileRect.right) / 2,
-			(selectedTileRect.top + selectedTileRect.bottom) / 2,
-			selectedTile.x,selectedTile.y);
-	}
-
-	// 현재 모드 표시 (폰트 크기 및 색상 개선)
-	TCHAR szText[128];
-	LPCWSTR modeName = TEXT("Tile");
-	COLORREF modeColor = RGB(255,255,255);
-
-	if(mode == EditorMode::TILE) {
-		modeName = TEXT("TILE MODE (select tile)");
-		modeColor = RGB(255,255,0);
-	} 
-	else if(mode == EditorMode::START) {
-		modeName = TEXT("START MODE (place player start position)");
-		modeColor = RGB(120,255,120);
-	} 
-	else if(mode == EditorMode::ITEM) {
-		modeName = TEXT("ITEM MODE (place item)");
-		modeColor = RGB(200,200,255);
-	} 
-	else if(mode == EditorMode::MONSTER) {
-		modeName = TEXT("MONSTER MODE (place monster)");
-		modeColor = RGB(255,100,100);
-	}
-
-	// 모드 텍스트 출력 (폰트 크기 증가)
-	SetTextColor(hdc,modeColor);
-	HFONT hFont = CreateFont(24,0,0,0,FW_BOLD,FALSE,FALSE,FALSE,
-						  DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
-						  DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Arial"));
-	HFONT oldFont = (HFONT)SelectObject(hdc,hFont);
-
-	wsprintf(szText,TEXT("Current Mode: %s"),modeName);
-	TextOut(hdc,20,20,szText,lstrlen(szText));
-
-	SelectObject(hdc,oldFont);
-	DeleteObject(hFont);
-	SetTextColor(hdc,RGB(0,0,0)); // 기본 색상으로 복원
-
-	// 조작 설명 표시 (하단에 명확하게)
-	HFONT guideFont = CreateFont(18,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,
-						  DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
-						  DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Arial"));
-	SelectObject(hdc,guideFont);
-
-	// 검은색 배경에 흰색 텍스트로 표시하여 가독성 높이기
-	RECT guideRect = {0,WINSIZE_Y - 80,WINSIZE_X,WINSIZE_Y};
-	FillRect(hdc,&guideRect,(HBRUSH)GetStockObject(BLACK_BRUSH));
-	SetTextColor(hdc,RGB(255,255,255));
-
-	TextOut(hdc,20,WINSIZE_Y - 70,TEXT("Left Click: Place / Right Click: Delete"),
-			lstrlen(TEXT("Left Click: Place / Right Click: Delete")));
-	TextOut(hdc,20,WINSIZE_Y - 50,TEXT("ESC: Return to Game"),
-			lstrlen(TEXT("ESC: Return to Game")));
-	TextOut(hdc,20,WINSIZE_Y - 30,TEXT("1-4: Change Mode, S: Save, L: Load"),
-			lstrlen(TEXT("1-4: Change Mode, S: Save, L: Load")));
-
-	SelectObject(hdc,oldFont);
-	DeleteObject(guideFont);
-}
-
-void MapEditor::RenderTiles(HDC hdc)
-{
-	// 맵 섹션 제목 추가
-	HFONT titleFont = CreateFont(20,0,0,0,FW_BOLD,FALSE,FALSE,FALSE,
-						  DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
-						  DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Arial"));
-	HFONT oldFont = (HFONT)SelectObject(hdc,titleFont);
-	SetTextColor(hdc,RGB(0,0,0));
-
-	TextOut(hdc,mapArea.left,mapArea.top - 25,TEXT("Map Editor"),
-			lstrlen(TEXT("Map Editor")));
-
-	SelectObject(hdc,oldFont);
-	DeleteObject(titleFont);
-
-	// 타일 크기 계산
-	int tileSize = (mapArea.right - mapArea.left) / VISIBLE_MAP_WIDTH;
-
-	for(int y = 0; y < VISIBLE_MAP_HEIGHT; y++)
+	} else if(km->IsOnceKeyDown('C'))
 	{
-		for(int x = 0; x < VISIBLE_MAP_WIDTH; x++)
+		ClearMap();
+	}
+
+	if(mode == EditorMode::OBSTACLE)
+	{
+		if(km->IsOnceKeyDown(VK_UP))
 		{
-			int screenX = mapArea.left + x * tileSize + (tileSize / 2);
-			int screenY = mapArea.top + y * tileSize + (tileSize / 2);
-
-			int tileIndex = mapTiles[y][x].tileIndex;
-			int frameX = tileIndex % SAMPLE_TILE_X;
-			int frameY = tileIndex / SAMPLE_TILE_X;
-
-			if(sampleTileImage)
-			{
-				sampleTileImage->FrameRender(
-					hdc,
-					screenX,
-					screenY,
-					frameX,frameY,
-					false,
-					true
-				);
-			}
-
-			// 시작 위치 강조 표시
-			if(mapTiles[y][x].type == RoomType::START)
-			{
-				HBRUSH greenBrush = CreateSolidBrush(RGB(100,255,0));
-				HPEN greenPen = CreatePen(PS_SOLID,2,RGB(0,160,0));
-
-				HBRUSH oldBrush = (HBRUSH)SelectObject(hdc,greenBrush);
-				HPEN oldPen = (HPEN)SelectObject(hdc,greenPen);
-
-				Ellipse(hdc,
-					   screenX - (tileSize / 3),
-					   screenY - (tileSize / 3),
-					   screenX + (tileSize / 3),
-					   screenY + (tileSize / 3));
-
-				SelectObject(hdc,oldPen);
-				SelectObject(hdc,oldBrush);
-				DeleteObject(greenPen);
-				DeleteObject(greenBrush);
-			}
+			ChangeObstacleDirection(Direction::NORTH);
+		} else if(km->IsOnceKeyDown(VK_DOWN))
+		{
+			ChangeObstacleDirection(Direction::SOUTH);
+		} else if(km->IsOnceKeyDown(VK_LEFT))
+		{
+			ChangeObstacleDirection(Direction::WEST);
+		} else if(km->IsOnceKeyDown(VK_RIGHT))
+		{
+			ChangeObstacleDirection(Direction::EAST);
 		}
 	}
-}
-
-void MapEditor::RenderSampleTiles(HDC hdc)
-{
-	if(sampleTileImage)
-	{
-		int sampleTileSize = (sampleArea.right - sampleArea.left) / SAMPLE_TILE_X;
-
-		// 샘플 타일 섹션 제목 추가
-		HFONT titleFont = CreateFont(20,0,0,0,FW_BOLD,FALSE,FALSE,FALSE,
-							  DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
-							  DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Arial"));
-		HFONT oldFont = (HFONT)SelectObject(hdc,titleFont);
-		SetTextColor(hdc,RGB(0,0,0));
-
-		TextOut(hdc,sampleArea.left,sampleArea.top - 25,TEXT("Tile Palette"),
-				lstrlen(TEXT("Tile Palette")));
-
-		SelectObject(hdc,oldFont);
-		DeleteObject(titleFont);
-
-		// 타일 렌더링
-		for(int y = 0; y < SAMPLE_TILE_Y; y++)
-		{
-			for(int x = 0; x < SAMPLE_TILE_X; x++)
-			{
-				int posX = sampleArea.left + x * sampleTileSize + (sampleTileSize / 2);
-				int posY = sampleArea.top + y * sampleTileSize + (sampleTileSize / 2);
-
-				// 선택된 타일 강조 표시
-				if(x == selectedTile.x && y == selectedTile.y)
-				{
-					// 더 눈에 띄는 선택 표시
-					HPEN selectPen = CreatePen(PS_SOLID,3,RGB(255,0,0));
-					HBRUSH selectBrush = CreateSolidBrush(RGB(255,230,230)); // 연한 빨강 배경
-
-					HPEN oldPen = (HPEN)SelectObject(hdc,selectPen);
-					HBRUSH oldBrush = (HBRUSH)SelectObject(hdc,selectBrush);
-
-					Rectangle(hdc,
-							posX - (sampleTileSize / 2) - 2,
-							posY - (sampleTileSize / 2) - 2,
-							posX + (sampleTileSize / 2) + 2,
-							posY + (sampleTileSize / 2) + 2);
-
-					SelectObject(hdc,oldPen);
-					SelectObject(hdc,oldBrush);
-					DeleteObject(selectPen);
-					DeleteObject(selectBrush);
-				}
-
-				// 타일 이미지 렌더링
-				sampleTileImage->FrameRender(hdc,posX,posY,x,y,false,true);
-			}
-		}
-	}
-}
-
-void MapEditor::RenderSprites(HDC hdc)
-{
-	for(const auto& sprite : editorSprites)
-	{
-		int tileX = static_cast<int>(sprite.pos.x - 0.5f);
-		int tileY = static_cast<int>(sprite.pos.y - 0.5f);
-
-		if(tileX >= 0 && tileX < VISIBLE_MAP_WIDTH &&
-		   tileY >= 0 && tileY < VISIBLE_MAP_HEIGHT)
-		{
-			int screenX = mapArea.left + tileX * TILE_SIZE + (TILE_SIZE / 2);
-			int screenY = mapArea.top + tileY * TILE_SIZE + (TILE_SIZE / 2);
-
-			COLORREF color = (sprite.type == SpriteType::KEY) ? RGB(0,0,255) :
-				(sprite.type == SpriteType::MONSTER) ? RGB(255,0,0) :
-				RGB(128,128,128);
-
-			HBRUSH spriteBrush = CreateSolidBrush(color);
-			HBRUSH oldBrush = (HBRUSH)SelectObject(hdc,spriteBrush);
-
-			Ellipse(hdc,
-				   screenX - (TILE_SIZE / 3),
-				   screenY - (TILE_SIZE / 3),
-				   screenX + (TILE_SIZE / 3),
-				   screenY + (TILE_SIZE / 3));
-
-			SelectObject(hdc,oldBrush);
-			DeleteObject(spriteBrush);
-		}
-	}
-
-	int itemCount = 0,monsterCount = 0;
-	for(const auto& sprite : editorSprites)
-	{
-		if(sprite.type == SpriteType::KEY) itemCount++;
-		else if(sprite.type == SpriteType::MONSTER) monsterCount++;
-	}
-
-	TCHAR szCount[128];
-	wsprintf(szCount,TEXT("Items: %d, Monsters: %d"),itemCount,monsterCount);
-	TextOut(hdc,mapArea.left,mapArea.bottom + 10,szCount,lstrlen(szCount));
-}
-
-void MapEditor::ChangeMode(EditorMode newMode)
-{
-	mode = newMode;
 }
 
 void MapEditor::PlaceTile(int x,int y)
 {
-	int tileIndex = selectedTile.y * SAMPLE_TILE_X + selectedTile.x;
-	mapTiles[y][x].tileIndex = tileIndex;
-	mapTiles[y][x].type = selectedRoomType;
+	int tileIndex = ui->GetSelectedTile().y * SAMPLE_TILE_X + ui->GetSelectedTile().x;
+	int index = y * mapWidth + x;
+
+	if(index < tiles.size()) {
+		tiles[index].tilePos = tileIndex;
+		tiles[index].roomType = selectedRoomType;
+	}
 }
 
 void MapEditor::PlaceStartPoint(int x,int y)
 {
-	for(int j = 0; j < MAP_EDITOR_HEIGHT; j++)
-	{
-		for(int i = 0; i < MAP_EDITOR_WIDTH; i++)
-		{
-			if(mapTiles[j][i].type == RoomType::START)
-			{
-				mapTiles[j][i].type = RoomType::FLOOR;
-				mapTiles[j][i].tileIndex = 10;
-			}
+	// 이미 있는 시작 위치 제거
+	for(size_t i = 0; i < tiles.size(); i++) {
+		if(tiles[i].roomType == RoomType::START) {
+			tiles[i].roomType = RoomType::FLOOR;
+			tiles[i].tilePos = 10;
 		}
 	}
 
-	mapTiles[y][x].type = RoomType::START;
-	startPosition = {x + 0.5f,y + 0.5f};
+	// 새 시작 위치 설정
+	int index = y * mapWidth + x;
+	if(index < tiles.size()) {
+		tiles[index].roomType = RoomType::START;
+		startPosition = {x + 0.5f,y + 0.5f};
+	}
 }
 
 void MapEditor::PlaceItem(int x,int y)
@@ -529,6 +296,7 @@ void MapEditor::PlaceItem(int x,int y)
 	Texture* keyTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/jewel.bmp"));
 	if(keyTexture)
 	{
+		// 타일 중앙에 정확히 배치
 		FPOINT centerPos = {x + 0.5f,y + 0.5f};
 		AddSprite(centerPos,keyTexture,SpriteType::KEY);
 	}
@@ -542,9 +310,48 @@ void MapEditor::PlaceMonster(int x,int y)
 	Texture* monsterTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/boss.bmp"));
 	if(monsterTexture)
 	{
+		// 타일 중앙에 정확히 배치
 		FPOINT centerPos = {x + 0.5f,y + 0.5f};
 		AddSprite(centerPos,monsterTexture,SpriteType::MONSTER);
 	}
+}
+
+void MapEditor::PlaceObstacle(int x,int y)
+{
+	if(FindObstacle(x,y) >= 0)
+		return;
+
+	Texture* obstacleTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/jewel.bmp"));
+	if(obstacleTexture)
+	{
+		POINT pos = {x,y};
+		AddObstacle(pos,obstacleTexture,selectedObstacleDir);
+	}
+}
+
+void MapEditor::ChangeMode(EditorMode newMode)
+{
+	mode = newMode;
+}
+
+void MapEditor::ChangeObstacleDirection(Direction dir)
+{
+	selectedObstacleDir = dir;
+}
+
+int MapEditor::FindSprite(int x,int y)
+{
+	for(size_t i = 0; i < editorSprites.size(); i++)
+	{
+		float spriteX = editorSprites[i].pos.x - 0.5f;
+		float spriteY = editorSprites[i].pos.y - 0.5f;
+
+		if(static_cast<int>(spriteX) == x && static_cast<int>(spriteY) == y)
+		{
+			return i;
+		}
+	}
+	return -1;
 }
 
 void MapEditor::AddSprite(FPOINT position,Texture* texture,SpriteType type)
@@ -578,14 +385,11 @@ void MapEditor::RemoveSprite(int x,int y)
 	}
 }
 
-int MapEditor::FindSprite(int x,int y)
+int MapEditor::FindObstacle(int x,int y)
 {
-	for(size_t i = 0; i < editorSprites.size(); i++)
+	for(size_t i = 0; i < editorObstacles.size(); i++)
 	{
-		float spriteX = editorSprites[i].pos.x - 0.5f;
-		float spriteY = editorSprites[i].pos.y - 0.5f;
-
-		if(static_cast<int>(spriteX) == x && static_cast<int>(spriteY) == y)
+		if(editorObstacles[i].pos.x == x && editorObstacles[i].pos.y == y)
 		{
 			return i;
 		}
@@ -593,10 +397,106 @@ int MapEditor::FindSprite(int x,int y)
 	return -1;
 }
 
+void MapEditor::AddObstacle(POINT position,Texture* texture,Direction dir)
+{
+	EditorObstacle newObstacle;
+	newObstacle.pos = position;
+	newObstacle.texture = texture;
+	newObstacle.dir = dir;
+
+	editorObstacles.push_back(newObstacle);
+}
+
+void MapEditor::RemoveObstacle(int x,int y)
+{
+	int index = FindObstacle(x,y);
+	if(index >= 0)
+	{
+		editorObstacles.erase(editorObstacles.begin() + index);
+	}
+}
+
+void MapEditor::InitTiles()
+{
+	// 타일 초기화
+	tiles.resize(mapWidth * mapHeight);
+
+	for(int y = 0; y < mapHeight; y++)
+	{
+		for(int x = 0; x < mapWidth; x++)
+		{
+			int index = y * mapWidth + x;
+
+			if(x == 0 || y == 0 || x == mapWidth - 1 || y == mapHeight - 1)
+			{
+				tiles[index].tilePos = 4;
+				tiles[index].roomType = RoomType::WALL;
+			} else
+			{
+				tiles[index].tilePos = 10;
+				tiles[index].roomType = RoomType::FLOOR;
+			}
+		}
+	}
+
+	int centerX = mapWidth / 2;
+	int centerY = mapHeight / 2;
+	tiles[centerY * mapWidth + centerX].roomType = RoomType::START;
+	startPosition = {centerX + 0.5f,centerY + 0.5f};
+}
+
 void MapEditor::SaveMap()
 {
-	PrepareDataForSave();
+	// DataManager 활용하여 저장
+	DataManager::GetInstance()->ClearAllData();
 
+	// 맵 데이터 설정
+	DataManager::GetInstance()->SetMapData(tiles,mapWidth,mapHeight);
+
+	// 텍스처 정보 설정
+	DataManager::GetInstance()->SetTextureInfo(L"Image/horrorMapTiles.bmp",
+											 128,SAMPLE_TILE_X,SAMPLE_TILE_Y);
+
+	// 시작 위치 설정
+	DataManager::GetInstance()->SetStartPosition(startPosition);
+
+	// 아이템 데이터 추가
+	for(const auto& sprite : editorSprites)
+	{
+		if(sprite.type == SpriteType::KEY)
+		{
+			ItemData item;
+			item.pos = sprite.pos;
+			item.aniInfo = sprite.aniInfo;
+			item.itemType = 0;  // Key
+			DataManager::GetInstance()->AddItemData(item);
+		}
+	}
+
+	// 몬스터 데이터 추가
+	for(const auto& sprite : editorSprites)
+	{
+		if(sprite.type == SpriteType::MONSTER)
+		{
+			MonsterData monster;
+			monster.pos = sprite.pos;
+			monster.aniInfo = sprite.aniInfo;
+			monster.monsterType = 0;  // Tentacle
+			DataManager::GetInstance()->AddMonsterData(monster);
+		}
+	}
+
+	// 장애물 데이터 추가
+	for(const auto& obstacle : editorObstacles)
+	{
+		ObstacleData obsData;
+		obsData.pos = obstacle.pos;
+		obsData.dir = obstacle.dir;
+		obsData.obstacleType = 0;  // Pile
+		DataManager::GetInstance()->AddObstacleData(obsData);
+	}
+
+	// 파일로 저장
 	if(DataManager::GetInstance()->SaveMapFile(L"Map/EditorMap.dat"))
 	{
 		MessageBox(g_hWnd,TEXT("Map Saved"),TEXT("Success"),MB_OK);
@@ -618,110 +518,27 @@ void MapEditor::LoadMap()
 	}
 }
 
-void MapEditor::ClearMap()
-{
-	for(int y = 0; y < VISIBLE_MAP_HEIGHT; y++)
-	{
-		for(int x = 0; x < VISIBLE_MAP_WIDTH; x++)
-		{
-			if(x == 0 || y == 0 || x == VISIBLE_MAP_WIDTH - 1 || y == VISIBLE_MAP_HEIGHT - 1)
-			{
-				mapTiles[y][x].tileIndex = 4;
-				mapTiles[y][x].type = RoomType::WALL;
-			} else
-			{
-				mapTiles[y][x].tileIndex = 10;
-				mapTiles[y][x].type = RoomType::FLOOR;
-			}
-		}
-	}
-
-	int centerX = VISIBLE_MAP_WIDTH / 2;
-	int centerY = VISIBLE_MAP_HEIGHT / 2;
-	mapTiles[centerY][centerX].type = RoomType::START;
-	startPosition = {centerX + 0.5f,centerY + 0.5f};
-
-	editorSprites.clear();
-
-	MessageBox(g_hWnd,TEXT("Map Cleared"),TEXT("Success"),MB_OK);
-}
-
-void MapEditor::PrepareDataForSave()
-{
-	// 맵 타일 데이터 변환
-	vector<Room> tiles;
-	for(int y = 0; y < VISIBLE_MAP_HEIGHT; y++)
-	{
-		for(int x = 0; x < VISIBLE_MAP_WIDTH; x++)
-		{
-			Room tile;
-			tile.roomType = mapTiles[y][x].type;
-			tile.tilePos = mapTiles[y][x].tileIndex;
-			tiles.push_back(tile);
-		}
-	}
-
-	// DataManager 초기화 및 설정
-	DataManager::GetInstance()->ClearAllData();
-	DataManager::GetInstance()->SetMapData(tiles,VISIBLE_MAP_WIDTH,VISIBLE_MAP_HEIGHT);
-	DataManager::GetInstance()->SetTextureInfo(L"Image/horrorMapTiles.bmp",128,11,11);
-	DataManager::GetInstance()->SetStartPosition(startPosition);
-
-	// 아이템 데이터 전달
-	for(const auto& sprite : editorSprites)
-	{
-		if(sprite.type == SpriteType::KEY)
-		{
-			ItemData item;
-			item.pos = sprite.pos;
-			item.aniInfo = sprite.aniInfo;
-			item.itemType = 0;  // Key
-			DataManager::GetInstance()->AddItemData(item);
-		}
-	}
-
-	// 몬스터 데이터 전달
-	for(const auto& sprite : editorSprites)
-	{
-		if(sprite.type == SpriteType::MONSTER)
-		{
-			MonsterData monster;
-			monster.pos = sprite.pos;
-			monster.aniInfo = sprite.aniInfo;
-			monster.monsterType = 0;  // Tentacle
-			DataManager::GetInstance()->AddMonsterData(monster);
-		}
-	}
-}
-
 void MapEditor::LoadFromDataManager()
 {
 	// 맵 데이터 로드
 	MapData mapData;
-	if(DataManager::GetInstance()->GetMapData(mapData))
-	{
+	if(DataManager::GetInstance()->GetMapData(mapData)) {
 		// 타일 데이터 복원
-		for(int y = 0; y < mapData.height && y < MAP_EDITOR_HEIGHT; y++)
-		{
-			for(int x = 0; x < mapData.width && x < MAP_EDITOR_WIDTH; x++)
-			{
-				int index = y * mapData.width + x;
-				mapTiles[y][x].tileIndex = mapData.tiles[index].tilePos;
-				mapTiles[y][x].type = mapData.tiles[index].roomType;
-			}
-		}
+		mapWidth = mapData.width;
+		mapHeight = mapData.height;
+		tiles = mapData.tiles;
 	}
 
 	// 시작 위치 복원
 	startPosition = DataManager::GetInstance()->GetStartPosition();
 
-	// 아이템 및 몬스터 복원
+	// 엔티티들 초기화
 	editorSprites.clear();
+	editorObstacles.clear();
 
 	// 아이템 복원
 	const auto& items = DataManager::GetInstance()->GetItems();
-	for(const auto& item : items)
-	{
+	for(const auto& item : items) {
 		Sprite sprite;
 		sprite.pos = item.pos;
 		sprite.type = SpriteType::KEY;
@@ -733,8 +550,7 @@ void MapEditor::LoadFromDataManager()
 
 	// 몬스터 복원
 	const auto& monsters = DataManager::GetInstance()->GetMonsters();
-	for(const auto& monster : monsters)
-	{
+	for(const auto& monster : monsters) {
 		Sprite sprite;
 		sprite.pos = monster.pos;
 		sprite.type = SpriteType::MONSTER;
@@ -743,4 +559,26 @@ void MapEditor::LoadFromDataManager()
 		sprite.distance = 0.0f;
 		editorSprites.push_back(sprite);
 	}
+
+	// 장애물 복원 
+	const auto& obstacles = DataManager::GetInstance()->GetObstacles();
+	for(const auto& obstacle : obstacles) {
+		EditorObstacle editorObstacle;
+		editorObstacle.pos = obstacle.pos;
+		editorObstacle.dir = obstacle.dir;
+		editorObstacle.texture = TextureManager::GetInstance()->GetTexture(L"Image/jewel.bmp");
+		editorObstacles.push_back(editorObstacle);
+	}
+}
+
+void MapEditor::ClearMap()
+{
+	// 맵 초기화
+	InitTiles();
+
+	// 스프라이트와 장애물 초기화
+	editorSprites.clear();
+	editorObstacles.clear();
+
+	MessageBox(g_hWnd,TEXT("Map Cleared"),TEXT("Success"),MB_OK);
 }

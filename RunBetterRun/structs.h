@@ -109,7 +109,8 @@ typedef struct tagFileHeader
 	int mapHeight;          
 	int tileCount;          // ��ü Ÿ�� ��
 	int itemCount;         
-	int monsterCount;       
+	int monsterCount;    
+	int obstacleCount;
 	FPOINT startPos;        
 
 	// �ؽ�ó ����
@@ -128,6 +129,7 @@ typedef struct tagFileHeader
 		tileCount = 0;
 		itemCount = 0;
 		monsterCount = 0;
+		obstacleCount = 0;
 		startPos = {0.0f,0.0f};
 		texturePath[0] = L'\0';
 		textureTileSize = 0;
@@ -149,3 +151,18 @@ typedef struct tagMonsterSaveData
 	AnimationInfo aniInfo;  // �ִϸ��̼� ����
 	int monsterType;        // ���� Ÿ�� - 0: Tentacle
 }MonsterData;
+
+typedef struct tagObstacleSaveData
+{
+	POINT pos;             // 위치 (타일 좌표)
+	Direction dir;         // 장애물 방향 (NORTH, SOUTH, EAST, WEST)
+	AnimationInfo aniInfo; // 애니메이션 정보
+	int obstacleType;      // 장애물 타입 - 0: Pile, 1: 다른 장애물 타입 등
+}ObstacleData;
+
+typedef struct tagEditorObstacle
+{
+	POINT pos;
+	Direction dir;
+	Texture* texture;
+} EditorObstacle;

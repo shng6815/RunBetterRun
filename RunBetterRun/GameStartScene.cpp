@@ -7,7 +7,9 @@ HRESULT GameStartScene::Init()
 {
 	titleText = TEXT("HorrorGame");
 	InitButtons();
-	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
+	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
+	//MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
+	//MapManager::GetInstance()->Init();
 	while(ShowCursor(TRUE) < 0);
 	return S_OK;
 } 

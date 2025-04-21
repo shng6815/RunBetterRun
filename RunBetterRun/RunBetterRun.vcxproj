@@ -148,6 +148,9 @@ mf.lib
     <ClCompile Include="MainGame.cpp" />
     <ClCompile Include="MainGameScene.cpp" />
     <ClCompile Include="AMonster.cpp" />
+    <ClCompile Include="MapEditor.cpp" />
+    <ClCompile Include="MapEditorRenderer.cpp" />
+    <ClCompile Include="MapEditorUI.cpp" />
     <ClCompile Include="ObstacleManager.cpp" />
     <ClCompile Include="PhoneUI.cpp" />
     <ClCompile Include="MonsterManager.cpp" />
@@ -159,7 +162,6 @@ mf.lib
     <ClCompile Include="SpriteManager.cpp" />
     <ClCompile Include="Tentacle.cpp" />
     <ClCompile Include="TextureManager.cpp" />
-    <ClCompile Include="MapEditor.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerManager.cpp" />
     <ClCompile Include="UIManager.cpp" />
@@ -186,6 +188,9 @@ mf.lib
     <ClInclude Include="MainGame.h" />
     <ClInclude Include="MainGameScene.h" />
     <ClInclude Include="AMonster.h" />
+    <ClInclude Include="MapEditor.h" />
+    <ClInclude Include="MapEditorRenderer.h" />
+    <ClInclude Include="MapEditorUI.h" />
     <ClInclude Include="MonsterManager.h" />
     <ClInclude Include="ObstacleManager.h" />
     <ClInclude Include="PhoneUI.h" />
@@ -199,7 +204,6 @@ mf.lib
     <ClInclude Include="SpriteManager.h" />
     <ClInclude Include="Tentacle.h" />
     <ClInclude Include="TextureManager.h" />
-    <ClInclude Include="MapEditor.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerManager.h" />
     <ClInclude Include="UIManager.h" />

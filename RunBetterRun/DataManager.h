@@ -9,6 +9,7 @@ private:
 	vector<Room> tiles;
 	vector<ItemData> items;
 	vector<MonsterData> monsters;
+	vector<ObstacleData> obstacles;  // 장애물 데이터 목록
 
 public:
 	HRESULT Init();
@@ -24,6 +25,7 @@ public:
 	void SetStartPosition(const FPOINT& pos);
 	void AddItemData(const ItemData& item);
 	void AddMonsterData(const MonsterData& monster);
+	void AddObstacleData(const ObstacleData& obstacle);
 	void ClearAllData();
 
 	// 게임에서 데이터 가져오기
@@ -31,7 +33,7 @@ public:
 	const FPOINT& GetStartPosition() const { return header.startPos; }
 	const vector<ItemData>& GetItems() const { return items; }
 	const vector<MonsterData>& GetMonsters() const { return monsters; }
-
+	const vector<ObstacleData>& GetObstacles() const { return obstacles; }
 private:
 	// 내부 사용 메서드
 	bool ValidateHeader(const FileHeader& header);
@@ -43,4 +45,6 @@ private:
 	bool ReadItems(HANDLE hFile);
 	bool WriteMonsters(HANDLE hFile);
 	bool ReadMonsters(HANDLE hFile);
+	bool WriteObstacles(HANDLE hFile);
+	bool ReadObstacles(HANDLE hFile);
 };

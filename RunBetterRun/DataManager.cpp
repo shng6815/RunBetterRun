@@ -23,6 +23,7 @@ void DataManager::ClearAllData()
 	tiles.clear();
 	items.clear();
 	monsters.clear();
+	obstacles.clear();
 }
 
 void DataManager::SetMapData(const vector<Room>& mapTiles,int width,int height)
@@ -71,6 +72,12 @@ void DataManager::AddMonsterData(const MonsterData& monster)
 {
 	monsters.push_back(monster);
 	header.monsterCount = static_cast<int>(monsters.size());
+}
+
+void DataManager::AddObstacleData(const ObstacleData& obstacle)
+{
+	obstacles.push_back(obstacle);
+	header.obstacleCount = static_cast<int>(obstacles.size());
 }
 
 bool DataManager::GetMapData(MapData& outMapData)
@@ -168,6 +175,12 @@ bool DataManager::SaveMapFile(LPCWCH filePath)
 		success = false;
 	}
 
+	// 장애물 데이터 저장 
+	if(success && !WriteObstacles(hFile))
+	{
+		success = false;
+	}
+
 	CloseHandle(hFile);
 	return success;
 }
@@ -214,6 +227,12 @@ bool DataManager::LoadMapFile(LPCWCH filePath)
 
 	// 몬스터 데이터 읽기
 	if(success && !ReadMonsters(hFile))
+	{
+		success = false;
+	}
+
+	// 장애물 데이터 읽기
+	if(success && !ReadObstacles(hFile))
 	{
 		success = false;
 	}
@@ -387,6 +406,59 @@ bool DataManager::ReadMonsters(HANDLE hFile)
 			return false;
 		}
 		monsters.push_back(monster);
+	}
+
+	return true;
+}
+
+bool DataManager::WriteObstacles(HANDLE hFile)
+{
+	DWORD bytesWritten;
+
+	// 장애물 수 기록
+	int obstacleCount = static_cast<int>(obstacles.size());
+	if(!WriteFile(hFile,&obstacleCount,sizeof(int),&bytesWritten,NULL) ||
+		bytesWritten != sizeof(int))
+	{
+		return false;
+	}
+
+	// 장애물 데이터 기록
+	for(const auto& obstacle : obstacles)
+	{
+		if(!WriteFile(hFile,&obstacle,sizeof(ObstacleData),&bytesWritten,NULL) ||
+			bytesWritten != sizeof(ObstacleData))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool DataManager::ReadObstacles(HANDLE hFile)
+{
+	DWORD bytesRead;
+
+	// 장애물 수 읽기
+	int obstacleCount;
+	if(!ReadFile(hFile,&obstacleCount,sizeof(int),&bytesRead,NULL) ||
+		bytesRead != sizeof(int))
+	{
+		return false;
+	}
+
+	// 장애물 데이터 읽기
+	obstacles.clear();
+	for(int i = 0; i < obstacleCount; i++)
+	{
+		ObstacleData obstacle;
+		if(!ReadFile(hFile,&obstacle,sizeof(ObstacleData),&bytesRead,NULL) ||
+			bytesRead != sizeof(ObstacleData))
+		{
+			return false;
+		}
+		obstacles.push_back(obstacle);
 	}
 
 	return true;

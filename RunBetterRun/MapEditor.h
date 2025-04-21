@@ -2,82 +2,83 @@
 #include "GameObject.h"
 #include "structs.h"
 
-#define MAP_EDITOR_WIDTH  80       
-#define MAP_EDITOR_HEIGHT 80     
+// 전방 선언
+class MapEditorUI;
+class MapEditorRenderer;
 
-#define VISIBLE_MAP_WIDTH  40       
-#define VISIBLE_MAP_HEIGHT 40
-
-#define TILE_SIZE 24               
-#define SAMPLE_TILE_X 11            
-#define SAMPLE_TILE_Y 11            
-
-enum class EditorMode
-{
+// 맵 에디터 모드
+enum class EditorMode {
 	TILE,
 	START,
 	ITEM,
-	MONSTER
+	MONSTER,
+	OBSTACLE
 };
 
-typedef struct EditorTile
-{
-	RECT rc;
-	int tileIndex;
-	RoomType type;
-} editTile;
-
-class Image;
-
-class MapEditor: public GameObject
-{
+class MapEditor: public GameObject {
 private:
-	EditorMode mode;
-	POINT selectedTile;
-	RoomType selectedRoomType;
+	// 컴포넌트
+	MapEditorUI* ui;
+	MapEditorRenderer* renderer;
 
+	// 에디터 상태
+	EditorMode mode;
+	RoomType selectedRoomType;
+	Direction selectedObstacleDir;
+	FPOINT startPosition;
+
+	// 맵 데이터
+	vector<Room> tiles;
+	int mapWidth,mapHeight;
+	vector<Sprite> editorSprites;
+	vector<EditorObstacle> editorObstacles;
+
+	// UI 리소스
 	Image* sampleTileImage;
 	RECT sampleArea;
 	RECT mapArea;
 
-	editTile mapTiles[MAP_EDITOR_HEIGHT][MAP_EDITOR_WIDTH];
-	vector<Sprite> editorSprites;
-	POINT mousePos;
-	FPOINT startPosition; 
+	// 내부 기능 함수들
+	void TileSelect();
+	void MapEdit();
+	void Shortcut();
+
+	// 배치 함수들
+	void PlaceTile(int x,int y);
+	void PlaceStartPoint(int x,int y);
+	void PlaceItem(int x,int y);
+	void PlaceMonster(int x,int y);
+	void PlaceObstacle(int x,int y);
+
+	// DataManager 연동
+	void PrepareDataForSave();
+	void LoadFromDataManager();
 
 public:
+	MapEditor();
+	virtual ~MapEditor();
+
 	virtual HRESULT Init() override;
 	virtual void Release() override;
 	virtual void Update() override;
 	virtual void Render(HDC hdc) override;
 
 	void InitTiles();
-
-	// 기본 기능
-	void TileSelect();
-	void MapEdit();
-	void Shortcut();
-
-	void RenderTiles(HDC hdc);
-	void RenderSampleTiles(HDC hdc);
-	void RenderSprites(HDC hdc);
-
 	void ChangeMode(EditorMode newMode);
-	void PlaceTile(int x,int y);
-	void PlaceStartPoint(int x,int y);
-	void PlaceItem(int x,int y);
-	void PlaceMonster(int x,int y);
+	void ChangeObstacleDirection(Direction dir);
 
-	// 스프라이트 관리
+	// 엔티티 관리
+	int FindSprite(int x,int y);
 	void AddSprite(FPOINT position,Texture* texture,SpriteType type);
 	void RemoveSprite(int x,int y);
-	int FindSprite(int x,int y);
 
+	// 장애물 관리
+	int FindObstacle(int x,int y);
+	void AddObstacle(POINT position,Texture* texture,Direction dir);
+	void RemoveObstacle(int x,int y);
+
+	// 파일 관리
 	void SaveMap();
 	void LoadMap();
 	void ClearMap();
-
-private:
-	void PrepareDataForSave();
-	void LoadFromDataManager();
 };
