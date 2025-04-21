@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "structs.h"
 #include <queue>
+#include <list>
 
 #define CEILING_COLOR 0x383838
 #define FLOOR_COLOR 0x717171
@@ -51,18 +52,23 @@ private:
 	float	screenWidthRayDistance[WINSIZE_X];
 	float	screenHeightPixelDepths[WINSIZE_Y];
 
-	Ray RayCastingWall(int column);
-	Ray RayCastingObstacle(int column);
+	Ray RayCastingWall(int column, list<Obstacle*>& obstacles);
+	Obstacle* HitObstacle(Ray & ray);
+	Ray RayCastingObstacle(int column, Obstacle*& obstacle);
+
 	void RenderWall(Ray& ray, int column);
-	void RenderObstacle(Ray & ray,int column);
 	void RenderCeilingFloor(Ray& ray, int column);
 	void RenderCeilingFloor(Ray& ray, int column, COLORREF ceiling, COLORREF floor);
+	void RenderObjects(DWORD start, DWORD end, list<Obstacle*>& obstacles);
+	void RenderObstacles(DWORD start, DWORD end, Obstacle*& obstacle);
+	void RenderObstacle(Ray & ray, int column);
+	void RenderSprites(DWORD start, DWORD end, const Sprite* sprite, float inverseDeterminant);
+	void RenderSprite(const Sprite* sprite,POINT renderX,POINT renderY,FPOINT transform);
 	void RenderPixel(FPOINT pixel, int color);
+
 	COLORREF GetDistanceShadeColor(int tile, FPOINT texturePixel, float distance);
 	COLORREF GetDistanceShadeColor(COLORREF color, float distance, float shade);
-	void RenderSprites(DWORD start, DWORD end);
-	void RenderSprite(const Sprite* sprite, POINT renderX, POINT renderY, FPOINT transform);
-	BOOL DetermineHit(POINT pos,Ray & ray);
+
 	int GetRenderScaleBasedOnFPS(void);
 
 public:

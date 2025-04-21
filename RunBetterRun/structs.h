@@ -36,8 +36,10 @@ typedef struct tagAnimationInfo
 
 typedef struct tagObstacle
 {
+	POINT			pos;
 	BOOL			block;
 	Direction		dir;
+	float			distance;
 	Texture*		texture;
 	AnimationInfo	aniInfo;
 } Obstacle;
@@ -77,10 +79,11 @@ typedef struct tagRay
 	int			height;
 	FPOINT		pos;
 	FPOINT		dir;
-	FPOINT		mapPos;
+	POINT		mapPos;
+	DWORD		mapCoordinate;
 	FPOINT		sideDist;
 	FPOINT		deltaDist;
-	FPOINT		step;
+	POINT		step;
 	float		wallTextureX;
 	Obstacle*	obstacle;
 	tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX);

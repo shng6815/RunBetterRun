@@ -8,6 +8,8 @@
 #include "PhoneUI.h"
 #include "Key.h"
 #include "Tentacle.h"
+#include "ObstacleManager.h"
+#include "Pile.h"
 
 HRESULT MainGameScene::Init()
 {
@@ -23,6 +25,7 @@ HRESULT MainGameScene::Init()
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	MonsterManager::GetInstance()->Init();
 	ItemManager::GetInstance()->Init();
+	ObstacleManager::GetInstance()->Init();
 
 	UIManager::GetInstance()->Init();
 	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
@@ -44,7 +47,10 @@ HRESULT MainGameScene::Init()
 
 	ItemManager::GetInstance()->PutItem(new Key({ 21.5, 10.5 }));
 	MonsterManager::GetInstance()->PutMonster(new Tentacle({ 21.5, 8.5 }));
-
+	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,21},Direction::WEST));
+	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,19},Direction::EAST));
+	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,20},Direction::NORTH));
+	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,18},Direction::SOUTH));
 
 	return S_OK;
 }
@@ -96,6 +102,7 @@ void MainGameScene::Update()
 		MonsterManager::GetInstance()->Update();
 		ItemManager::GetInstance()->Update();
 		//UIManager::GetInstance()->Update();
+		ObstacleManager::GetInstance()->Update();
 		break;
 	case MainGameScene::SceneStatus::PAUSE:
 		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {

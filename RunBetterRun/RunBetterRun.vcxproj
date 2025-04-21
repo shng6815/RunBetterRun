@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AObstacle.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="DeadScene.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -143,8 +144,10 @@
     <ClCompile Include="MainGame.cpp" />
     <ClCompile Include="MainGameScene.cpp" />
     <ClCompile Include="AMonster.cpp" />
+    <ClCompile Include="ObstacleManager.cpp" />
     <ClCompile Include="PhoneUI.cpp" />
     <ClCompile Include="MonsterManager.cpp" />
+    <ClCompile Include="Pile.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="MapManager.cpp" />
     <ClCompile Include="RayCast.cpp" />
@@ -159,6 +162,7 @@
     <ClCompile Include="UIUnit.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AObstacle.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="CommonFunction.h" />
     <ClInclude Include="config.h" />
@@ -177,7 +181,9 @@
     <ClInclude Include="MainGameScene.h" />
     <ClInclude Include="AMonster.h" />
     <ClInclude Include="MonsterManager.h" />
+    <ClInclude Include="ObstacleManager.h" />
     <ClInclude Include="PhoneUI.h" />
+    <ClInclude Include="Pile.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="MapManager.h" />
     <ClInclude Include="RayCast.h" />

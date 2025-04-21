@@ -28,6 +28,12 @@ private:
 	vector<AMonster*> monsters;
 	MapData* mapData;
 
+	vector<FPOINT> FindPath(FPOINT start,FPOINT end);
+	int CalculateHeuristic(int x1,int y1,int x2,int y2);
+	bool IsNodeInList(const vector<PathNode*>& list,int x,int y);
+	PathNode* GetNodeFromList(vector<PathNode*>& list,int x,int y);
+	BOOL Move(POINT src, POINT dst);
+
 public:
 	HRESULT Init();
 	void Release();
@@ -35,13 +41,5 @@ public:
 
 	// 몬스터 생성 및 관리
 	void PutMonster(AMonster* monster);
-
-	// TODO: Astar
-	vector<FPOINT> FindPath(FPOINT start, FPOINT end);
-	int CalculateHeuristic(int x1, int y1, int x2, int y2);
-	bool IsNodeInList(const vector<PathNode*>& list, int x, int y);
-	PathNode* GetNodeFromList(vector<PathNode*>& list, int x, int y);
-	FPOINT Move(FPOINT src, FPOINT dst);
-	void Reset();
 };
 
