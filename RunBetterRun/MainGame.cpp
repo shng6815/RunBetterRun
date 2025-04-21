@@ -11,12 +11,14 @@
 #include "GameStartScene.h"
 #include "LossLifeScene.h"
 #include "DeadScene.h"
+#include "VideoManager.h"
 
 HRESULT MainGame::Init()
 {
 	ImageManager::GetInstance()->Init();
 	KeyManager::GetInstance()->Init();
 	SceneManager::GetInstance()->Init();
+	VideoManager::Init();
 	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
 
 	SceneManager::GetInstance()->AddScene("MainGameScene",new MainGameScene());
@@ -53,6 +55,7 @@ void MainGame::Release()
 	SpriteManager::GetInstance()->Release();
 	SceneManager::GetInstance()->Release();
 	KeyManager::GetInstance()->Release();
+	VideoManager::Release();
 	ImageManager::GetInstance()->Release();
 	MapManager::GetInstance()->Release();
 }

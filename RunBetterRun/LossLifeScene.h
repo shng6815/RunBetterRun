@@ -12,8 +12,6 @@ private:
 	float delayTime;
 
 	IMFPMediaPlayer*  pPlayer     = nullptr;
-	bool videoFinished;
-	bool useImageMode = false;
 	float videoTimer;  // 비디오 재생 시간 체크용
 	float videoLength;
 
@@ -23,6 +21,5 @@ public:
 	virtual void Release() override;
 	virtual void Update() override;
 	virtual void Render(HDC hdc) override;
-
 };
 

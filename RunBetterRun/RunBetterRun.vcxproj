@@ -160,6 +160,7 @@ mf.lib
     <ClCompile Include="TimerManager.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="UIUnit.cpp" />
+    <ClCompile Include="VideoManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h" />
@@ -195,6 +196,7 @@ mf.lib
     <ClInclude Include="TimerManager.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="UIUnit.h" />
+    <ClInclude Include="VideoManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
