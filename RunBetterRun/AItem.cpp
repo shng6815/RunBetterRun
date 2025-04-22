@@ -10,12 +10,11 @@ BOOL AItem::Update(void)
 {
 	if(sprite.distance < ITEM_SIZE)
 	{
-		Action();
-		SpriteManager::GetInstance()->DeleteSprite(sprite);
-
-		(static_cast<PhoneUI*>(UIManager::GetInstance()->GetUIUnit("PhoneUI")))->ShakeOnItemGet();
-
-		return true;
+		if (Action())
+		{
+			SpriteManager::GetInstance()->DeleteSprite(sprite);
+			return true;
+		}
 	}
 	return false;
 }

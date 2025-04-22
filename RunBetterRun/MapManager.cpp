@@ -82,7 +82,7 @@ bool MapManager::SaveMap(const LPCWCH filePath)
 {
 	DataManager::GetInstance()->ClearAllData();
 	DataManager::GetInstance()->SetMapData(mapData.tiles,mapData.width,mapData.height);
-	DataManager::GetInstance()->SetTextureInfo(L"Image/horrorMapTiles.bmp",
+	DataManager::GetInstance()->SetTextureInfo(L"Image/tiles.bmp",
 											 mapData.textureTileSize,
 											 mapData.textureTileRowSize,
 											 mapData.textureTileColumnSize);
@@ -175,12 +175,12 @@ void MapManager::SetTile(int x,int y,RoomType tileType,int index)
 
 HRESULT MapManager::InitializeTexture()
 {
-	mapData.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/horrorMapTiles.bmp"));
+	mapData.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/tiles.bmp"));
 	if(!mapData.texture)
 		return E_FAIL;
 	mapData.textureTileSize = 128;
-	mapData.textureTileRowSize = 11;
-	mapData.textureTileColumnSize = 11;
+	mapData.textureTileRowSize = 7;
+	mapData.textureTileColumnSize = 4;
 
 	return S_OK;
 }
