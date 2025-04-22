@@ -5,7 +5,7 @@
 
 BOOL Pile::Action(void)
 {
-	if(KeyManager::GetInstance()->IsStayKeyDown('E'))
+	if(obstacle.distance <= OBSTACLE_SIZE && KeyManager::GetInstance()->IsStayKeyDown('E'))
 	{
 		float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
 		obstacle.aniInfo.currentTime -= deltaTime;
