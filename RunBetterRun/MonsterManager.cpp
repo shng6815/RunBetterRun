@@ -26,14 +26,18 @@ void MonsterManager::Update()
     // 플레이어 위치 업데이트
     playerPos = Player::GetInstance()->GetCameraPos();
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
+	vector<FPOINT> paths;
 
     for (auto& monster : monsters)
     {
 		FPOINT monsterPos = monster->GetPostion();
-		vector<FPOINT> path = FindPath(monsterPos, playerPos);
+		vector<FPOINT> path = FindPath(monsterPos, playerPos, paths);
 
 		if(path.size() >= 2)
+		{
 			monster->SetTargetPosition(path[1]);
+			paths.insert(paths.end(),path.begin() + 1, path.end() - 1);
+		}
 
 		monster->Update();
     }
@@ -45,7 +49,7 @@ void MonsterManager::PutMonster(AMonster* monster)
 	monsters.push_back(monster);
 }
 
-vector<FPOINT> MonsterManager::FindPath(FPOINT start, FPOINT end)
+vector<FPOINT> MonsterManager::FindPath(FPOINT start, FPOINT end, vector<FPOINT>& paths)
 {
     // 결과 경로 저장
     vector<FPOINT> path;
@@ -77,6 +81,9 @@ vector<FPOINT> MonsterManager::FindPath(FPOINT start, FPOINT end)
     PathNode* startNode = new PathNode(startX, startY);
     startNode->h = CalculateHeuristic(startX, startY, endX, endY);
     startNode->f = startNode->h;
+
+	for(auto& p : paths)
+		closedList.push_back(new PathNode(p.x,p.y));
 
     // 열린 목록에 시작 노드 추가
     openList.push_back(startNode);

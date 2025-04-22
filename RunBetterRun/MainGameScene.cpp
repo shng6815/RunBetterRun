@@ -51,6 +51,7 @@ HRESULT MainGameScene::Init()
 
 	ItemManager::GetInstance()->PutItem(new Key({ 21.5, 10.5 }));
 	MonsterManager::GetInstance()->PutMonster(new Tentacle({ 21.5, 8.5 }));
+	MonsterManager::GetInstance()->PutMonster(new Tentacle({21.5,7.5}));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,21},Direction::WEST));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,19},Direction::EAST));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,20},Direction::NORTH));

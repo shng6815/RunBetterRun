@@ -28,7 +28,7 @@ private:
 	vector<AMonster*> monsters;
 	MapData* mapData;
 
-	vector<FPOINT> FindPath(FPOINT start,FPOINT end);
+	vector<FPOINT> FindPath(FPOINT start,FPOINT end, vector<FPOINT>& paths);
 	int CalculateHeuristic(int x1,int y1,int x2,int y2);
 	bool IsNodeInList(const vector<PathNode*>& list,int x,int y);
 	PathNode* GetNodeFromList(vector<PathNode*>& list,int x,int y);
