@@ -161,6 +161,7 @@
     <ClCompile Include="MapEditorRender.cpp" />
     <ClCompile Include="MapEditorUI.cpp" />
     <ClCompile Include="ObstacleManager.cpp" />
+    <ClCompile Include="OpeningScene.cpp" />
     <ClCompile Include="PhoneUI.cpp" />
     <ClCompile Include="MonsterManager.cpp" />
     <ClCompile Include="Pile.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="MapEditorUI.h" />
     <ClInclude Include="MonsterManager.h" />
     <ClInclude Include="ObstacleManager.h" />
+    <ClInclude Include="OpeningScene.h" />
     <ClInclude Include="PhoneUI.h" />
     <ClInclude Include="Pile.h" />
     <ClInclude Include="Player.h" />

@@ -6,6 +6,7 @@
 #include "RayCast.h"
 #include "SpriteManager.h"
 #include "MapManager.h"
+#include "OpeningScene.h"
 #include "MainGameScene.h"
 #include "GameStartScene.h"
 #include "JumpscareScene.h"
@@ -43,6 +44,7 @@ HRESULT MainGame::Init()
 	DataManager::GetInstance()->Init();	
 	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
 	SceneManager::GetInstance()->AddScene("MapEditorScene",new MapEditor());
+	SceneManager::GetInstance()->AddScene("OpeningScene",new OpeningScene());
 	SceneManager::GetInstance()->AddScene("MainGameScene",new MainGameScene());
 	SceneManager::GetInstance()->AddScene("GameStartScene",new GameStartScene());
 	SceneManager::GetInstance()->AddScene("LossLifeScene",new LossLifeScene());
