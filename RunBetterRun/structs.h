@@ -1,32 +1,21 @@
 #pragma once
 #include "config.h"
 
-enum class RoomType
+enum class RoomType: BYTE
 { NONE, WALL, FLOOR, START, GOAL };
 
-enum class SpriteType
+enum class Direction: BYTE
+{
+	NORTH, SOUTH, WEST, EAST
+};
+
+enum class SpriteType: BYTE
 { NONE, KEY, ITEM, MONSTER };
 
-enum class UIType
+enum class UIType: BYTE
 {
 	NONE, PLAYING, GAMEOVER, PAUSE, TITLE
 };
-
-typedef struct tagRoom
-{
-	RoomType	roomType;
-	DWORD		tilePos;
-	tagRoom() :roomType(RoomType::FLOOR), tilePos(1) {}
-} Room;
-
-typedef struct tagLevel
-{
-	FPOINT	mosterPos;
-	FPOINT	cameraDir;
-	FPOINT	cameraPos;
-	DWORD	itemCount;
-	DWORD	monsterCount;
-} Level;
 
 typedef struct tagTexture
 {
@@ -45,6 +34,35 @@ typedef struct tagAnimationInfo
 
 } AnimationInfo;
 
+typedef struct tagObstacle
+{
+	POINT			pos;
+	BOOL			block;
+	Direction		dir;
+	float			distance;
+	Texture*		texture;
+	AnimationInfo	aniInfo;
+} Obstacle;
+
+typedef struct tagRoom
+{
+	RoomType	roomType;
+	DWORD		tilePos;
+	Obstacle*	obstacle;
+	tagRoom() :roomType(RoomType::FLOOR),
+		tilePos(1), obstacle(nullptr) {}
+} Room;
+
+typedef struct tagLevel
+{
+	FPOINT	mosterPos;
+	FPOINT	cameraDir;
+	FPOINT	cameraPos;
+	DWORD	itemCount;
+	DWORD	monsterCount;
+} Level;
+
+
 typedef struct tagSprite
 {
 	SpriteType		type;
@@ -61,12 +79,13 @@ typedef struct tagRay
 	int			height;
 	FPOINT		pos;
 	FPOINT		dir;
-	FPOINT		mapPos;
+	POINT		mapPos;
+	DWORD		mapCoordinate;
 	FPOINT		sideDist;
 	FPOINT		deltaDist;
-	FPOINT		step;
+	POINT		step;
 	float		wallTextureX;
-
+	Obstacle*	obstacle;
 	tagRay(FPOINT pos, FPOINT plane, FPOINT cameraDir, float cameraX);
 } Ray;
 
@@ -80,3 +99,63 @@ typedef struct tagMapData
 	DWORD textureTileRowSize;
 	DWORD textureTileColumnSize;
 } MapData;
+
+// ����� ������
+typedef struct tagFileHeader
+{
+	char signature[4];      // ����Ÿ�Ա���
+	int version;            // ���� ���� ����
+	int mapWidth;          
+	int mapHeight;          
+	int tileCount;          // ��ü Ÿ�� ��
+	int itemCount;         
+	int monsterCount;    
+	int obstacleCount;
+	FPOINT startPos;        
+
+	// �ؽ�ó ����
+	wchar_t texturePath[MAX_PATH];  // �ؽ�ó ���
+	DWORD textureTileSize;          // Ÿ�� ũ��
+	DWORD textureTileRowSize;       // ���� Ÿ�� ��
+	DWORD textureTileColumnSize;    // ���� Ÿ�� ��
+
+	tagFileHeader()
+	{
+		signature[0] = 'M'; signature[1] = 'P';
+		signature[2] = 'D'; signature[3] = 'T';
+		version = 1;
+		mapWidth = 0;
+		mapHeight = 0;
+		tileCount = 0;
+		itemCount = 0;
+		monsterCount = 0;
+		obstacleCount = 0;
+		startPos = {0.0f,0.0f};
+		texturePath[0] = L'\0';
+		textureTileSize = 0;
+		textureTileRowSize = 0;
+		textureTileColumnSize = 0;
+	}
+}FileHeader;
+
+typedef struct tagItemSaveData
+{
+	FPOINT pos;             // ��ġ
+	AnimationInfo aniInfo;  // �ִϸ��̼� ����
+	int itemType;           // ������ Ÿ�� - 0: Key
+}ItemData;
+
+typedef struct tagMonsterSaveData
+{
+	FPOINT pos;             // ��ġ
+	AnimationInfo aniInfo;  // �ִϸ��̼� ����
+	int monsterType;        // ���� Ÿ�� - 0: Tentacle
+}MonsterData;
+
+typedef struct tagObstacleSaveData
+{
+	POINT pos;             // 위치 (타일 좌표)
+	Direction dir;         // 장애물 방향 (NORTH, SOUTH, EAST, WEST)
+	AnimationInfo aniInfo; // 애니메이션 정보
+	int obstacleType;      // 장애물 타입 - 0: Pile, 1: 다른 장애물 타입 등
+}ObstacleData;

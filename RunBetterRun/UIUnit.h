@@ -13,15 +13,21 @@ public:
 
 	UIType GetUIType() { return uiType; }
 	void SetActive(bool isActive) { this->isActive = isActive; }
-	void ToggleActive() { isActive = !isActive; }
+	virtual void ToggleActive() { isActive = !isActive; }
+	void SetPosition(FPOINT newPos) {
+		pos = newPos;
+	}
+
+	void SetSize(FPOINT newSize) {
+		size = newSize;
+	}
 
 protected:
 	UIType uiType;
-	//vector<UIUnit*> uiUnits;
+	vector<UIUnit*> uiUnits;
 	FPOINT pos;
 	FPOINT size;
 	INT layer;
 
 	bool isActive;
 };
-

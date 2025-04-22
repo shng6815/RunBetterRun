@@ -2,6 +2,8 @@
 #include "TextureManager.h"
 #include "SpriteManager.h"
 #include "ItemManager.h"
+#include "UIManager.h"
+#include "PhoneUI.h"
 
 
 BOOL AItem::Update(void)
@@ -10,6 +12,9 @@ BOOL AItem::Update(void)
 	{
 		Action();
 		SpriteManager::GetInstance()->DeleteSprite(sprite);
+
+		(static_cast<PhoneUI*>(UIManager::GetInstance()->GetUIUnit("PhoneUI")))->ShakeOnItemGet();
+
 		return true;
 	}
 	return false;

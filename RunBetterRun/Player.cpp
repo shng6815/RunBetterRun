@@ -1,12 +1,26 @@
 #include "Player.h"
 #include "MapManager.h"
+#include "UIManager.h"
+#include "PhoneUI.h"
+#include "SoundManager.h"
+#include "DataManager.h"
 
 HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 {
     fov = 0.66f;
     targetFOV = fov;
 
-	cameraPos = { 22, 12 };
+	FPOINT startPos = DataManager::GetInstance()->GetStartPosition();
+
+	if(startPos.x != 0.0f || startPos.y != 0.0f)
+	{
+		cameraPos = startPos;
+	} 
+	else
+	{
+		cameraPos = {22,12};
+	}
+
 
 	cameraVerDir = { -1, 0 };
 	cameraHorDir = { 0, 1.f };
@@ -66,38 +80,62 @@ void Player::Render(HDC hdc)
 
 void Player::KeyInput(void)
 {
-    KeyManager* km = KeyManager::GetInstance();
+	KeyManager* km = KeyManager::GetInstance();
+	bool wasMoving = (moveInput.x != 0 || moveInput.y != 0);
+	bool wasRunning = (moveSpeed == runSpeed);
 
-	moveInput = { 0, 0 };
+	// 이동 입력 초기화
+	moveInput = {0,0};
 
-    if (km->IsStayKeyDown('W'))
-        moveInput.x = -1;
+	// 방향키 입력 처리
+	if(km->IsStayKeyDown('W'))
+		moveInput.x = -1;
+	if(km->IsStayKeyDown('S'))
+		moveInput.x = 1;
+	if(km->IsStayKeyDown('A'))
+		moveInput.y = -1;
+	if(km->IsStayKeyDown('D'))
+		moveInput.y = 1;
 
-    if (km->IsStayKeyDown('S'))
-        moveInput.x = 1;
+	// 현재 움직이는 중인지 확인
+	bool isMoving = (moveInput.x != 0 || moveInput.y != 0);
 
-    if (km->IsStayKeyDown('A'))
-        moveInput.y = -1;
+	// SHIFT 키 입력 처리 (달리기)
+	if(km->IsStayKeyDown(VK_SHIFT) && isMoving)
+	{
+		targetFOV = 0.5f;
+		moveSpeed = runSpeed;
+	} else if(!km->IsStayKeyDown(VK_SHIFT))
+	{
+		targetFOV = 0.66f;
+		moveSpeed = defaultSpeed;
+	}
 
-    if (km->IsStayKeyDown('D'))
-        moveInput.y = 1;
-    
-    if (km->IsOnceKeyDown(VK_SHIFT))
-    {
-        targetFOV = 0.5f;
-        moveSpeed = runSpeed;
-    }
+	// 현재 달리는 중인지 확인
+	bool isRunning = (moveSpeed == runSpeed && isMoving);
 
-    if (km->IsOnceKeyUp(VK_SHIFT))
-    {
-        targetFOV = 0.66f;
-        moveSpeed = defaultSpeed;
-    }
-    if (km->IsOnceKeyDown('O'))
-        Save();
+	// PhoneUI 가져오기
+	PhoneUI* phoneUI = static_cast<PhoneUI*>(UIManager::GetInstance()->GetUIUnit("PhoneUI"));
+	if(phoneUI)
+	{
+		// 상태 업데이트
+		if(!isMoving)
+		{
+			phoneUI->UpdateByPlayerState(PlayerState::IDLE);
+		} else if(isRunning)
+		{
+			phoneUI->UpdateByPlayerState(PlayerState::RUNNING);
+		} else
+		{
+			phoneUI->UpdateByPlayerState(PlayerState::WALKING);
+		}
+	}
 
-    if (km->IsOnceKeyDown('P'))
-        Load();
+	// 기타 키 입력 처리
+	if(km->IsOnceKeyDown('O'))
+		Save();
+	if(km->IsOnceKeyDown('P'))
+		Load();
 }
 
 void Player::MouseInput(void)
@@ -114,47 +152,86 @@ void Player::MouseInput(void)
 
 void Player::MoveCamera(float deltaTime)
 {
-    if (!moveInput.x && !moveInput.y)
-    {
+	if(!moveInput.x && !moveInput.y)
+	{
 		stepElapsedTime = 0;
 		return;
-    }
+	}
 
 	stepElapsedTime += deltaTime;
 
-    float interval = (runSpeed == moveSpeed ? runTime : stepTime);
-    if (stepElapsedTime > interval)
-    {
-        shakeFunc(moveSpeed * 10 + 3, 0.2f, true);
-        stepElapsedTime = 0;
-    }
+	float interval = (moveSpeed == runSpeed ? runTime : stepTime);
+	if(stepElapsedTime > interval)
+	{
+		// 카메라 흔들기 효과
+		shakeFunc(moveSpeed * 10 + 3,0.2f,true);
 
-    bool moveForward = moveInput.x > 0;
-    bool moveBackward = moveInput.x < 0;
-    bool moveLeft = moveInput.y < 0;
-    bool moveRight = moveInput.y > 0;
+		// 발소리 재생 - 걷기/뛰기에 따라 다른 볼륨으로 재생
+		if(moveSpeed == runSpeed) {
+			// 뛰는 소리 (더 큰 볼륨)
+			SoundManager::GetInstance()->PlaySound("Step",false,1.0f);
+		} else {
+			// 걷는 소리 (약간 작은 볼륨)
+			SoundManager::GetInstance()->PlaySound("Step",false,0.7f);
+		}
 
-    FPOINT pos = cameraPos;
+		stepElapsedTime = 0;
+	}
 
-    if (moveForward || moveBackward) {
-        pos.x += (moveForward ? -1 : 1) * (cameraVerDir.x * moveSpeed * deltaTime);
-        pos.y += (moveForward ? -1 : 1) * (cameraVerDir.y * moveSpeed * deltaTime);
-    }
+	bool moveForward = moveInput.x > 0;
+	bool moveBackward = moveInput.x < 0;
+	bool moveLeft = moveInput.y < 0;
+	bool moveRight = moveInput.y > 0;
+
+	FPOINT pos = cameraPos;
+
+	if(moveForward || moveBackward) {
+		pos.x += (moveForward ? -1 : 1) * (cameraVerDir.x * moveSpeed * deltaTime);
+		pos.y += (moveForward ? -1 : 1) * (cameraVerDir.y * moveSpeed * deltaTime);
+	}
 
     if (moveLeft || moveRight) {
         pos.x += (moveLeft ? -1 : 1) * (cameraHorDir.x * moveSpeed * deltaTime);
         pos.y += (moveLeft ? -1 : 1) * (cameraHorDir.y * moveSpeed * deltaTime);
     }
+	
+	Move(pos);
+}
 
+void Player::Move(FPOINT pos)
+{
+	int x = INT(pos.x);
+	int y = INT(pos.y);
+	BOOL result = TRUE;
+	MapData* md = MapManager::GetInstance()->GetMapData();
 
-    int x = INT(pos.x);
-    int y = INT(pos.y);
-    MapData* md = MapManager::GetInstance()->GetMapData();
-    if ((0 <= x && x < md->width && 0 <= y && y < md->height)
-        && md->tiles[y * md->width + x].roomType == RoomType::FLOOR)
-    {
-        cameraPos = pos;
-    }
+	if ((0 <= x && x < md->width && 0 <= y && y < md->height)
+		&& md->tiles[y * md->width + x].roomType == RoomType::FLOOR)
+	{
+		int oldX = INT(cameraPos.x);
+		int oldY = INT(cameraPos.y);
+		Obstacle* newMove = md->tiles[y * md->width + x].obstacle;
+		Obstacle* oldMove = md->tiles[oldY * md->width + oldX].obstacle;
+		if (newMove && newMove->block)
+		{
+			if ((oldX < x && newMove->dir == Direction::EAST)
+				|| (oldX > x && newMove->dir == Direction::WEST)
+				|| (oldY < y && newMove->dir == Direction::SOUTH)
+				|| (oldY > y && newMove->dir == Direction::NORTH))
+				result = FALSE;
+		}
+		if(oldMove && oldMove->block)
+		{
+			if ((oldX < x && oldMove->dir == Direction::WEST)
+				|| (oldX > x && oldMove->dir == Direction::EAST)
+				|| (oldY < y && oldMove->dir == Direction::NORTH)
+				|| (oldY > y && oldMove->dir == Direction::SOUTH))
+				result = FALSE;
+		}
+	} else
+		result = FALSE;
+	if (result)
+		cameraPos = pos;
 }
 
 void Player::RotateCamera(float deltaTime)

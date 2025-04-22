@@ -1,6 +1,7 @@
 #include "GameStartScene.h"
 #include "SceneManager.h"
 #include "Player.h"
+#include "MapManager.h"
 #include "Image.h"
 
 HRESULT GameStartScene::Init()
@@ -15,10 +16,12 @@ HRESULT GameStartScene::Init()
 
 	titleText = L"Horror Game";
 	InitButtons();
-	ShowCursor(true);
-
+	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
+	//MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
+	//MapManager::GetInstance()->Init();
+	while(ShowCursor(TRUE) < 0);
 	return S_OK;
-}
+} 
 
 void GameStartScene::Release()
 {
@@ -34,6 +37,10 @@ void GameStartScene::Update()
 	mousePos = cursor;
 
 	CheckButtonHover();
+
+	if(KeyManager::GetInstance()->IsOnceKeyDown(VK_SPACE)) {
+		SceneManager::GetInstance()->ChangeScene("MapEditorScene");
+	}
 
 	if(KeyManager::GetInstance()->IsOnceKeyDown(VK_LBUTTON))
 	{
@@ -147,7 +154,7 @@ void GameStartScene::HandleButtonClick(Button & button)
 		break;
 	
 	case ButtonType::MAP_EDITOR:
-		//SceneManager::GetInstance()->ChangeScene("MapEditerScene");
+		SceneManager::GetInstance()->ChangeScene("MapEditorScene");
 		break;
 	case ButtonType::EXIT:
 		DestroyWindow(g_hWnd);	

@@ -2,7 +2,6 @@
 #include "CommonFunction.h"
 #include "Image.h"
 #include "Timer.h"
-#include "TilemapTool.h"
 #include "LoadingScene.h"
 #include "RayCast.h"
 #include "SpriteManager.h"
@@ -12,15 +11,37 @@
 #include "LossLifeScene.h"
 #include "DeadScene.h"
 #include "VideoManager.h"
+#include "DataManager.h"
+#include "MapEditor.h"
+#include "SoundManager.h"
 
 HRESULT MainGame::Init()
 {
 	ImageManager::GetInstance()->Init();
 	KeyManager::GetInstance()->Init();
 	SceneManager::GetInstance()->Init();
-	VideoManager::Init();
 	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
 
+	SoundManager::GetInstance()->Init();
+
+	if(FAILED(SoundManager::GetInstance()->LoadMusic("BGM","Sounds/bgm_main.wav")))
+	{
+		MessageBox(g_hWnd,TEXT("BGM Load Failed"),TEXT("Error"),MB_OK);
+		return E_FAIL;
+	}
+
+	if(FAILED(SoundManager::GetInstance()->LoadSound("Step","Sounds/SFX_Step.wav")))
+	{
+		MessageBox(g_hWnd,TEXT("SFX Load Failed"),TEXT("Error"),MB_OK);
+		return E_FAIL;
+	}
+
+	SoundManager::GetInstance()->PlayMusic("BGM",true,0.8f);
+
+	VideoManager::Init();
+	DataManager::GetInstance()->Init();	
+	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
+	SceneManager::GetInstance()->AddScene("MapEditorScene",new MapEditor());
 	SceneManager::GetInstance()->AddScene("MainGameScene",new MainGameScene());
 	SceneManager::GetInstance()->AddScene("GameStartScene",new GameStartScene());
 	SceneManager::GetInstance()->AddScene("LossLifeScene",new LossLifeScene());
@@ -51,13 +72,15 @@ void MainGame::Release()
 	}
 
 	ReleaseDC(g_hWnd, hdc);
-
+	MapManager::GetInstance()->Release();
 	SpriteManager::GetInstance()->Release();
+	DataManager::GetInstance()->Release();
 	SceneManager::GetInstance()->Release();
 	KeyManager::GetInstance()->Release();
 	VideoManager::Release();
 	ImageManager::GetInstance()->Release();
 	MapManager::GetInstance()->Release();
+	SoundManager::GetInstance()->Release();
 }
 
 void MainGame::Update()

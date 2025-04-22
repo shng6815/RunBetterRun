@@ -3,18 +3,15 @@
 #include <functional>
 
 /*
-	ÇÔ¼ö Æ÷ÀÎÅÍ : ÇÔ¼öÀÇ ¸Ş¸ğ¸® ÁÖ¼Ò¸¦ ÀúÀåÇÒ ¼ö ÀÖ´Â º¯¼ö
-	(º¯¼ö)Æ÷ÀÎÅÍ : º¯¼öÀÇ ¸Ş¸ğ¸® ÁÖ¼Ò¸¦ ÀúÀåÇÒ ¼ö ÀÖ´Â º¯¼ö
-
+	í•¨ìˆ˜ í¬ì¸í„° : í•¨ìˆ˜ì˜ ë©”ëª¨ë¦¬ ì£¼ì†Œë¥¼ ì €ì¥í•  ìˆ˜ ìˆëŠ” ë³€ìˆ˜
+	(ë³€ìˆ˜)í¬ì¸í„° : ë³€ìˆ˜ì˜ ë©”ëª¨ë¦¬ ì£¼ì†Œë¥¼ ì €ì¥í•  ìˆ˜ ìˆëŠ” ë³€ìˆ˜
 	int a = 10;
-	int* pA = &a;	// º¯¼ö aÀÇ ¸Ş¸ğ¸® ÁÖ¼Ò¸¦ ÀúÀå
-	
-	void sum(int a, int b);
-	void (*pFunc)(int, int) = sum;	// ÇÔ¼ö sumÀÇ ¸Ş¸ğ¸® ÁÖ¼Ò¸¦ ÀúÀå
+	int* pA = &a;    // ë³€ìˆ˜ aì˜ ë©”ëª¨ë¦¬ ì£¼ì†Œë¥¼ ì €ì¥
 
+	void sum(int a, int b);
+	void (*pFunc)(int, int) = sum;    // í•¨ìˆ˜ sumì˜ ë©”ëª¨ë¦¬ ì£¼ì†Œë¥¼ ì €ì¥
 	sum(10, 20);
 	pFunc(10, 20);
-
 	int getRandom(void);
 	int (*pFunc)(void);
 	pFunc = getRandom;
@@ -24,33 +21,38 @@ typedef void (*ButtonFunc)(void);
 
 enum class ButtonState
 {
-	None, Down, Up
+	None,Down,Up
 };
 
 class Image;
-class Button : public GameObject
+class Button: public GameObject
 {
 private:
 	ButtonState state;
 	Image* image;
 	RECT rc;
 	POINT pos;
-
+	LPCWSTR text;
+	bool useTextOnly;
 	ButtonFunc buttonFunc1;
 	//GameObject* obj;
-
 	std::function<void(void)> buttonFunc;
 
 public:
-	virtual HRESULT Init(int posX, int posY);
+	// ìƒì„±ì ì¶”ê°€
+	Button(): state(ButtonState::None),image(nullptr),text(nullptr),
+		useTextOnly(false),buttonFunc1(nullptr),buttonFunc(nullptr) {}
+
+	virtual HRESULT Init(int posX,int posY);
 	virtual void Release() override;
 	virtual void Update() override;
 	virtual void Render(HDC hdc) override;
+	HRESULT InitTextButton(int posX,int posY,int width,int height,LPCWSTR text);
 
 	//void SetFunction(ButtonFunc func, GameObject* obj)
 	//{
-	//	buttonFunc = func;
-	//	this->obj = obj;
+	//    buttonFunc = func;
+	//    this->obj = obj;
 	//}
 
 	void SetFunction(std::function<void(void)> func)
@@ -60,7 +62,6 @@ public:
 
 	//void SetFunction(ButtonFunc func)
 	//{
-	//	buttonFunc1 = func;
+	//    buttonFunc1 = func;
 	//}
 };
-

@@ -2,25 +2,25 @@
 #include "Singleton.h"
 #include "structs.h"
 
-#define MAP_COLUME 24
-#define MAP_ROW 24
+#define MAP_COLUME 80
+#define MAP_ROW 80
 
-class MapManager : public Singleton<MapManager>
+class MapManager: public Singleton<MapManager>
 {
 private:
 	MapData mapData;
 
 public:
-	HRESULT Init();					//±âº»	   ¸Ê »ı¼º
-	HRESULT Init(LPCWCH filePath);  //ÆÄÀÏ°æ·Î ¸Ê ·Îµå
+	HRESULT Init();                     // ê¸°ë³¸ ë§µ ìƒì„±
+	HRESULT Init(LPCWCH filePath);      // íŒŒì¼ ê²½ë¡œë¡œ ë§µ ë¡œë“œ
 	void Release();
 
 	bool LoadMap(const LPCWCH filePath);
-	bool SaveMap(const LPCWCH filePath);
-	
-	bool CreateNewMap(int width, int height); //»õ·Î¿î ¸Ê »ı¼º
-	bool CreateMazeMap(int width, int height);
-	void SetTile(int x, int y, RoomType tileType, int index); //Æ¯Á¤Å¸ÀÔÀÇ Å¸ÀÏ ¼³Á¤
+	bool SaveMap(const LPCWCH filePath); 
+	bool CreateNewMap(int width,int height);
+	bool CreateMazeMap(int width,int height);
+	HRESULT InitializeTexture();
+	void SetTile(int x,int y,RoomType tileType,int index);
 
-	MapData* GetMapData();
+	MapData* GetMapData(); 
 };
