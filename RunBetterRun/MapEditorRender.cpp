@@ -26,7 +26,7 @@ void MapEditorRender::RenderTiles(HDC hdc,const vector<Room>& tiles,int mapWidth
 	// 타일 크기를 계산 (가로, 세로 중 작은 값을 기준으로 정사각형 유지)
 	int tileWidth = mapAreaWidth / maxTilesX;
 	int tileHeight = mapAreaHeight / maxTilesY;
-	int tileSize = min(tileWidth,tileHeight);  
+	int tileSize = min(tileWidth,tileHeight);  // 정사각형 보장
 
 	// 정사각형 타일을 기준으로 실제 표시 가능한 타일 수 다시 계산
 	int actualTilesX = mapAreaWidth / tileSize;
@@ -60,13 +60,13 @@ void MapEditorRender::RenderTiles(HDC hdc,const vector<Room>& tiles,int mapWidth
 			int frameX = tileIndex % SAMPLE_TILE_X;
 			int frameY = tileIndex / SAMPLE_TILE_X;
 
-			// RenderResized 함수 사용 
+			// RenderResized 함수 사용 (정사각형 타일 보장)
 			sampleTileImage->RenderResized(
 				hdc,
 				screenX,
 				screenY,
-				tileSize,  
-				tileSize,  
+				tileSize,  // 정사각형 크기 사용
+				tileSize,  // 정사각형 크기 사용
 				frameX * TILE_SIZE,
 				frameY * TILE_SIZE,
 				TILE_SIZE,

@@ -112,14 +112,12 @@ void MainGameScene::Update()
 	switch (status)
 	{
 	case MainGameScene::SceneStatus::IN_GAME:
-		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) 
-		{
+		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {
 			while(ShowCursor(TRUE) < 0);
 			status = SceneStatus::PAUSE;
 		}
 
-		if (KeyManager::GetInstance()->IsOnceKeyDown('M'))
-		{
+		if (KeyManager::GetInstance()->IsOnceKeyDown('M')) {
 			UIManager::GetInstance()->ToggleActiveUIUnit("PhoneUI");
 		}
 		
@@ -133,8 +131,7 @@ void MainGameScene::Update()
 		ObstacleManager::GetInstance()->Update();
 		break;
 	case MainGameScene::SceneStatus::PAUSE:
-		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)
-			) {
+		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {
 			while(ShowCursor(FALSE) >= 0);
 			status = SceneStatus::IN_GAME;
 		}
