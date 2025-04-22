@@ -29,8 +29,8 @@ HRESULT MapEditor::Init()
 	// 샘플 타일 이미지 로드
 
 	sampleTileImage = ImageManager::GetInstance()->AddImage(
-		"EditorSampleTile",L"Image/horrorMapTiles2.bmp",
-		352,352,SAMPLE_TILE_X,SAMPLE_TILE_Y,
+		"EditorSampleTile",L"Image/tiles32x32.bmp",
+		224,128,SAMPLE_TILE_X,SAMPLE_TILE_Y,
 		true,RGB(255,0,255));
 
 	if(!sampleTileImage)
@@ -539,8 +539,8 @@ void MapEditor::PrepareDataForSave()
 	// 맵 데이터 설정
 	DataManager::GetInstance()->SetMapData(tiles,mapWidth,mapHeight);
 	// 텍스처 정보 설정
-	DataManager::GetInstance()->SetTextureInfo(L"Image/horrorMapTiles2.bmp",
-											 32,SAMPLE_TILE_X,SAMPLE_TILE_Y);
+	DataManager::GetInstance()->SetTextureInfo(L"Image/tiles.bmp",
+											 128,SAMPLE_TILE_X,SAMPLE_TILE_Y);
 	// 시작 위치 설정
 	DataManager::GetInstance()->SetStartPosition(startPosition);
 	// 아이템, 몬스터, 장애물 데이터 추가
