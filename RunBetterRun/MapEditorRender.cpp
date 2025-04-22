@@ -83,13 +83,6 @@ void MapEditorRender::RenderSampleTiles(HDC hdc,RECT sampleArea,POINT selectedTi
 	// 타일 크기 계산 수정
 	int sampleTileWidth = (sampleArea.right - sampleArea.left) / SAMPLE_TILE_X;
 	int sampleTileHeight = (sampleArea.bottom - sampleArea.top) / SAMPLE_TILE_Y;
-	// 디버깅 메시지
-	TCHAR szDebug[128];
-	wsprintf(szDebug,TEXT("Sample area: (%d,%d) - (%d,%d), Tile size: %dx%d\n"),
-			 sampleArea.left,sampleArea.top,sampleArea.right,sampleArea.bottom,
-			 sampleTileWidth,sampleTileHeight);
-	OutputDebugString(szDebug);
-
 
 	// 타일 렌더링
 	for(int y = 0; y < SAMPLE_TILE_Y; y++)
@@ -107,9 +100,8 @@ void MapEditorRender::RenderSampleTiles(HDC hdc,RECT sampleArea,POINT selectedTi
 			// 선택된 타일 강조 표시
 			if(x == selectedTile.x && y == selectedTile.y)
 			{
-				// 더 눈에 띄는 선택 표시
 				HPEN selectPen = CreatePen(PS_SOLID,3,RGB(255,0,0));
-				HBRUSH selectBrush = CreateSolidBrush(RGB(255,230,230)); // 연한 빨강 배경
+				HBRUSH selectBrush = CreateSolidBrush(RGB(255,230,230)); 
 
 				HPEN oldPen = (HPEN)SelectObject(hdc,selectPen);
 				HBRUSH oldBrush = (HBRUSH)SelectObject(hdc,selectBrush);
@@ -175,7 +167,7 @@ void MapEditorRender::RenderSprites(HDC hdc,const vector<Sprite>& sprites,RECT m
 
 	TCHAR szCount[128];
 	wsprintf(szCount,TEXT("Items: %d, Monsters: %d"),itemCount,monsterCount);
-	TextOut(hdc,mapArea.left,mapArea.bottom + 10,szCount,lstrlen(szCount));
+	TextOut(hdc,20, 0, szCount,lstrlen(szCount));
 }
 
 void MapEditorRender::RenderObstacles(HDC hdc,const vector<Obstacle>& obstacles,RECT mapArea)

@@ -1,6 +1,16 @@
 #pragma once
 #include "config.h"
 
+//타일맵 관련 상수
+#define TILEMAPTOOL_X	1600
+#define TILEMAPTOOL_Y	900
+
+#define VISIBLE_MAP_WIDTH  40       
+#define VISIBLE_MAP_HEIGHT 40
+#define TILE_SIZE 32
+#define SAMPLE_TILE_X 11            
+#define SAMPLE_TILE_Y 11
+
 enum class RoomType: BYTE
 { NONE, WALL, FLOOR, START, GOAL };
 

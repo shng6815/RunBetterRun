@@ -284,6 +284,15 @@ void MapEditor::Shortcut()
 		selectedRoomType = RoomType::START;
 	}
 
+	//if(km->IsOnceKeyDown('-'))
+	//{
+	//	확대
+	//}
+	//else if(km->IsOnceKeyDown('+')
+	//{
+	//	축소
+	//}
+
 	if(mode == EditorMode::OBSTACLE)
 	{
 		if(km->IsOnceKeyDown(VK_UP))
