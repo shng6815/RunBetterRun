@@ -18,6 +18,14 @@ public:
 	void SetActiveUIUnit(string str, bool isActive);
 	void ToggleActiveUIUnit(string str);
 
+	UIUnit* GetUIUnit(string str)
+	{
+		auto it = uiUnits.find(str);
+		if(it != uiUnits.end())
+			return it->second;
+		return nullptr;
+	}
+
 private:
 	map<string, UIUnit*> uiUnits;
 	UIType uiType;

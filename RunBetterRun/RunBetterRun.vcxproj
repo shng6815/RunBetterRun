@@ -70,6 +70,13 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(ProjectDir)include/SDL2;$(ProjectDir)include;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(ProjectDir)include/SDL2;$(ProjectDir)include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -102,12 +109,15 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_WIN32_WINNT=0x0602;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>SDL2/include;SDL2_mixer/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;strmiids.lib;quartz.lib;mfplat.lib;mf.lib;mfplay.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>SDL2/lib/x64;SDL2_mixer/lib/x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -129,6 +139,7 @@
   <ItemGroup>
     <ClCompile Include="AObstacle.cpp" />
     <ClCompile Include="Button.cpp" />
+    <ClCompile Include="DataManager.cpp" />
     <ClCompile Include="DeadScene.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameStartScene.cpp" />
@@ -143,7 +154,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainGame.cpp" />
     <ClCompile Include="MainGameScene.cpp" />
+    <ClCompile Include="MinimapUI.cpp" />
     <ClCompile Include="AMonster.cpp" />
+    <ClCompile Include="MapEditor.cpp" />
+    <ClCompile Include="MapEditorRender.cpp" />
+    <ClCompile Include="MapEditorUI.cpp" />
     <ClCompile Include="ObstacleManager.cpp" />
     <ClCompile Include="PhoneUI.cpp" />
     <ClCompile Include="MonsterManager.cpp" />
@@ -152,20 +167,22 @@
     <ClCompile Include="MapManager.cpp" />
     <ClCompile Include="RayCast.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="SpriteManager.cpp" />
     <ClCompile Include="Tentacle.cpp" />
     <ClCompile Include="TextureManager.cpp" />
-    <ClCompile Include="TilemapTool.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerManager.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="UIUnit.cpp" />
+    <ClCompile Include="VideoManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AObstacle.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="CommonFunction.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="DataManager.h" />
     <ClInclude Include="DeadScene.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameStartScene.h" />
@@ -179,7 +196,12 @@
     <ClInclude Include="LossLifeScene.h" />
     <ClInclude Include="MainGame.h" />
     <ClInclude Include="MainGameScene.h" />
+    <ClInclude Include="MinimapUI.h" />
+    <ClInclude Include="Monster.h" />
     <ClInclude Include="AMonster.h" />
+    <ClInclude Include="MapEditor.h" />
+    <ClInclude Include="MapEditorRender.h" />
+    <ClInclude Include="MapEditorUI.h" />
     <ClInclude Include="MonsterManager.h" />
     <ClInclude Include="ObstacleManager.h" />
     <ClInclude Include="PhoneUI.h" />
@@ -189,15 +211,16 @@
     <ClInclude Include="RayCast.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Singleton.h" />
+    <ClInclude Include="SoundManager.h" />
     <ClInclude Include="structs.h" />
     <ClInclude Include="SpriteManager.h" />
     <ClInclude Include="Tentacle.h" />
     <ClInclude Include="TextureManager.h" />
-    <ClInclude Include="TilemapTool.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerManager.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="UIUnit.h" />
+    <ClInclude Include="VideoManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -123,13 +123,13 @@ void Image::Render(HDC hdc, int destX, int destY)
     else
     {
         BitBlt(
-            hdc,                // º¹»ç ¸ñÀûÁö DC
-            destX, destY,       // º¹»ç ¸ñÀûÁö À§Ä¡
-            imageInfo->width,   // ¿øº»¿¡¼­ º¹»çµÉ °¡·ÎÅ©±â
-            imageInfo->height,  // ¿øº»¿¡¼­ º¹»çµÉ ¼¼·ÎÅ©±â
-            imageInfo->hMemDC,  // ¿øº» DC
-            0, 0,               // ¿øº» º¹»ç ½ÃÀÛ À§Ä¡
-            SRCCOPY             // º¹»ç ¿É¼Ç
+            hdc,                // ë³µì‚¬ ëª©ì ì§€ DC
+            destX, destY,       // ë³µì‚¬ ëª©ì ì§€ ìœ„ì¹˜
+            imageInfo->width,   // ì›ë³¸ì—ì„œ ë³µì‚¬ë  ê°€ë¡œí¬ê¸°
+            imageInfo->height,  // ì›ë³¸ì—ì„œ ë³µì‚¬ë  ì„¸ë¡œí¬ê¸°
+            imageInfo->hMemDC,  // ì›ë³¸ DC
+            0, 0,               // ì›ë³¸ ë³µì‚¬ ì‹œì‘ ìœ„ì¹˜
+            SRCCOPY             // ë³µì‚¬ ì˜µì…˜
         );
     }
 }
@@ -182,6 +182,32 @@ void Image::Render(HDC hdc, int destX, int destY, int frameIndex, bool isFlip)
             SRCCOPY
         );
     }
+}
+
+void Image::RenderResized(HDC hdc,int destX,int destY,int width,int height)
+{
+	if(isTransparent)
+	{
+		GdiTransparentBlt(hdc,
+			destX,destY,
+			width,height,  // ì›í•˜ëŠ” í¬ê¸°ë¡œ ë Œë”ë§
+			imageInfo->hMemDC,
+			0,0,
+			imageInfo->width,imageInfo->height,
+			transColor);
+	} else
+	{
+		StretchBlt(
+			hdc,                // ë³µì‚¬ ëª©ì ì§€ DC
+			destX,destY,       // ë³µì‚¬ ëª©ì ì§€ ìœ„ì¹˜
+			width,height,      // ì›í•˜ëŠ” í¬ê¸°ë¡œ ë Œë”ë§
+			imageInfo->hMemDC,  // ì›ë³¸ DC
+			0,0,               // ì›ë³¸ ë³µì‚¬ ì‹œì‘ ìœ„ì¹˜
+			imageInfo->width,   // ì›ë³¸ì—ì„œ ë³µì‚¬ë  ê°€ë¡œí¬ê¸°
+			imageInfo->height,  // ì›ë³¸ì—ì„œ ë³µì‚¬ë  ì„¸ë¡œí¬ê¸°
+			SRCCOPY             // ë³µì‚¬ ì˜µì…˜
+		);
+	}
 }
 
 void Image::FrameRender(HDC hdc, int destX, int destY, 

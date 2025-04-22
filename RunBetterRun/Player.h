@@ -21,6 +21,9 @@ public:
 	FPOINT GetCameraPos() { return cameraPos; }
 	FPOINT GetCameraVerDir() { return cameraVerDir; }
 	FPOINT GetPlane() { return plane; }
+	void InitPlayerLife() { playerLife = 3; }
+	int GetPlayerLife(){ return playerLife; }
+	void LossPlayerLife();
 
 private:
 	FPOINT cameraPos;                         // 카메라 위치
@@ -48,6 +51,9 @@ private:
 	function<void(float, float, bool)> shakeFunc;
 	void Save();
 	void Load();
+
+	// 플레이어 목숨
+	int playerLife;
 } Camera;
 
 

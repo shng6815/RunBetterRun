@@ -10,9 +10,13 @@
 #include "Tentacle.h"
 #include "ObstacleManager.h"
 #include "Pile.h"
+#include "DataManager.h"
 
 HRESULT MainGameScene::Init()
 {
+	InvalidateRect(g_hWnd,NULL,TRUE);
+	UpdateWindow(g_hWnd);
+
 	rayCasting = new RayCast();
 	if (FAILED(rayCasting->Init()))
 	{
@@ -20,21 +24,42 @@ HRESULT MainGameScene::Init()
 		return E_FAIL;
 	}
 
-	MapManager::GetInstance()->Init();
+	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
 	SpriteManager::GetInstance()->Init();
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	MonsterManager::GetInstance()->Init();
 	ItemManager::GetInstance()->Init();
 	ObstacleManager::GetInstance()->Init();
 
+	const auto& items = DataManager::GetInstance()->GetItems();
+	for(const auto& itemData : items)
+	{
+		Key* key = new Key(itemData.pos);
+		key->SetAnimInfo(itemData.aniInfo);
+		ItemManager::GetInstance()->PutItem(key);
+	}
+	const auto& monsters = DataManager::GetInstance()->GetMonsters();
+	for(const auto& monsterData : monsters)
+	{
+		Tentacle* tentacle = new Tentacle(monsterData.pos);
+		tentacle->SetAnimInfo(monsterData.aniInfo);
+		MonsterManager::GetInstance()->PutMonster(tentacle);
+	}
+	const auto& obstacles = DataManager::GetInstance()->GetObstacles();
+	for(const auto& obstacleData : obstacles)
+	{
+		Pile* pile = new Pile(obstacleData.pos,obstacleData.dir);
+		ObstacleManager::GetInstance()->PutObstacle(pile);
+	}
+
 	UIManager::GetInstance()->Init();
 	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
 	PhoneUI* uiUnit = new PhoneUI();
-	uiUnit->Init(UIType::PLAYING, FPOINT{ 200, WINSIZE_Y - 200 }, FPOINT{ 150, 150 }, 0);
+	uiUnit->Init(UIType::PLAYING, FPOINT{ 100, WINSIZE_Y - 500 }, FPOINT{ 300, 400 }, 0);
 	UIManager::GetInstance()->AddUIUnit("PhoneUI", uiUnit);
 
 	status = SceneStatus::IN_GAME;
-	ShowCursor(FALSE);
+	while(ShowCursor(FALSE) >= 0);
 
 	RECT rc;
 	GetClientRect(g_hWnd, &rc);
@@ -45,12 +70,13 @@ HRESULT MainGameScene::Init()
 	oldBitmap = (HBITMAP)SelectObject(backBufferDC, backBufferBitmap);
 	ReleaseDC(g_hWnd, screenDC);
 
-	ItemManager::GetInstance()->PutItem(new Key({ 21.5, 10.5 }));
+	/*ItemManager::GetInstance()->PutItem(new Key({ 21.5, 10.5 }));
 	MonsterManager::GetInstance()->PutMonster(new Tentacle({ 21.5, 8.5 }));
+	MonsterManager::GetInstance()->PutMonster(new Tentacle({21.5,7.5}));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,21},Direction::WEST));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,19},Direction::EAST));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,20},Direction::NORTH));
-	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,18},Direction::SOUTH));
+	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,18},Direction::SOUTH));*/
 
 	return S_OK;
 }
@@ -87,7 +113,7 @@ void MainGameScene::Update()
 	{
 	case MainGameScene::SceneStatus::IN_GAME:
 		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {
-			ShowCursor(TRUE);
+			while(ShowCursor(TRUE) < 0);
 			status = SceneStatus::PAUSE;
 		}
 
@@ -101,13 +127,18 @@ void MainGameScene::Update()
 		SpriteManager::GetInstance()->SortSpritesByDistance();
 		MonsterManager::GetInstance()->Update();
 		ItemManager::GetInstance()->Update();
-		//UIManager::GetInstance()->Update();
+		UIManager::GetInstance()->Update();
 		ObstacleManager::GetInstance()->Update();
 		break;
 	case MainGameScene::SceneStatus::PAUSE:
 		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) {
-			ShowCursor(FALSE);
+			while(ShowCursor(FALSE) >= 0);
 			status = SceneStatus::IN_GAME;
+		}
+
+		if(KeyManager::GetInstance()->IsOnceKeyDown('T'))
+		{
+			SceneManager::GetInstance()->ChangeScene("MapEditorScene");
 		}
 
 		break;
@@ -137,6 +168,7 @@ void MainGameScene::ShakeScreen(float shakePower, float time, bool isStepShake)
 void MainGameScene::ApplyShake(HDC hdc)
 {
 	screenShake.Update(TimerManager::GetInstance()->GetDeltaTime());
+
 	POINT offset = screenShake.GetOffset();
 
 	BitBlt(hdc, offset.x, offset.y, WINSIZE_X, WINSIZE_Y, backBufferDC, 0, 0, SRCCOPY);

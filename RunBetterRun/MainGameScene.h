@@ -77,6 +77,7 @@ public:
 
 	void ShakeScreen(float shakePower, float time, bool isStepShake);
 	void ApplyShake(HDC hdc);
+
 private:
 	enum class SceneStatus { IN_GAME, PAUSE, QUIT };
 

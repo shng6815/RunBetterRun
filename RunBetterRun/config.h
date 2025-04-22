@@ -1,5 +1,4 @@
-// config.h
-
+//config.h
 #pragma once
 #pragma comment(lib, "Winmm.lib")
 
@@ -18,12 +17,20 @@ using namespace std;
 #include "SceneManager.h"
 
 /*
-	ÄÄÆÄÀÏ·¯¿¡¼­ ÇØ´ç ÄÚµå¸¦ µÚ¿¡ Á¤ÀÇµÈ ÄÚµå·Î º¯°æÇÑ´Ù. 
+	ì»´íŒŒì¼ëŸ¬ì—ì„œ í•´ë‹¹ ì½”ë“œë¥¼ ë’¤ì— ì •ì˜ëœ ì½”ë“œë¡œ ë³€ê²½í•œë‹¤. 
 */
-#define WINSIZE_X	1280
-#define WINSIZE_Y	960
-#define TILEMAPTOOL_X	1420
-#define TILEMAPTOOL_Y	960
+#define WINSIZE_X	1600
+#define WINSIZE_Y	900
+
+//íƒ€ì¼ë§µ ê´€ë ¨ ìƒìˆ˜
+#define TILEMAPTOOL_X	1600
+#define TILEMAPTOOL_Y	900
+
+#define VISIBLE_MAP_WIDTH  40       
+#define VISIBLE_MAP_HEIGHT 40
+#define TILE_SIZE 32
+#define SAMPLE_TILE_X 7            
+#define SAMPLE_TILE_Y 4
 
 #define DEG_TO_RAD(degree) ((3.14 / 180.0) * degree)
 #define RAD_TO_DEG(radian) ((180.0 / 3.14) * radian)
@@ -35,8 +42,8 @@ typedef struct tagFPOINT
 } FPOINT;
 
 /*
-	extern Å°¿öµå : º¯¼ö³ª ÇÔ¼ö°¡ ´Ù¸¥ ÆÄÀÏ¿¡ Á¤ÀÇµÇ¾î ÀÖ´Ù ¶ó´Â
-	»ç½ÇÀ» ¾Ë¸®´Â Å°¿öµå.
+	extern í‚¤ì›Œë“œ : ë³€ìˆ˜ë‚˜ í•¨ìˆ˜ê°€ ë‹¤ë¥¸ íŒŒì¼ì— ì •ì˜ë˜ì–´ ìˆë‹¤ ë¼ëŠ”
+	ì‚¬ì‹¤ì„ ì•Œë¦¬ëŠ” í‚¤ì›Œë“œ.
 */
 extern HWND g_hWnd;
 extern HINSTANCE g_hInstance;

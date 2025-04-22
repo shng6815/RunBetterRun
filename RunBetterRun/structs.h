@@ -99,3 +99,63 @@ typedef struct tagMapData
 	DWORD textureTileRowSize;
 	DWORD textureTileColumnSize;
 } MapData;
+
+// ����� ������
+typedef struct tagFileHeader
+{
+	char signature[4];      // ����Ÿ�Ա���
+	int version;            // ���� ���� ����
+	int mapWidth;          
+	int mapHeight;          
+	int tileCount;          // ��ü Ÿ�� ��
+	int itemCount;         
+	int monsterCount;    
+	int obstacleCount;
+	FPOINT startPos;        
+
+	// �ؽ�ó ����
+	wchar_t texturePath[MAX_PATH];  // �ؽ�ó ���
+	DWORD textureTileSize;          // Ÿ�� ũ��
+	DWORD textureTileRowSize;       // ���� Ÿ�� ��
+	DWORD textureTileColumnSize;    // ���� Ÿ�� ��
+
+	tagFileHeader()
+	{
+		signature[0] = 'M'; signature[1] = 'P';
+		signature[2] = 'D'; signature[3] = 'T';
+		version = 1;
+		mapWidth = 0;
+		mapHeight = 0;
+		tileCount = 0;
+		itemCount = 0;
+		monsterCount = 0;
+		obstacleCount = 0;
+		startPos = {0.0f,0.0f};
+		texturePath[0] = L'\0';
+		textureTileSize = 0;
+		textureTileRowSize = 0;
+		textureTileColumnSize = 0;
+	}
+}FileHeader;
+
+typedef struct tagItemSaveData
+{
+	FPOINT pos;             // ��ġ
+	AnimationInfo aniInfo;  // �ִϸ��̼� ����
+	int itemType;           // ������ Ÿ�� - 0: Key
+}ItemData;
+
+typedef struct tagMonsterSaveData
+{
+	FPOINT pos;             // ��ġ
+	AnimationInfo aniInfo;  // �ִϸ��̼� ����
+	int monsterType;        // ���� Ÿ�� - 0: Tentacle
+}MonsterData;
+
+typedef struct tagObstacleSaveData
+{
+	POINT pos;             // 위치 (타일 좌표)
+	Direction dir;         // 장애물 방향 (NORTH, SOUTH, EAST, WEST)
+	AnimationInfo aniInfo; // 애니메이션 정보
+	int obstacleType;      // 장애물 타입 - 0: Pile, 1: 다른 장애물 타입 등
+}ObstacleData;

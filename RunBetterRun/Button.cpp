@@ -5,8 +5,8 @@ HRESULT Button::Init(int posX, int posY)
 {
 	state = ButtonState::None;
 	image = ImageManager::GetInstance()->
-		AddImage("¹öÆ°", L"Image/button.bmp", 122, 62, 1, 2);
-	if (image == nullptr)
+		AddImage("ë²„íŠ¼",L"Image/LoadButton.bmp",122,62,1,2);
+	if(image == nullptr)
 	{
 		return E_FAIL;
 	}
@@ -20,8 +20,30 @@ HRESULT Button::Init(int posX, int posY)
 	rc.bottom = rc.top + image->GetFrameHeight();
 
 	buttonFunc = nullptr;
+	useTextOnly = false;
+	text = nullptr;
 
-    return S_OK;
+	return S_OK;
+}
+
+HRESULT Button::InitTextButton(int posX, int posY, int width, int height, LPCWSTR buttonText)
+{
+	state = ButtonState::None;
+	image = nullptr;
+	useTextOnly = true;
+	text = buttonText;
+
+	pos.x = posX + width / 2;
+	pos.y = posY + height / 2;
+
+	rc.left = posX;
+	rc.top = posY;
+	rc.right = rc.left + width;
+	rc.bottom = rc.top + height;
+
+	buttonFunc = nullptr;
+
+	return S_OK;
 }
 
 void Button::Release()
@@ -41,9 +63,6 @@ void Button::Update()
 		{
 			state = ButtonState::Up;
 
-			// ±â´É ¼öÇà
-			// TilemapTool::Save()
-			//if (buttonFunc && obj)	obj->buttonFunc();
 			if (buttonFunc) buttonFunc();
 		}
 	}
@@ -55,14 +74,53 @@ void Button::Update()
 
 void Button::Render(HDC hdc)
 {
-	switch (state)
-	{
-	case ButtonState::None:
-	case ButtonState::Up:
-		image->FrameRender(hdc, pos.x, pos.y, 0, 0);
-		break;
-	case ButtonState::Down:
-		image->FrameRender(hdc, pos.x, pos.y, 0, 1);
-		break;
-	}
+	if (useTextOnly)
+    {
+		//í…ìŠ¤íŠ¸ ë²„íŠ¼
+        COLORREF bgColor;
+        switch (state)
+        {
+        case ButtonState::None:
+            bgColor = RGB(50, 50, 50);
+            break;
+        case ButtonState::Down:
+            bgColor = RGB(120, 120, 120);
+            break;
+        case ButtonState::Up:
+            bgColor = RGB(80, 80, 80);
+            break;
+        }
+        
+        HBRUSH hBrush = CreateSolidBrush(bgColor);
+        HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+        RoundRect(hdc, rc.left, rc.top, rc.right, rc.bottom, 10, 10);
+        
+        SetTextColor(hdc, RGB(255, 255, 255));
+        SetBkMode(hdc, TRANSPARENT);
+        
+        HFONT hFont = CreateFont(16, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+                                DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                                DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Arial"));
+        HFONT oldFont = (HFONT)SelectObject(hdc, hFont);
+        
+        DrawText(hdc, text, -1, &rc, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+        
+        SelectObject(hdc, oldFont);
+        DeleteObject(hFont);
+        SelectObject(hdc, oldBrush);
+        DeleteObject(hBrush);
+    }
+    else if (image)
+    {	//ì´ë¯¸ì§€ ë²„íŠ¼
+        switch (state)
+        {
+        case ButtonState::None:
+        case ButtonState::Up:
+            image->FrameRender(hdc, pos.x, pos.y, 0, 0);
+            break;
+        case ButtonState::Down:
+            image->FrameRender(hdc, pos.x, pos.y, 0, 1);
+            break;
+        }
+    }
 }

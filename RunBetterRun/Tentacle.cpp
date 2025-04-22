@@ -1,6 +1,7 @@
 #include "Tentacle.h"
 #include "TextureManager.h"
 #include "SpriteManager.h"
+#include "Player.h"
 
 void Tentacle::Action(void)
 {
@@ -9,7 +10,17 @@ void Tentacle::Action(void)
 
 void Tentacle::Catch(void)
 {
-	//SceneManager::GetInstance()->ChangeScene("LossLifeScene");
+	/*Player*player = Player::GetInstance();
+	player->LossPlayerLife();
+
+	if(player->GetPlayerLife() == 0)
+	{
+		SceneManager::GetInstance()->ChangeScene("DeadScene");
+	}
+
+	else {
+		SceneManager::GetInstance()->ChangeScene("LossLifeScene");
+	}*/
 }
 
 HRESULT Tentacle::Init(FPOINT pos)

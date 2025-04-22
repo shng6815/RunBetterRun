@@ -1,15 +1,27 @@
 #include "GameStartScene.h"
 #include "SceneManager.h"
-
+#include "Player.h"
+#include "MapManager.h"
+#include "Image.h"
 
 HRESULT GameStartScene::Init()
 {
-	titleText = TEXT("HorrorGame");
-	InitButtons();
-	ShowCursor(true);
+	image = ImageManager::GetInstance()->
+		AddImage("게임시작",L"Image/start_scene.bmp",1536,1024,1,2);
 
+	if(image == nullptr)
+	{
+		return E_FAIL;
+	}
+
+	titleText = L"Horror Game";
+	InitButtons();
+	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
+	//MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
+	//MapManager::GetInstance()->Init();
+	while(ShowCursor(TRUE) < 0);
 	return S_OK;
-}
+} 
 
 void GameStartScene::Release()
 {
@@ -26,6 +38,10 @@ void GameStartScene::Update()
 
 	CheckButtonHover();
 
+	if(KeyManager::GetInstance()->IsOnceKeyDown(VK_SPACE)) {
+		SceneManager::GetInstance()->ChangeScene("MapEditorScene");
+	}
+
 	if(KeyManager::GetInstance()->IsOnceKeyDown(VK_LBUTTON))
 	{
 		for(auto& button: buttons)
@@ -41,14 +57,17 @@ void GameStartScene::Update()
 
 void GameStartScene::Render(HDC hdc)
 {
-	RECT rc;
-	GetClientRect(g_hWnd,&rc);
-	FillRect(hdc,&rc,(HBRUSH)GetStockObject(BLACK_BRUSH));
+	if(image) {
+		image->Render(hdc);
 
-	// 제목 그리기
+	} else {
+		RECT rc;
+		GetClientRect(g_hWnd,&rc);
+		FillRect(hdc,&rc,(HBRUSH)GetStockObject(BLACK_BRUSH));
+	}
+
 	DrawTitle(hdc);
 
-	// 버튼 그리기
 	for(auto& button : buttons) {
 		DrawButton(hdc,button);
 	}
@@ -95,7 +114,7 @@ void GameStartScene::InitButtons()
 		buttonWidth,
 		buttonHeight,
 		ButtonType::EXIT,
-		TEXT("Game Exit")
+		L"EXIT"
 	);
 
 }
@@ -135,7 +154,7 @@ void GameStartScene::HandleButtonClick(Button & button)
 		break;
 	
 	case ButtonType::MAP_EDITOR:
-		//SceneManager::GetInstance()->ChangeScene("MapEditerScene");
+		SceneManager::GetInstance()->ChangeScene("MapEditorScene");
 		break;
 	case ButtonType::EXIT:
 		DestroyWindow(g_hWnd);	
@@ -145,16 +164,17 @@ void GameStartScene::HandleButtonClick(Button & button)
 
 void GameStartScene::DrawTitle(HDC hdc)
 {
-	SetTextColor(hdc,RGB(255,255,255));  
-	SetBkMode(hdc,TRANSPARENT);          
+	// 텍스트 색상을 빨간색으로 변경
+	SetTextColor(hdc,RGB(180,0,0));  // 진한 빨간색  
+	SetBkMode(hdc,TRANSPARENT);
 
 	RECT rc;
 	GetClientRect(g_hWnd,&rc);
 
-	// 제목용 폰트 생성
-	HFONT hFont = CreateFont(60,0,0,0,FW_BOLD,FALSE,FALSE,FALSE,
+	HFONT hFont = CreateFont(60,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,
 							 DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
-							 DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Arial"));
+							 DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("BleedingPixels"));
+
 	HFONT oldFont = (HFONT)SelectObject(hdc,hFont);
 
 	// 제목 위치 계산 (화면 상단에서 1/3 위치)
@@ -201,7 +221,7 @@ void GameStartScene::DrawButton(HDC hdc,Button & button)
 	// 버튼 텍스트용 폰트
 	HFONT hFont = CreateFont(24,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,
 							 DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
-							 DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Arial"));
+							 DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("BleedingPixels"));
 	HFONT oldFont = (HFONT)SelectObject(hdc,hFont);
 
 

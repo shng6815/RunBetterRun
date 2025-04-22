@@ -9,6 +9,6 @@ class Tentacle : public AMonster
 public:
 	Tentacle(FPOINT pos) { Init(pos); }
 	virtual HRESULT Init(FPOINT pos) override;
-
+	void SetAnimInfo(AnimationInfo info) {sprite.aniInfo = info;}
 };
 
