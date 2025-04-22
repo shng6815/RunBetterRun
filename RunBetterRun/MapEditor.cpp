@@ -415,7 +415,8 @@ void MapEditor::AddSprite(FPOINT position,Texture* texture,SpriteType type)
 	} 
 	else if(type == SpriteType::MONSTER)
 	{
-		newSprite.aniInfo = {0.1f,0.1f,{423,437},{1,1},{0,0}};
+		//newSprite.aniInfo = {0.1f,0.1f,{423,437},{1,1},{0,0}};
+		newSprite.aniInfo = {0.1f,0.1f,{431,495},{10,36},{0,0}};
 	}
 	else
 	{
