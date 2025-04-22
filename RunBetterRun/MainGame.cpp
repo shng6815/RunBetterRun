@@ -79,7 +79,6 @@ void MainGame::Release()
 	KeyManager::GetInstance()->Release();
 	VideoManager::Release();
 	ImageManager::GetInstance()->Release();
-	MapManager::GetInstance()->Release();
 	SoundManager::GetInstance()->Release();
 }
 
@@ -124,25 +123,14 @@ LRESULT MainGame::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lPara
 	{
 		int delta = GET_WHEEL_DELTA_WPARAM(wParam);
 		bool isCtrlPressed = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
-		bool isShiftPressed = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
 
-		// 현재 씬이 MapEditor인 경우에만 처리
+		// 현재 씬이 MapEditor인 경우 처리
 		MapEditor* mapEditor = dynamic_cast<MapEditor*>(SceneManager::GetInstance()->currentScene);
 		if(mapEditor)
 		{
 			if(isCtrlPressed)
 			{
-				mapEditor->MouseWheel(delta);
-				return 0;
-			}
-			else if(isShiftPressed)
-			{
-				mapEditor->HorizontalScroll(delta);
-				return 0;
-			}
-			else
-			{
-				mapEditor->VerticalScroll(delta);
+				mapEditor->Zoom(delta > 0 ? 0.1f : -0.1f);
 				return 0;
 			}
 		}
