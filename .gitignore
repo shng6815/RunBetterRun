@@ -398,3 +398,7 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# high-capacity file
+RunBetterRun/image/Enemy.bmp
+RunBetterRun/image/Enemy2.bmp
