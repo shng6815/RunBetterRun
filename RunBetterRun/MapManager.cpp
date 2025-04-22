@@ -4,8 +4,8 @@
 
 HRESULT MapManager::Init()
 {
-	mapData.height = 24;
-	mapData.width = 24;
+	mapData.height = 100;
+	mapData.width = 100;
 	mapData.tiles.resize(mapData.height * mapData.width);
 
 	InitializeTexture();

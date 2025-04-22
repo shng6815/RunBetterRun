@@ -24,8 +24,8 @@ void MapEditorRender::RenderTiles(HDC hdc,const vector<Room>& tiles,int mapWidth
 		for(int x = 0; x < visibleWidth; x++)
 		{
 			// 타일 중앙 좌표 계산
-			int screenX = mapArea.left + x * tileWidth + (tileWidth / 2);
-			int screenY = mapArea.top + y * tileHeight + (tileHeight / 2);
+			int screenX = mapArea.left + x * tileWidth;
+			int screenY = mapArea.top + y * tileHeight;
 
 			// 1차원 배열에서 해당 타일의 인덱스 계산
 			int index = y * mapWidth + x;
@@ -51,10 +51,6 @@ void MapEditorRender::RenderTiles(HDC hdc,const vector<Room>& tiles,int mapWidth
 			// 현재 편집 중인 타일 표시 (마우스 위치에 있는 타일)
 			if(mouseInMapArea)
 			{
-				// 마우스 좌표를 타일 인덱스로 변환
-				int mouseMapX = (mousePos.x - mapArea.left) * visibleWidth / (mapArea.right - mapArea.left);
-				int mouseMapY = (mousePos.y - mapArea.top) * visibleHeight / (mapArea.bottom - mapArea.top);
-
 				bool isEdge = (x == 0 || x == mapWidth - 1 || y == 0 || y == mapHeight - 1);
 
 				if(isEdge)
@@ -64,10 +60,10 @@ void MapEditorRender::RenderTiles(HDC hdc,const vector<Room>& tiles,int mapWidth
 					SelectObject(hdc,GetStockObject(NULL_BRUSH));
 
 					RECT edgeRect = {
-						screenX - tileWidth/2,
-						screenY - tileHeight/2,
-						screenX + tileWidth/2,
-						screenY + tileHeight/2
+						screenX - tileWidth / 2,
+						screenY - tileHeight / 2,
+						screenX + tileWidth / 2,
+						screenY + tileHeight / 2
 					};
 
 					Rectangle(hdc,edgeRect.left,edgeRect.top,edgeRect.right,edgeRect.bottom);
@@ -94,17 +90,19 @@ void MapEditorRender::RenderSampleTiles(HDC hdc,RECT sampleArea,POINT selectedTi
 			 sampleTileWidth,sampleTileHeight);
 	OutputDebugString(szDebug);
 
+
 	// 타일 렌더링
 	for(int y = 0; y < SAMPLE_TILE_Y; y++)
 	{
+		int posY = sampleArea.top + y * sampleTileHeight;
 		for(int x = 0; x < SAMPLE_TILE_X; x++)
 		{
 			// 타일 중앙 좌표 계산
-			int posX = sampleArea.left + x * sampleTileWidth + (sampleTileWidth / 2);
-			int posY = sampleArea.top + y * sampleTileHeight + (sampleTileHeight / 2);
+			int posX = sampleArea.left + x * sampleTileWidth;
+
 
 			// 타일 렌더링
-			sampleTileImage->FrameRender(hdc,posX,posY,x,y,false,true);
+			sampleTileImage->FrameRender(hdc,posX, posY, x, y, false,false);
 
 			// 선택된 타일 강조 표시
 			if(x == selectedTile.x && y == selectedTile.y)
@@ -117,23 +115,20 @@ void MapEditorRender::RenderSampleTiles(HDC hdc,RECT sampleArea,POINT selectedTi
 				HBRUSH oldBrush = (HBRUSH)SelectObject(hdc,selectBrush);
 
 				Rectangle(hdc,
-						 posX - (sampleTileWidth / 2) - 2,
-						 posY - (sampleTileHeight / 2) - 2,
-						 posX + (sampleTileWidth / 2) + 2,
-						 posY + (sampleTileHeight / 2) + 2);
+						 posX,
+						 posY,
+						 posX + sampleTileWidth,
+						 posY + sampleTileHeight);
 
 				SelectObject(hdc,oldPen);
 				SelectObject(hdc,oldBrush);
 				DeleteObject(selectPen);
 				DeleteObject(selectBrush);
 			}
-
-			// 타일 이미지 렌더링
-			sampleTileImage->FrameRender(hdc,posX,posY,x,y,false,true);
 		}
 	}
 }
-
+	
 void MapEditorRender::RenderSprites(HDC hdc,const vector<Sprite>& sprites,RECT mapArea)
 {
 	int visibleWidth = VISIBLE_MAP_WIDTH;
@@ -149,8 +144,8 @@ void MapEditorRender::RenderSprites(HDC hdc,const vector<Sprite>& sprites,RECT m
 
 		if(tileX >= 0 && tileX < visibleWidth && tileY >= 0 && tileY < visibleHeight)
 		{
-			int screenX = mapArea.left + tileX * tileWidth + (tileWidth / 2);
-			int screenY = mapArea.top + tileY * tileHeight + (tileHeight / 2);
+			int screenX = mapArea.left + tileX * tileWidth + (tileWidth / 4);
+			int screenY = mapArea.top + tileY * tileHeight + (tileHeight / 4);
 
 			COLORREF color = (sprite.type == SpriteType::KEY) ? RGB(0,0,255) :
 				(sprite.type == SpriteType::MONSTER) ? RGB(255,0,0) :
@@ -198,8 +193,8 @@ void MapEditorRender::RenderObstacles(HDC hdc,const vector<Obstacle>& obstacles,
 
 		if(tileX >= 0 && tileX < visibleWidth && tileY >= 0 && tileY < visibleHeight)
 		{
-			int screenX = mapArea.left + tileX * tileWidth + (tileWidth / 2);
-			int screenY = mapArea.top + tileY * tileHeight + (tileHeight / 2);
+			int screenX = mapArea.left + tileX * tileWidth;
+			int screenY = mapArea.top + tileY * tileHeight;
 
 			COLORREF color = RGB(255,128,0);  // 주황색으로 장애물 표시
 
@@ -303,7 +298,7 @@ void MapEditorRender::RenderStartPosition(HDC hdc,FPOINT startPos,const vector<R
 	}
 }
 
-void MapEditorRender::RenderModeInfo(HDC hdc,EditorMode mode)
+void MapEditorRender::RenderModeInfo(HDC hdc,EditorMode mode, RoomType selectedRoomType)
 {
 	TCHAR szText[128];
 	LPCWSTR modeName = TEXT("Tile");
@@ -336,9 +331,35 @@ void MapEditorRender::RenderModeInfo(HDC hdc,EditorMode mode)
 	wsprintf(szText,TEXT("Current Mode: %s"),modeName);
 	TextOut(hdc,20,20,szText,lstrlen(szText));
 
+	// 선택된 타일 타입 표시 추가
+	LPCWSTR roomTypeName;
+	COLORREF roomTypeColor;
+
+	switch(selectedRoomType) {
+	case RoomType::FLOOR:
+	roomTypeName = TEXT("FLOOR");
+	roomTypeColor = RGB(0,255,0);
+	break;
+	case RoomType::WALL:
+	roomTypeName = TEXT("WALL");
+	roomTypeColor = RGB(0,255,0);
+	break;
+	case RoomType::START:
+	roomTypeName = TEXT("START");
+	roomTypeColor = RGB(0,255,0); 
+	break;
+	default:
+	roomTypeName = TEXT("NONE");
+	roomTypeColor = RGB(0,255,0); 
+	}
+
+	SetTextColor(hdc,roomTypeColor);
+	wsprintf(szText,TEXT("Tile Type: %s"),roomTypeName);
+	TextOut(hdc,20,50,szText,lstrlen(szText));
+
 	SelectObject(hdc,oldFont);
 	DeleteObject(hFont);
-	SetTextColor(hdc,RGB(0,0,0)); // 기본 색상으로 복원
+	SetTextColor(hdc,RGB(0,0,0)); 
 }
 
 void MapEditorRender::RenderControlGuide(HDC hdc)
@@ -354,12 +375,12 @@ void MapEditorRender::RenderControlGuide(HDC hdc)
 	FillRect(hdc,&guideRect,(HBRUSH)GetStockObject(BLACK_BRUSH));
 	SetTextColor(hdc,RGB(255,255,255));
 
-	TextOut(hdc,20,WINSIZE_Y - 70,TEXT("Left Click: Place / Right Click: Delete"),
+	TextOut(hdc,20,TILEMAPTOOL_Y - 70,TEXT("Left Click: Place / Right Click: Delete"),
 			lstrlen(TEXT("Left Click: Place / Right Click: Delete")));
-	TextOut(hdc,20,WINSIZE_Y - 50,TEXT("ESC: Return to Game, Arrow Keys: Change Obstacle Direction"),
+	TextOut(hdc,20,TILEMAPTOOL_Y - 50,TEXT("ESC: Return to Game, Arrow Keys: Change Obstacle Direction"),
 			lstrlen(TEXT("ESC: Return to Game, Arrow Keys: Change Obstacle Direction")));
-	TextOut(hdc,20,WINSIZE_Y - 30,TEXT("1-5: Change Mode, S: Save, L: Load, C: Clear"),
-			lstrlen(TEXT("1-5: Change Mode, S: Save, L: Load, C: Clear")));
+	TextOut(hdc,20,TILEMAPTOOL_Y - 30,TEXT("1-5: Change Mode, S: Save, L: Load, C: Clear, F: Floor, W: Wall, G: Start"),
+			lstrlen(TEXT("1-5: Change Mode, S: Save, L: Load, C: Clear, F: Floor, W: Wall, G: Start")));
 
 	SelectObject(hdc,oldFont);
 	DeleteObject(guideFont);
