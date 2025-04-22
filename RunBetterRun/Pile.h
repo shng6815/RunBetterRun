@@ -3,10 +3,10 @@
 
 class Pile: public AObstacle
 {
-	virtual BOOL Action(void) override;
 
 public:
 	Pile(POINT pos,Direction dir);
+	virtual BOOL Action(void) override;
 
 };
 

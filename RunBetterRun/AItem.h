@@ -8,7 +8,7 @@ class AItem
 protected:
 	Sprite sprite;
 
-	virtual void Action(void) = 0;
+	virtual BOOL Action(void) = 0;
 
 public:
 	virtual ~AItem(void) {};

@@ -3,7 +3,7 @@
 
 class Key: public AItem
 {
-	virtual void Action(void) override;
+	virtual BOOL Action(void) override;
 
 public:
 	Key(FPOINT pos) { Init(pos); }

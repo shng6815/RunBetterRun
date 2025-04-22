@@ -59,12 +59,12 @@ POINT MapEditorUI::ScreenToMap(POINT screenPos,RECT mapArea,int mapWidth,int map
 		screenPos.y >= mapArea.top && screenPos.y < mapArea.bottom)
 	{
 		// 맵 영역 내 상대 좌표 계산
-		int relX = screenPos.x - mapArea.left;
-		int relY = screenPos.y - mapArea.top;
+		int relX = screenPos.x - mapArea.left / mapWidth;
+		int relY = screenPos.y - mapArea.top / mapHeight;
 
 		// 타일 크기 계산
-		int tileWidth = (mapArea.right - mapArea.left) / VISIBLE_MAP_WIDTH;
-		int tileHeight = (mapArea.bottom - mapArea.top) / VISIBLE_MAP_HEIGHT;
+		int tileWidth = (mapArea.right - mapArea.left) / mapWidth;
+		int tileHeight = (mapArea.bottom - mapArea.top) / mapHeight;
 
 		// 타일 좌표 직접 계산
 		result.x = relX / tileWidth;
@@ -87,19 +87,21 @@ POINT MapEditorUI::MapToScreen(POINT mapPos,RECT mapArea,int mapWidth,int mapHei
 		mapPos.y >= 0 && mapPos.y < mapHeight)
 	{
 		// 타일 크기 계산
-		int tileWidth = (mapArea.right - mapArea.left) / VISIBLE_MAP_WIDTH;
-		int tileHeight = (mapArea.bottom - mapArea.top) / VISIBLE_MAP_HEIGHT;
+		int tileWidth = (mapArea.right - mapArea.left) / mapWidth;
+		int tileHeight = (mapArea.bottom - mapArea.top) / mapHeight;
 
 		// 맵 좌표를 스크린 좌표로 변환 (타일 중앙 기준)
-		result.x = mapArea.left + mapPos.x * tileWidth + (tileWidth / 2);
-		result.y = mapArea.top + mapPos.y * tileHeight + (tileHeight / 2);
+		/*result.x = mapArea.left + mapPos.x * tileWidth + (tileWidth / 2);
+		result.y = mapArea.top + mapPos.y * tileHeight + (tileHeight / 2);*/
+		result.x = mapArea.left + mapPos.x * tileWidth;
+		result.y = mapArea.top + mapPos.y * tileHeight;
 	}
-	else
-	{
-		// 유효하지 않은 맵 좌표인 경우 맵 영역 밖으로 설정
-		result.x = mapArea.left - 100;
-		result.y = mapArea.top - 100;
-	}
+	//else
+	//{
+	//	// 유효하지 않은 맵 좌표인 경우 맵 영역 밖으로 설정
+	//	result.x = mapArea.left - 100;
+	//	result.y = mapArea.top - 100;
+	//}
 
 	return result;
 }
