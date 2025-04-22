@@ -19,7 +19,6 @@ public:
 	void Update() override;
 	void Render(HDC hdc) override;
 	virtual void ToggleActive() override;
-	void UpdateUIUnitsPosition();
 	void ToggleUdate();
 
 	// 상태 변경 함수

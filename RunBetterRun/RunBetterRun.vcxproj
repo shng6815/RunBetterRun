@@ -159,6 +159,7 @@
     <ClCompile Include="MapEditor.cpp" />
     <ClCompile Include="MapEditorRender.cpp" />
     <ClCompile Include="MapEditorUI.cpp" />
+    <ClCompile Include="NumberUI.cpp" />
     <ClCompile Include="ObstacleManager.cpp" />
     <ClCompile Include="PhoneUI.cpp" />
     <ClCompile Include="MonsterManager.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="MapEditorRender.h" />
     <ClInclude Include="MapEditorUI.h" />
     <ClInclude Include="MonsterManager.h" />
+    <ClInclude Include="NumberUI.h" />
     <ClInclude Include="ObstacleManager.h" />
     <ClInclude Include="PhoneUI.h" />
     <ClInclude Include="Pile.h" />
