@@ -26,8 +26,10 @@ public:
 	bool HandleTileSelection(POINT mousePos,RECT sampleArea);
 
 	// 좌표 변환 기능
-	POINT ScreenToMap(POINT screenPos,RECT mapArea,int mapWidth,int mapHeight) const;
-	POINT MapToScreen(POINT mapPos,RECT mapArea,int mapWidth,int mapHeight) const;
+	POINT ScreenToMap(POINT screenPos,RECT mapArea,int mapWidth,int mapHeight,
+					float zoomLevel = 1.0f,FPOINT viewportOffset = {0.0f,0.0f}) const;
+	POINT MapToScreen(POINT mapPos,RECT mapArea,int mapWidth,int mapHeight,
+					 float zoomLevel = 1.0f,FPOINT viewportOffset = {0.0f,0.0f}) const;
 
 	RECT GetSampleArea() const { return sampleArea;	}
 	RECT GetMapArea() const { return mapArea; }

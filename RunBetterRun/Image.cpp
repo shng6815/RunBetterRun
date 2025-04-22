@@ -210,6 +210,32 @@ void Image::RenderResized(HDC hdc,int destX,int destY,int width,int height)
 	}
 }
 
+void Image::RenderResized(HDC hdc,int destX,int destY,int width,int height,
+						 int srcX,int srcY,int srcWidth,int srcHeight)
+{
+	if(isTransparent)
+	{
+		GdiTransparentBlt(hdc,
+			destX,destY,
+			width,height,
+			imageInfo->hMemDC,
+			srcX,srcY,
+			srcWidth,srcHeight,
+			transColor);
+	} else
+	{
+		StretchBlt(
+			hdc,
+			destX,destY,
+			width,height,
+			imageInfo->hMemDC,
+			srcX,srcY,
+			srcWidth,srcHeight,
+			SRCCOPY
+		);
+	}
+}
+
 void Image::FrameRender(HDC hdc, int destX, int destY, 
     int frameX, int frameY, bool isFlip, bool isCenter)
 {

@@ -10,7 +10,8 @@
 MapEditor::MapEditor()
 	: ui(nullptr),render(nullptr),mode(EditorMode::TILE),
 	selectedRoomType(RoomType::WALL),selectedObstacleDir(Direction::EAST),
-	sampleTileImage(nullptr),mapWidth(VISIBLE_MAP_WIDTH),mapHeight(VISIBLE_MAP_HEIGHT)
+	sampleTileImage(nullptr),mapWidth(VISIBLE_MAP_WIDTH),mapHeight(VISIBLE_MAP_HEIGHT),
+	zoomLevel(1.0f), viewportOffset({ 0.0f, 0.0f }), isDragging(false)
 {}
 
 MapEditor::~MapEditor()
@@ -48,7 +49,7 @@ HRESULT MapEditor::Init()
 	int rightPanelLeft = TILEMAPTOOL_X - rightPanelWidth - uiPadding;
 
 	// 맵 영역 설정 - 왼쪽 영역을 최대한 활용
-	int mapAreaWidth = TILEMAPTOOL_X - rightPanelWidth - (uiPadding * 4);
+	int mapAreaWidth = rightPanelLeft - (uiPadding * 2);
 	int mapAreaHeight = TILEMAPTOOL_Y - (uiPadding * 4);
 	int mapTileSize = 32;
 
@@ -67,8 +68,8 @@ HRESULT MapEditor::Init()
 
 	mapArea.left = uiPadding;
 	mapArea.top = uiPadding;
-	mapArea.right = mapArea.left + (mapWidth * mapTileSize);
-	mapArea.bottom = mapArea.top + (mapHeight * mapTileSize);
+	mapArea.right = mapArea.left + mapAreaWidth;
+	mapArea.bottom = mapArea.top + mapAreaHeight;
 
 	// UI 및 렌더러 초기화
 	ui = new MapEditorUI();
@@ -125,6 +126,23 @@ void MapEditor::Update()
 	TileSelect();
 	MapEdit();
 	Shortcut();
+
+	// 마우스 중간 버튼으로 드래그 처리
+	if (KeyManager::GetInstance()->IsStayKeyDown(VK_MBUTTON))
+	{
+		if (!isDragging) 
+		{
+			StartDrag(mousePos);
+		}
+		else 
+		{
+			UpdateDrag(mousePos);
+		}
+	}
+	else if (isDragging)
+	{
+		EndDrag();
+	}
 }
 
 void MapEditor::Render(HDC hdc)
@@ -132,17 +150,26 @@ void MapEditor::Render(HDC hdc)
 	// 배경 채우기
 	PatBlt(hdc,0,0,WINSIZE_X,WINSIZE_Y,WHITENESS);
 
-	// 맵 요소 렌더링
-	render->RenderTiles(hdc,tiles,mapWidth,mapHeight,mapArea,ui->GetMousePos(),ui->IsMouseInMapArea());
-	render->RenderSprites(hdc,editorSprites,mapArea);
-	render->RenderObstacles(hdc,editorObstacles,mapArea);
-	render->RenderStartPosition(hdc,startPosition,tiles,mapWidth,mapArea);
+	// 맵 요소 렌더링 (확대/축소 및 스크롤 적용)
+	render->RenderTiles(hdc,tiles,mapWidth,mapHeight,mapArea,
+					   ui->GetMousePos(),ui->IsMouseInMapArea(),
+					   zoomLevel,viewportOffset);
+
+	render->RenderSprites(hdc,editorSprites,mapArea,zoomLevel,viewportOffset);
+	render->RenderObstacles(hdc,editorObstacles,mapArea,zoomLevel,viewportOffset);
+	render->RenderStartPosition(hdc,startPosition,tiles,mapWidth,mapArea,zoomLevel,viewportOffset);
 
 	// UI 요소 렌더링
 	render->RenderSampleTiles(hdc,sampleArea,ui->GetSelectedTile());
-	render->RenderModeInfo(hdc,mode, selectedRoomType);
+	render->RenderModeInfo(hdc,mode,selectedRoomType,zoomLevel);
 	render->RenderControlGuide(hdc);
 	render->RenderSelectedTilePreview(hdc,ui->GetSelectedTile(),sampleArea);
+
+	// 디버그 정보 표시
+	TCHAR szDebug[100];
+	wsprintf(szDebug,L"Zoom: %.2f, Offset: (%.1f, %.1f), 아이템 수: %d",
+			 zoomLevel,viewportOffset.x,viewportOffset.y,editorSprites.size());
+	TextOut(hdc,20,TILEMAPTOOL_Y - 100,szDebug,lstrlen(szDebug));
 }
 
 void MapEditor::TileSelect()
@@ -158,69 +185,57 @@ void MapEditor::MapEdit()
 	{
 		// 마우스 위치를 맵 타일 위치로 변환
 		POINT mousePos = ui->GetMousePos();
-		POINT mapPos = ui->ScreenToMap(mousePos,mapArea,mapWidth,mapHeight);
+		POINT mapPos = ui->ScreenToMap(mousePos,mapArea,mapWidth,mapHeight,zoomLevel,viewportOffset);
 		int tileX = mapPos.x;
 		int tileY = mapPos.y;
 
-		// 타일의 중앙 화면 좌표 계산
-		POINT screenPos = ui->MapToScreen({tileX,tileY},mapArea,mapWidth,mapHeight);
+		// 디버그 출력
+		TCHAR szDebug[100];
+		wsprintf(szDebug,L"마우스 위치: 화면(%d, %d) -> 맵(%d, %d)\n",
+				 mousePos.x,mousePos.y,tileX,tileY);
+		OutputDebugString(szDebug);
 
-		int tileWidth = (mapArea.right - mapArea.left) / mapWidth;
-		int tileHeight = (mapArea.bottom - mapArea.top) / mapHeight;
-
-		// GetRectAtCenter를 사용하여 타일 영역 계산
-		RECT tileRect = {
-			screenPos.x - tileWidth/2,
-			screenPos.y - tileHeight/2,
-			screenPos.x + tileWidth/2,
-			screenPos.y + tileHeight/2
-		};
-
-		if(PtInRect(&tileRect,ui->GetMousePos()))
+		if(KeyManager::GetInstance()->IsStayKeyDown(VK_LBUTTON))
 		{
-
-			if(KeyManager::GetInstance()->IsStayKeyDown(VK_LBUTTON))
+			if(tileX >= 0 && tileX < mapWidth && tileY >= 0 && tileY < mapHeight)
 			{
-				if(tileX >= 0 && tileX < mapWidth && tileY >= 0 && tileY < mapHeight)
+				switch(mode)
 				{
-					switch(mode)
-					{
-					case EditorMode::TILE:
-						PlaceTile(tileX,tileY);
-						break;
-					case EditorMode::START:
-						PlaceStartPoint(tileX,tileY);
-						break;
-					case EditorMode::ITEM:
-						PlaceItem(tileX,tileY);
-						break;
-					case EditorMode::MONSTER:
-						PlaceMonster(tileX,tileY);
-						break;
-					case EditorMode::OBSTACLE:
-						PlaceObstacle(tileX,tileY);
-						break;
-					}
+				case EditorMode::TILE:
+				PlaceTile(tileX,tileY);
+				break;
+				case EditorMode::START:
+				PlaceStartPoint(tileX,tileY);
+				break;
+				case EditorMode::ITEM:
+				PlaceItem(tileX,tileY);
+				break;
+				case EditorMode::MONSTER:
+				PlaceMonster(tileX,tileY);
+				break;
+				case EditorMode::OBSTACLE:
+				PlaceObstacle(tileX,tileY);
+				break;
 				}
 			}
+		}
 
-			if(KeyManager::GetInstance()->IsStayKeyDown(VK_RBUTTON))
+		if(KeyManager::GetInstance()->IsStayKeyDown(VK_RBUTTON))
+		{
+			if(tileX >= 0 && tileX < mapWidth && tileY >= 0 && tileY < mapHeight)
 			{
-				if(tileX >= 0 && tileX < mapWidth && tileY >= 0 && tileY < mapHeight)
+				if(mode == EditorMode::ITEM || mode == EditorMode::MONSTER)
 				{
-					if(mode == EditorMode::ITEM || mode == EditorMode::MONSTER)
-					{
-						RemoveSprite(tileX,tileY);
-					} else if(mode == EditorMode::OBSTACLE)
-					{
-						RemoveObstacle(tileX,tileY);
-					} else if(mode == EditorMode::TILE)
-					{
-						int index = tileY * mapWidth + tileX;
-						if(index < tiles.size()) {
-							tiles[index].roomType = RoomType::FLOOR;
-							tiles[index].tilePos = 10;
-						}
+					RemoveSprite(tileX,tileY);
+				} else if(mode == EditorMode::OBSTACLE)
+				{
+					RemoveObstacle(tileX,tileY);
+				} else if(mode == EditorMode::TILE)
+				{
+					int index = tileY * mapWidth + tileX;
+					if(index < tiles.size()) {
+						tiles[index].roomType = RoomType::FLOOR;
+						tiles[index].tilePos = 10;
 					}
 				}
 			}
@@ -284,14 +299,14 @@ void MapEditor::Shortcut()
 		selectedRoomType = RoomType::START;
 	}
 
-	//if(km->IsOnceKeyDown('-'))
-	//{
-	//	확대
-	//}
-	//else if(km->IsOnceKeyDown('+')
-	//{
-	//	축소
-	//}
+	if (km->IsOnceKeyDown(VK_OEM_PLUS) || km->IsOnceKeyDown(VK_ADD))
+	{
+		Zoom(0.1f); // 확대
+	}
+	else if (km->IsOnceKeyDown(VK_OEM_MINUS) || km->IsOnceKeyDown(VK_SUBTRACT))
+	{
+		Zoom(-0.1f); // 축소
+	}
 
 	if(mode == EditorMode::OBSTACLE)
 	{
@@ -340,34 +355,37 @@ void MapEditor::PlaceStartPoint(int x,int y)
 	int index = y * mapWidth + x;
 	if(index < tiles.size()) {
 		tiles[index].roomType = RoomType::START;
-		startPosition = {x + 0.5f,y + 0.5f};
+		startPosition = {x + 0.5f,y + 0.5f}; // 타일 중앙에 위치
 	}
 }
 
 void MapEditor::PlaceItem(int x,int y)
 {
+	// 해당 위치에 아이템이 이미 있는지 확인
 	if(FindSprite(x,y) >= 0)
 		return;
 
 	Texture* keyTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/jewel.bmp"));
 	if(keyTexture)
 	{
-		// 타일 중앙에 정확히 배치
-		FPOINT centerPos = {x + 0.5f,y + 0.5f};
+		// 타일 중앙에 정확히 배치 - 0.5f 오프셋 추가
+		FPOINT centerPos = {static_cast<float>(x) + 0.5f,static_cast<float>(y) + 0.5f};
 		AddSprite(centerPos,keyTexture,SpriteType::KEY);
 	}
 }
 
+
 void MapEditor::PlaceMonster(int x,int y)
 {
+	// 해당 위치에 몬스터가 이미 있는지 확인
 	if(FindSprite(x,y) >= 0)
 		return;
 
 	Texture* monsterTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/boss.bmp"));
 	if(monsterTexture)
 	{
-		// 타일 중앙에 정확히 배치
-		FPOINT centerPos = {x + 0.5f,y + 0.5f};
+		// 타일 중앙에 정확히 배치 - 0.5f 오프셋 추가
+		FPOINT centerPos = {static_cast<float>(x) + 0.5f,static_cast<float>(y) + 0.5f};
 		AddSprite(centerPos,monsterTexture,SpriteType::MONSTER);
 	}
 }
@@ -382,6 +400,11 @@ void MapEditor::PlaceObstacle(int x,int y)
 	{
 		POINT pos = {x,y};
 		AddObstacle(pos,obstacleTexture,selectedObstacleDir);
+
+		// 디버그 출력
+		TCHAR szDebug[100];
+		wsprintf(szDebug,L"장애물 배치: (%d, %d), 방향: %d\n",x,y,(int)selectedObstacleDir);
+		OutputDebugString(szDebug);
 	}
 }
 
@@ -393,6 +416,38 @@ void MapEditor::ChangeMode(EditorMode newMode)
 void MapEditor::ChangeObstacleDirection(Direction dir)
 {
 	selectedObstacleDir = dir;
+}
+
+void MapEditor::Zoom(float delta)
+{
+	// 확대/축소 비율 계산 (최소 0.5, 최대 3.0으로 제한)
+	float newZoomLevel = zoomLevel + delta;
+	newZoomLevel = max(0.5f, min(newZoomLevel, 3.0f));
+
+	// 마우스 위치 기준 확대/축소를 위한 계산
+	POINT mousePos = ui->GetMousePos();
+
+	// 현재 마우스 위치의 맵 좌표 계산
+	int tileWidth = (mapArea.right - mapArea.left) / (VISIBLE_MAP_WIDTH / zoomLevel);
+	int tileHeight = (mapArea.bottom - mapArea.top) / (VISIBLE_MAP_HEIGHT / zoomLevel);
+
+	float mouseMapX = viewportOffset.x + (mousePos.x - mapArea.left) / (float)tileWidth;
+	float mouseMapY = viewportOffset.y + (mousePos.y - mapArea.top) / (float)tileHeight;
+
+	// 확대/축소 비율 변경
+	zoomLevel = newZoomLevel;
+
+	// 새 타일 크기
+	tileWidth = (mapArea.right - mapArea.left) / (VISIBLE_MAP_WIDTH / zoomLevel);
+	tileHeight = (mapArea.bottom - mapArea.top) / (VISIBLE_MAP_HEIGHT / zoomLevel);
+
+	// 새 뷰포트 오프셋 계산 (마우스 위치가 동일한 맵 좌표를 가리키도록)
+	viewportOffset.x = mouseMapX - (mousePos.x - mapArea.left) / (float)tileWidth;
+	viewportOffset.y = mouseMapY - (mousePos.y - mapArea.top) / (float)tileHeight;
+
+	// 뷰포트 오프셋 범위 제한
+	viewportOffset.x = max(0.0f, min(viewportOffset.x, mapWidth - VISIBLE_MAP_WIDTH / zoomLevel));
+	viewportOffset.y = max(0.0f, min(viewportOffset.y, mapHeight - VISIBLE_MAP_HEIGHT / zoomLevel));
 }
 
 int MapEditor::FindSprite(int x,int y)
@@ -408,6 +463,41 @@ int MapEditor::FindSprite(int x,int y)
 		}
 	}
 	return -1;
+}
+
+void MapEditor::StartDrag(POINT mousePos)
+{
+	isDragging = true;
+	lastMousePos = mousePos;
+}
+
+void MapEditor::EndDrag()
+{
+	isDragging = false;
+}
+
+void MapEditor::UpdateDrag(POINT mousePos)
+{
+	if (isDragging)
+	{
+		// 마우스 이동 거리 계산
+		int deltaX = mousePos.x - lastMousePos.x;
+		int deltaY = mousePos.y - lastMousePos.y;
+
+		// 타일 크기 계산
+		int tileWidth = (mapArea.right - mapArea.left) / (VISIBLE_MAP_WIDTH / zoomLevel);
+		int tileHeight = (mapArea.bottom - mapArea.top) / (VISIBLE_MAP_HEIGHT / zoomLevel);
+
+		// 스크롤 오프셋 업데이트
+		viewportOffset.x -= deltaX / (float)tileWidth;
+		viewportOffset.y -= deltaY / (float)tileHeight;
+
+		// 오프셋 범위 제한
+		viewportOffset.x = max(0.0f, min(viewportOffset.x, mapWidth - VISIBLE_MAP_WIDTH / zoomLevel));
+		viewportOffset.y = max(0.0f, min(viewportOffset.y, mapHeight - VISIBLE_MAP_HEIGHT / zoomLevel));
+
+		lastMousePos = mousePos;
+	}
 }
 
 void MapEditor::AddSprite(FPOINT position,Texture* texture,SpriteType type)
@@ -504,25 +594,66 @@ void MapEditor::InitTiles()
 	startPosition = {centerX + 0.5f,centerY + 0.5f};
 }
 
+void MapEditor::MouseWheel(int delta)
+{
+	// Ctrl + 휠을 위로 돌리면 확대, 아래로 돌리면 축소
+	Zoom(delta > 0 ? 0.1f : -0.1f);
+}
+
+void MapEditor::VerticalScroll(int delta)
+{
+	float scrollAmount = 3.0f;
+
+	float visibleMapHeight = VISIBLE_MAP_HEIGHT / zoomLevel;
+	float maxY = max(0.0f,mapHeight - visibleMapHeight);
+
+	if(delta > 0)
+	{
+		viewportOffset.y = max(0.0f,viewportOffset.y - scrollAmount / zoomLevel);
+	} else
+	{
+		viewportOffset.y = min(maxY,viewportOffset.y + scrollAmount / zoomLevel);
+	}
+}
+
+void MapEditor::HorizontalScroll(int delta)
+{
+	float scrollAmount = 3.0f;
+
+	float visibleMapWidth = VISIBLE_MAP_WIDTH / zoomLevel;
+	float maxX = max(0.0f,mapWidth - visibleMapWidth);
+
+	if(delta > 0)
+	{
+		viewportOffset.x = max(0.0f,viewportOffset.x - scrollAmount / zoomLevel);
+	} else
+	{
+		viewportOffset.x = min(maxX,viewportOffset.x + scrollAmount / zoomLevel);
+	}
+}
+
+
 void MapEditor::SaveMap()
 {
 	PrepareDataForSave();
 
-	// 파일 저장 호출 추가
-	if(DataManager::GetInstance()->SaveMapFile(L"Map/EditorMap.dat")) {
+	if(DataManager::GetInstance()->SaveMapFile(L"Map/EditorMap.dat"))
+	{
 		MessageBox(g_hWnd,TEXT("Map Saved Successfully"),TEXT("Success"),MB_OK);
-	} else {
+	} else 
+	{
 		MessageBox(g_hWnd,TEXT("Failed to Save Map"),TEXT("Error"),MB_OK);
 	}
 }
 
 void MapEditor::LoadMap()
 {
-	// 파일 불러오기 호출 추가
-	if(DataManager::GetInstance()->LoadMapFile(L"Map/EditorMap.dat")) {
+	if(DataManager::GetInstance()->LoadMapFile(L"Map/EditorMap.dat")) 
+	{
 		LoadFromDataManager();
 		MessageBox(g_hWnd,TEXT("Map Loaded Successfully"),TEXT("Success"),MB_OK);
-	} else {
+	} else 
+	{
 		MessageBox(g_hWnd,TEXT("Failed to Load Map"),TEXT("Error"),MB_OK);
 	}
 }

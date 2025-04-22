@@ -36,6 +36,12 @@ private:
 	RECT sampleArea;
 	RECT mapArea;
 
+	//마우스 스크롤, 확대/축소
+	float zoomLevel;         // 확대/축소 비율
+	FPOINT viewportOffset;   // 스크롤 오프셋 (맵의 어느 부분을 보여줄지)
+	bool isDragging;       
+	POINT lastMousePos;      
+
 	// 내부 기능 함수들
 	void TileSelect();
 	void MapEdit();
@@ -64,6 +70,12 @@ public:
 	void InitTiles();
 	void ChangeMode(EditorMode newMode);
 	void ChangeObstacleDirection(Direction dir);
+	
+	// 드래그, 확대 /축소
+	void Zoom(float delta);
+	void StartDrag(POINT mousePos);
+	void EndDrag();
+	void UpdateDrag(POINT mousePos);
 
 	// 스프라이트 관리
 	int FindSprite(int x,int y);
@@ -74,6 +86,10 @@ public:
 	int FindObstacle(int x,int y);
 	void AddObstacle(POINT position,Texture* texture,Direction dir);
 	void RemoveObstacle(int x,int y);
+
+	void MouseWheel(int delta);     
+	void VerticalScroll(int delta);  
+	void HorizontalScroll(int delta); 
 
 	// 파일 관리
 	void SaveMap();
