@@ -17,7 +17,7 @@ public:
 	void	Release(void);
 	void	Update(void);
 
-	SIZE_T	Size(void) { return items.size(); }
+	DWORD	Key(void) {	return keyCount; }
 	void	PutItem(AItem* item);
 	void	PushKey(void);
 	void	PopKey(void);
