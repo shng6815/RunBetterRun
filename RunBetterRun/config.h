@@ -29,8 +29,8 @@ using namespace std;
 #define VISIBLE_MAP_WIDTH  40       
 #define VISIBLE_MAP_HEIGHT 40
 #define TILE_SIZE 32
-#define SAMPLE_TILE_X 11            
-#define SAMPLE_TILE_Y 11
+#define SAMPLE_TILE_X 7            
+#define SAMPLE_TILE_Y 4
 
 #define DEG_TO_RAD(degree) ((3.14 / 180.0) * degree)
 #define RAD_TO_DEG(radian) ((180.0 / 3.14) * radian)

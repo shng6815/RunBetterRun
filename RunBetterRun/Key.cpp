@@ -2,10 +2,14 @@
 #include "TextureManager.h"
 #include "SpriteManager.h"
 #include "ItemManager.h"
+#include "UIManager.h"
+#include "PhoneUI.h"
 
-void Key::Action(void)
+BOOL Key::Action(void)
 {
 	ItemManager::GetInstance()->PopKey();
+	(static_cast<PhoneUI*>(UIManager::GetInstance()->GetUIUnit("PhoneUI")))->ShakeOnItemGet();
+	return TRUE;
 }
 
 HRESULT Key::Init(FPOINT pos)

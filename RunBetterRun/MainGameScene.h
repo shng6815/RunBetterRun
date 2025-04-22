@@ -77,7 +77,7 @@ public:
 
 	void ShakeScreen(float shakePower, float time, bool isStepShake);
 	void ApplyShake(HDC hdc);
-	void LoadMapItems(LPCWCH filePath);
+
 private:
 	enum class SceneStatus { IN_GAME, PAUSE, QUIT };
 

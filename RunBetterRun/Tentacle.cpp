@@ -22,6 +22,10 @@ void Tentacle::Catch(void)
 	else {
 		SceneManager::GetInstance()->ChangeScene("JumpscareScene");
 	}
+
+		SceneManager::GetInstance()->ChangeScene("LossLifeScene");
+	}
+
 }
 
 HRESULT Tentacle::Init(FPOINT pos)

@@ -10,6 +10,7 @@
 #include "Tentacle.h"
 #include "ObstacleManager.h"
 #include "Pile.h"
+#include "DataManager.h"
 
 HRESULT MainGameScene::Init()
 {
@@ -21,12 +22,32 @@ HRESULT MainGameScene::Init()
 	}
 
 	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
-	LoadMapItems(L"Map/EditorMap.dat");
 	SpriteManager::GetInstance()->Init();
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	MonsterManager::GetInstance()->Init();
 	ItemManager::GetInstance()->Init();
 	ObstacleManager::GetInstance()->Init();
+
+	const auto& items = DataManager::GetInstance()->GetItems();
+	for(const auto& itemData : items)
+	{
+		Key* key = new Key(itemData.pos);
+		key->SetAnimInfo(itemData.aniInfo);
+		ItemManager::GetInstance()->PutItem(key);
+	}
+	const auto& monsters = DataManager::GetInstance()->GetMonsters();
+	for(const auto& monsterData : monsters)
+	{
+		Tentacle* tentacle = new Tentacle(monsterData.pos);
+		tentacle->SetAnimInfo(monsterData.aniInfo);
+		MonsterManager::GetInstance()->PutMonster(tentacle);
+	}
+	const auto& obstacles = DataManager::GetInstance()->GetObstacles();
+	for(const auto& obstacleData : obstacles)
+	{
+		Pile* pile = new Pile(obstacleData.pos,obstacleData.dir);
+		ObstacleManager::GetInstance()->PutObstacle(pile);
+	}
 
 	UIManager::GetInstance()->Init();
 	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
@@ -46,13 +67,13 @@ HRESULT MainGameScene::Init()
 	oldBitmap = (HBITMAP)SelectObject(backBufferDC, backBufferBitmap);
 	ReleaseDC(g_hWnd, screenDC);
 
-	ItemManager::GetInstance()->PutItem(new Key({ 21.5, 10.5 }));
+	/*ItemManager::GetInstance()->PutItem(new Key({ 21.5, 10.5 }));
 	MonsterManager::GetInstance()->PutMonster(new Tentacle({ 21.5, 8.5 }));
 	MonsterManager::GetInstance()->PutMonster(new Tentacle({21.5,7.5}));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,21},Direction::WEST));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,19},Direction::EAST));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,20},Direction::NORTH));
-	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,18},Direction::SOUTH));
+	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,18},Direction::SOUTH));*/
 
 	return S_OK;
 }
@@ -148,67 +169,4 @@ void MainGameScene::ApplyShake(HDC hdc)
 	POINT offset = screenShake.GetOffset();
 
 	BitBlt(hdc, offset.x, offset.y, WINSIZE_X, WINSIZE_Y, backBufferDC, 0, 0, SRCCOPY);
-}
-
-void MainGameScene::LoadMapItems(LPCWCH filePath)
-{
-	HANDLE hFile = CreateFile(
-		filePath,GENERIC_READ,0,NULL,
-		OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
-
-	if(hFile == INVALID_HANDLE_VALUE)
-	{
-		return;
-	}
-
-	DWORD bytesRead = 0;
-
-	// �� ������ �ǳʶٱ�
-	int mapWidth,mapHeight,tileCount;
-	ReadFile(hFile,&mapWidth,sizeof(int),&bytesRead,NULL);
-	ReadFile(hFile,&mapHeight,sizeof(int),&bytesRead,NULL);
-	ReadFile(hFile,&tileCount,sizeof(int),&bytesRead,NULL);
-
-	// Ÿ�� ������ �ǳʶٱ�
-	SetFilePointer(hFile,sizeof(Room) * tileCount,NULL,FILE_CURRENT);
-
-	// ������ ���� �б�
-	int itemCount = 0;
-	ReadFile(hFile,&itemCount,sizeof(int),&bytesRead,NULL);
-
-	// ������ ��ġ ���� �а� ����
-	for(int i = 0; i < itemCount; i++)
-	{
-		FPOINT pos;
-		AnimationInfo aniInfo;
-
-		ReadFile(hFile,&pos,sizeof(FPOINT),&bytesRead,NULL);
-		ReadFile(hFile,&aniInfo,sizeof(AnimationInfo),&bytesRead,NULL);
-
-		// Key ������ ����
-		Key* key = new Key(pos);
-		key->SetAnimInfo(aniInfo); // �ִϸ��̼� ���� ���� (Key Ŭ������ �߰� �ʿ�)
-		ItemManager::GetInstance()->PutItem(key);
-	}
-
-	// ���� ���� �б�
-	int monsterCount = 0;
-	ReadFile(hFile,&monsterCount,sizeof(int),&bytesRead,NULL);
-
-	// ���� ��ġ ���� �а� ����
-	for(int i = 0; i < monsterCount; i++)
-	{
-		FPOINT pos;
-		AnimationInfo aniInfo;
-
-		ReadFile(hFile,&pos,sizeof(FPOINT),&bytesRead,NULL);
-		ReadFile(hFile,&aniInfo,sizeof(AnimationInfo),&bytesRead,NULL);
-
-		// Tentacle ���� ����
-		Tentacle* tentacle = new Tentacle(pos);
-		tentacle->SetAnimInfo(aniInfo); // �ִϸ��̼� ���� ���� (Tentacle Ŭ������ �߰� �ʿ�)
-		MonsterManager::GetInstance()->PutMonster(tentacle);
-	}
-
-	CloseHandle(hFile);
 }
