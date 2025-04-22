@@ -57,4 +57,11 @@ BOOL AMonster::CanMoveToPosition(FPOINT pos)
 	Room& tile = md->tiles[y * md->width + x];
 	return (tile.roomType == RoomType::FLOOR
 		|| tile.roomType == RoomType::START);
+
+	FLOAT timePerSpeed = TimerManager::GetInstance()->GetDeltaTime() * speed;
+	FLOAT dx = targetPosition.x - sprite.pos.x;
+	FLOAT dy = targetPosition.y - sprite.pos.y;
+	FLOAT distance = sqrt(powf(dx,2)+ powf(dy,2));
+
+	if(distance == 0.0f) return false;
 }

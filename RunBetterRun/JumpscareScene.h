@@ -2,10 +2,9 @@
 
 #include "GameObject.h"
 #include <mfplay.h>
-class Image;
-class DeadScene : public GameObject
+class JumpscareScene: public GameObject
 {
-	Image* bg;
+private:
 	IMFPMediaPlayer*  pPlayer     = nullptr;
 
 public:
@@ -13,6 +12,5 @@ public:
 	virtual void Release() override;
 	virtual void Update() override;
 	virtual void Render(HDC hdc) override;
-
 };
 

@@ -13,9 +13,6 @@
 
 HRESULT MainGameScene::Init()
 {
-	InvalidateRect(g_hWnd,NULL,TRUE);
-	UpdateWindow(g_hWnd);
-
 	rayCasting = new RayCast();
 	if (FAILED(rayCasting->Init()))
 	{

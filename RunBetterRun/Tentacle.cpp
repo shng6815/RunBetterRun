@@ -1,6 +1,7 @@
 #include "Tentacle.h"
 #include "TextureManager.h"
 #include "SpriteManager.h"
+#include "MainGameScene.h"
 #include "Player.h"
 
 void Tentacle::Action(void)
@@ -19,7 +20,7 @@ void Tentacle::Catch(void)
 	}
 
 	else {
-		SceneManager::GetInstance()->ChangeScene("LossLifeScene");
+		SceneManager::GetInstance()->ChangeScene("JumpscareScene");
 	}
 }
 

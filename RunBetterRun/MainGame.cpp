@@ -8,6 +8,7 @@
 #include "MapManager.h"
 #include "MainGameScene.h"
 #include "GameStartScene.h"
+#include "JumpscareScene.h"
 #include "LossLifeScene.h"
 #include "DeadScene.h"
 #include "VideoManager.h"
@@ -45,6 +46,7 @@ HRESULT MainGame::Init()
 	SceneManager::GetInstance()->AddScene("MainGameScene",new MainGameScene());
 	SceneManager::GetInstance()->AddScene("GameStartScene",new GameStartScene());
 	SceneManager::GetInstance()->AddScene("LossLifeScene",new LossLifeScene());
+	SceneManager::GetInstance()->AddScene("JumpscareScene",new JumpscareScene());
 	SceneManager::GetInstance()->AddScene("DeadScene",new DeadScene());
 	SceneManager::GetInstance()->AddLoadingScene("LoadingScene",new LoadingScene());
 	SceneManager::GetInstance()->ChangeScene("GameStartScene");
