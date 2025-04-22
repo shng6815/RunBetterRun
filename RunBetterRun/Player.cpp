@@ -205,8 +205,10 @@ void Player::Move(FPOINT pos)
 	BOOL result = TRUE;
 	MapData* md = MapManager::GetInstance()->GetMapData();
 
+	BOOL isMovableType = (md->tiles[y * md->width + x].roomType != RoomType::NONE && md->tiles[y * md->width + x].roomType != RoomType::WALL);
+
 	if ((0 <= x && x < md->width && 0 <= y && y < md->height)
-		&& md->tiles[y * md->width + x].roomType == RoomType::FLOOR)
+		&&isMovableType)
 	{
 		int oldX = INT(cameraPos.x);
 		int oldY = INT(cameraPos.y);

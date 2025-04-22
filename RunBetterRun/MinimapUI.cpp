@@ -174,7 +174,7 @@ void MinimapUI::DrawMiniMapToDC(HDC hdc,int drawSize)
 
 			const auto& tile = mapData->tiles[mapY * mapData->width + mapX];
 
-			if(tile.roomType == RoomType::FLOOR)
+			if(tile.roomType != RoomType::WALL)
 			{
 				float drawX = (dx - fmodf(pPos.x,1.0f)) * tileSize + drawSize / 2.0f;
 				float drawY = (-dy + fmodf(pPos.y,1.0f) - 1) * tileSize + drawSize / 2.0f;
