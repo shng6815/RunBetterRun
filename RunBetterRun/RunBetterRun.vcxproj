@@ -116,7 +116,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;strmiids.lib;quartz.lib;mfplat.lib;mf.lib;mfplay.lib;%(AdditionalDependencies)</AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;strmiids.lib;quartz.lib;mfplat.lib;mf.lib;mfplay.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>SDL2/lib/x64;SDL2_mixer/lib/x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
