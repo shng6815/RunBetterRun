@@ -39,12 +39,12 @@ HRESULT MapEditor::Init()
 	}
 
 	// UI 레이아웃 계산
-	int rightPanelWidth = 400;  // 오른쪽 패널 너비
+	int rightPanelWidth = 300;  // 오른쪽 패널 너비
 	int uiPadding = 20;         // UI 요소 간 여백
 	int sampleTileSize = 32;    // 샘플 타일 크기 
 
 	// 오른쪽 패널 영역 설정
-	int rightPanelLeft = WINSIZE_X - rightPanelWidth - uiPadding;
+	int rightPanelLeft = TILEMAPTOOL_X - rightPanelWidth - uiPadding;
 
 	// 샘플 타일 영역 설정
 	sampleArea.left = rightPanelLeft;
@@ -54,7 +54,7 @@ HRESULT MapEditor::Init()
 
 	// 맵 영역 설정 - 왼쪽 영역을 최대한 활용
 	int mapAreaWidth = rightPanelLeft - (uiPadding * 2);
-	int mapTileSize = 128;
+	int mapTileSize = 32;
 
 	mapArea.left = uiPadding;
 	mapArea.top = uiPadding * 3;
