@@ -159,12 +159,6 @@
     <ClCompile Include="MapEditor.cpp">
       <Filter>Core\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="MapEditorRender.cpp">
-      <Filter>Core\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="MapEditorUI.cpp">
-      <Filter>Core\Editor</Filter>
-    </ClCompile>
     <ClCompile Include="MinimapUI.cpp">
       <Filter>InGame\UI</Filter>
     </ClCompile>
@@ -288,12 +282,6 @@
       <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="MapEditor.h">
-      <Filter>Core\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="MapEditorRender.h">
-      <Filter>Core\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="MapEditorUI.h">
       <Filter>Core\Editor</Filter>
     </ClInclude>
     <ClInclude Include="Monster.h">
