@@ -7,14 +7,12 @@ class AObstacle
 {
 protected:
 	Obstacle obstacle;
-	
-	virtual BOOL Action(void) = 0;
-	virtual void UpdateOthers(void);
 
 public:
 	virtual HRESULT Init(POINT pos,Direction dir);
 	virtual void Release(void);
-	virtual BOOL Update(void);
+	virtual BOOL Action(void) = 0;
+	virtual void Update(void);
 
 	void Distance(FPOINT player);
 };

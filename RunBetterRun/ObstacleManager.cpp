@@ -27,11 +27,14 @@ void ObstacleManager::Update(void)
 {
 	FPOINT player = Player::GetInstance()->GetCameraPos();
 	for(auto& obstacle: obstacles)
+	{
 		obstacle->Distance(player);
+		obstacle->Update();
+	}
 
 	for(auto& obstacle: obstacles)
 	{
-		if(obstacle->Update())
+		if(obstacle->Action())
 			break;
 	}
 }
