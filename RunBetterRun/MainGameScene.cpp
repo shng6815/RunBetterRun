@@ -34,7 +34,7 @@ HRESULT MainGameScene::Init()
 	UIManager::GetInstance()->Init();
 	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
 	PhoneUI* uiUnit = new PhoneUI();
-	uiUnit->Init(UIType::PLAYING, FPOINT{ 200, WINSIZE_Y - 200 }, FPOINT{ 150, 150 }, 0);
+	uiUnit->Init(UIType::PLAYING, FPOINT{ 100, WINSIZE_Y - 500 }, FPOINT{ 300, 400 }, 0);
 	UIManager::GetInstance()->AddUIUnit("PhoneUI", uiUnit);
 
 	status = SceneStatus::IN_GAME;
@@ -146,6 +146,7 @@ void MainGameScene::ShakeScreen(float shakePower, float time, bool isStepShake)
 void MainGameScene::ApplyShake(HDC hdc)
 {
 	screenShake.Update(TimerManager::GetInstance()->GetDeltaTime());
+
 	POINT offset = screenShake.GetOffset();
 
 	BitBlt(hdc, offset.x, offset.y, WINSIZE_X, WINSIZE_Y, backBufferDC, 0, 0, SRCCOPY);

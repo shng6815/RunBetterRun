@@ -14,6 +14,8 @@ HRESULT LoadingScene::Init()
 	pulseScale = 1.0f;
 	pulseDirection = 1.0f;
 
+	while(ShowCursor(FALSE)>=0);
+
 	return S_OK;
 }
 

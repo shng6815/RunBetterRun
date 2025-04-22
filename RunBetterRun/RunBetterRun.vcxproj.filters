@@ -40,6 +40,9 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="InGame\Sound">
+      <UniqueIdentifier>{ed3c2596-8596-4123-bac8-909238e5509d}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Core\Data">
       <UniqueIdentifier>{5bf577db-5bda-4690-9566-8318306cafa6}</UniqueIdentifier>
     </Filter>
@@ -161,6 +164,12 @@
     </ClCompile>
     <ClCompile Include="MapEditorUI.cpp">
       <Filter>Core\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="MinimapUI.cpp">
+      <Filter>InGame\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>InGame\Sound</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -286,6 +295,15 @@
     </ClInclude>
     <ClInclude Include="MapEditorUI.h">
       <Filter>Core\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Monster.h">
+      <Filter>Core\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="MinimapUI.h">
+      <Filter>InGame\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>InGame\Sound</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

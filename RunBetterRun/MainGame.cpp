@@ -13,12 +13,31 @@
 #include "VideoManager.h"
 #include "DataManager.h"
 #include "MapEditor.h"
+#include "SoundManager.h"
 
 HRESULT MainGame::Init()
 {
 	ImageManager::GetInstance()->Init();
 	KeyManager::GetInstance()->Init();
 	SceneManager::GetInstance()->Init();
+	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
+
+	SoundManager::GetInstance()->Init();
+
+	if(FAILED(SoundManager::GetInstance()->LoadMusic("BGM","Sounds/bgm_main.wav")))
+	{
+		MessageBox(g_hWnd,TEXT("BGM Load Failed"),TEXT("Error"),MB_OK);
+		return E_FAIL;
+	}
+
+	if(FAILED(SoundManager::GetInstance()->LoadSound("Step","Sounds/SFX_Step.wav")))
+	{
+		MessageBox(g_hWnd,TEXT("SFX Load Failed"),TEXT("Error"),MB_OK);
+		return E_FAIL;
+	}
+
+	SoundManager::GetInstance()->PlayMusic("BGM",true,0.8f);
+
 	VideoManager::Init();
 	DataManager::GetInstance()->Init();	
 	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
@@ -60,7 +79,8 @@ void MainGame::Release()
 	KeyManager::GetInstance()->Release();
 	VideoManager::Release();
 	ImageManager::GetInstance()->Release();
-	
+	MapManager::GetInstance()->Release();
+	SoundManager::GetInstance()->Release();
 }
 
 void MainGame::Update()
