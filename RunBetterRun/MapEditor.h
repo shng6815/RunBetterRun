@@ -36,9 +36,6 @@ private:
 	RECT sampleArea;
 	RECT mapArea;
 
-	float tileScaleRatio;  // 타일 스케일 비율
-	int mapTileSize;       // 화면에 표시되는 타일 크기
-
 	// 내부 기능 함수들
 	void TileSelect();
 	void MapEdit();
@@ -82,5 +79,4 @@ public:
 	void SaveMap();
 	void LoadMap();
 	void ClearMap();
-	void TestPlaceTile(int screenX,int screenY);
 };

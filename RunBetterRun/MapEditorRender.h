@@ -26,7 +26,7 @@ public:
 							int mapWidth,RECT mapArea);
 
 	// UI 요소 렌더링
-	void RenderModeInfo(HDC hdc,EditorMode mode);
+	void RenderModeInfo(HDC hdc,EditorMode mode, RoomType selectedRoomType);
 	void RenderControlGuide(HDC hdc);
 	void RenderSelectedTilePreview(HDC hdc,POINT selectedTile,RECT sampleArea);
 

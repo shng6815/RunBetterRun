@@ -27,9 +27,10 @@ HRESULT MapEditor::Init()
 	startPosition = {VISIBLE_MAP_WIDTH / 2.0f + 0.5f,VISIBLE_MAP_HEIGHT / 2.0f + 0.5f};
 
 	// 샘플 타일 이미지 로드
+
 	sampleTileImage = ImageManager::GetInstance()->AddImage(
-		"EditorSampleTile",L"Image/horrorMapTiles.bmp",
-		1408,1408,SAMPLE_TILE_X,SAMPLE_TILE_Y,
+		"EditorSampleTile",L"Image/horrorMapTiles2.bmp",
+		352,352,SAMPLE_TILE_X,SAMPLE_TILE_Y,
 		true,RGB(255,0,255));
 
 	if(!sampleTileImage)
@@ -46,20 +47,28 @@ HRESULT MapEditor::Init()
 	// 오른쪽 패널 영역 설정
 	int rightPanelLeft = TILEMAPTOOL_X - rightPanelWidth - uiPadding;
 
+	// 맵 영역 설정 - 왼쪽 영역을 최대한 활용
+	int mapAreaWidth = TILEMAPTOOL_X - rightPanelWidth - (uiPadding * 4);
+	int mapAreaHeight = TILEMAPTOOL_Y - (uiPadding * 4);
+	int mapTileSize = 32;
+
+	// 타일 크기를 맵 영역과 맵 크기에 맞게 조정
+	int tileWidth = mapAreaWidth / mapWidth;
+	int tileHeight = mapAreaHeight / mapHeight;
+
+	// 일관성을 위해 타일을 정사각형으로 유지
+	int tileSize = min(tileWidth,tileHeight);
+
 	// 샘플 타일 영역 설정
 	sampleArea.left = rightPanelLeft;
-	sampleArea.top = uiPadding * 3;
+	sampleArea.top = uiPadding;
 	sampleArea.right = sampleArea.left + (SAMPLE_TILE_X * sampleTileSize);
 	sampleArea.bottom = sampleArea.top + (SAMPLE_TILE_Y * sampleTileSize);
 
-	// 맵 영역 설정 - 왼쪽 영역을 최대한 활용
-	int mapAreaWidth = rightPanelLeft - (uiPadding * 2);
-	int mapTileSize = 32;
-
 	mapArea.left = uiPadding;
-	mapArea.top = uiPadding * 3;
-	mapArea.right = mapArea.left + (VISIBLE_MAP_WIDTH * mapTileSize);
-	mapArea.bottom = mapArea.top + (VISIBLE_MAP_HEIGHT * mapTileSize);
+	mapArea.top = uiPadding;
+	mapArea.right = mapArea.left + (mapWidth * mapTileSize);
+	mapArea.bottom = mapArea.top + (mapHeight * mapTileSize);
 
 	// UI 및 렌더러 초기화
 	ui = new MapEditorUI();
@@ -123,12 +132,6 @@ void MapEditor::Render(HDC hdc)
 	// 배경 채우기
 	PatBlt(hdc,0,0,WINSIZE_X,WINSIZE_Y,WHITENESS);
 
-	// 영역 경계 그리기
-	Rectangle(hdc,mapArea.left - 1,mapArea.top - 1,
-			 mapArea.right + 1,mapArea.bottom + 1);
-	Rectangle(hdc,sampleArea.left - 1,sampleArea.top - 1,
-			 sampleArea.right + 1,sampleArea.bottom + 1);
-
 	// 맵 요소 렌더링
 	render->RenderTiles(hdc,tiles,mapWidth,mapHeight,mapArea,ui->GetMousePos(),ui->IsMouseInMapArea());
 	render->RenderSprites(hdc,editorSprites,mapArea);
@@ -137,23 +140,15 @@ void MapEditor::Render(HDC hdc)
 
 	// UI 요소 렌더링
 	render->RenderSampleTiles(hdc,sampleArea,ui->GetSelectedTile());
-	render->RenderModeInfo(hdc,mode);
+	render->RenderModeInfo(hdc,mode, selectedRoomType);
 	render->RenderControlGuide(hdc);
 	render->RenderSelectedTilePreview(hdc,ui->GetSelectedTile(),sampleArea);
 }
 
 void MapEditor::TileSelect()
 {
-	if(ui->HandleTileSelection(ui->GetMousePos(),sampleArea)) {
-		int tileIndex = ui->GetSelectedTile().y * SAMPLE_TILE_X + ui->GetSelectedTile().x;
-		if(tileIndex < 5)
-		{
-			selectedRoomType = RoomType::WALL;
-		} 
-		else 
-		{
-			selectedRoomType = RoomType::FLOOR;
-		}
+	if(ui->HandleTileSelection(ui->GetMousePos(),sampleArea)) 
+	{ //나중에 타일 인덱스 접근을위해 남겨놓음
 	}
 }
 
@@ -170,10 +165,16 @@ void MapEditor::MapEdit()
 		// 타일의 중앙 화면 좌표 계산
 		POINT screenPos = ui->MapToScreen({tileX,tileY},mapArea,mapWidth,mapHeight);
 
-		// GetRectAtCenter를 사용하여 타일 영역 계산
 		int tileWidth = (mapArea.right - mapArea.left) / mapWidth;
 		int tileHeight = (mapArea.bottom - mapArea.top) / mapHeight;
-		RECT tileRect = GetRectAtCenter(screenPos.x,screenPos.y,tileWidth,tileHeight);
+
+		// GetRectAtCenter를 사용하여 타일 영역 계산
+		RECT tileRect = {
+			screenPos.x - tileWidth/2,
+			screenPos.y - tileHeight/2,
+			screenPos.x + tileWidth/2,
+			screenPos.y + tileHeight/2
+		};
 
 		if(PtInRect(&tileRect,ui->GetMousePos()))
 		{
@@ -247,7 +248,7 @@ void MapEditor::Shortcut()
 	else if(km->IsOnceKeyDown('3'))
 	{
 		ChangeMode(EditorMode::ITEM);
-	} 
+	}	
 	else if(km->IsOnceKeyDown('4'))
 	{
 		ChangeMode(EditorMode::MONSTER);
@@ -268,6 +269,19 @@ void MapEditor::Shortcut()
 	else if(km->IsOnceKeyDown('C'))
 	{
 		ClearMap();
+	}
+
+	if(km->IsOnceKeyDown('F'))
+	{
+		selectedRoomType = RoomType::FLOOR;
+	} 
+	else if(km->IsOnceKeyDown('W'))
+	{
+		selectedRoomType = RoomType::WALL;
+	}
+	else if(km->IsOnceKeyDown('G'))
+	{
+		selectedRoomType = RoomType::START;
 	}
 
 	if(mode == EditorMode::OBSTACLE)
@@ -295,6 +309,7 @@ void MapEditor::PlaceTile(int x,int y)
 {
 	int tileIndex = ui->GetSelectedTile().y * SAMPLE_TILE_X + ui->GetSelectedTile().x;
 	int index = y * mapWidth + x;
+
 
 	if(index < tiles.size()) {
 		tiles[index].tilePos = tileIndex;
@@ -524,8 +539,8 @@ void MapEditor::PrepareDataForSave()
 	// 맵 데이터 설정
 	DataManager::GetInstance()->SetMapData(tiles,mapWidth,mapHeight);
 	// 텍스처 정보 설정
-	DataManager::GetInstance()->SetTextureInfo(L"Image/horrorMapTiles.bmp",
-											 128,SAMPLE_TILE_X,SAMPLE_TILE_Y);
+	DataManager::GetInstance()->SetTextureInfo(L"Image/horrorMapTiles2.bmp",
+											 32,SAMPLE_TILE_X,SAMPLE_TILE_Y);
 	// 시작 위치 설정
 	DataManager::GetInstance()->SetStartPosition(startPosition);
 	// 아이템, 몬스터, 장애물 데이터 추가
