@@ -2,10 +2,12 @@
 #include "Singleton.h"
 #include "structs.h"
 #include "AObstacle.h"
+#include "Elevator.h"
 
 class ObstacleManager: public Singleton<ObstacleManager>
 {
-	vector<AObstacle*> obstacles;
+	vector<AObstacle*>	obstacles;
+	Elevator*			elevator;
 
 public:
 	HRESULT Init(void);
@@ -13,5 +15,9 @@ public:
 	void Update(void);
 
 	void PutObstacle(AObstacle* obstacle);
+	void PutObstacle(Elevator* elevator);
+
+	void LockElevator(void);
+	void UnlockElevator(void);
 };
 

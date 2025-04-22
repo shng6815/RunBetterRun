@@ -6,6 +6,12 @@ HRESULT ObstacleManager::Init(void)
 {
 	if(!obstacles.empty())
 		Release();
+	if(elevator)
+	{
+		elevator->Release();
+		delete elevator;
+	}
+	elevator = nullptr;
 
     return S_OK;
 }
@@ -21,6 +27,13 @@ void ObstacleManager::Release(void)
 		obstacle = nullptr;
 	}
 	obstacles.clear();
+
+	if(elevator)
+	{
+		elevator->Release();
+		delete elevator;
+	}
+	elevator = nullptr;
 }
 
 void ObstacleManager::Update(void)
@@ -41,5 +54,37 @@ void ObstacleManager::Update(void)
 
 void ObstacleManager::PutObstacle(AObstacle* obstacle)
 {
-	obstacles.push_back(obstacle);
+	if(obstacle)
+	{
+		if(FAILED(obstacle->Init()))
+			obstacle->Release();
+		else
+			obstacles.push_back(obstacle);
+	}
+}
+
+void ObstacleManager::PutObstacle(Elevator* elevator)
+{
+	if (elevator)
+	{
+		elevator->Init();
+		if(this->elevator)
+		{
+			this->elevator->Release();
+			delete this->elevator;
+		}
+		this->elevator = elevator;
+	}
+}
+
+void ObstacleManager::LockElevator(void)
+{
+	if(elevator)
+		elevator->Lock();
+}
+
+void ObstacleManager::UnlockElevator(void)
+{
+	if(elevator)
+		elevator->UnLock();
 }

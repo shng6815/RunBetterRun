@@ -2,19 +2,18 @@
 #include "MapManager.h"
 
 
-HRESULT AObstacle::Init(POINT pos,Direction dir)
+HRESULT AObstacle::Init(void)
 {
 	MapData* md = MapManager::GetInstance()->GetMapData();
 
-	obstacle.block = TRUE;
-	obstacle.pos = pos;
-	obstacle.dir = dir;
-	obstacle.distance = 0;
-
 	DWORD mapCoordinate = obstacle.pos.y * md->width + obstacle.pos.x;
-	if(mapCoordinate < md->width * md->height)
+	if(mapCoordinate < md->width * md->height && !md->tiles[mapCoordinate].obstacle)
+	{
 		md->tiles[mapCoordinate].obstacle = &obstacle;
-	return S_OK;
+		active = TRUE;
+		return S_OK;
+	}
+	return E_FAIL;
 }
 
 void AObstacle::Release(void)
@@ -22,7 +21,7 @@ void AObstacle::Release(void)
 	MapData* md = MapManager::GetInstance()->GetMapData();
 
 	DWORD mapCoordinate = obstacle.pos.y * md->width + obstacle.pos.x;
-	if(mapCoordinate < md->width * md->height)
+	if(active && mapCoordinate < md->width * md->height)
 		md->tiles[mapCoordinate].obstacle = nullptr;
 }
 

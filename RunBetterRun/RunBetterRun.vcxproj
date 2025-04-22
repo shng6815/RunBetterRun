@@ -141,6 +141,7 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="DataManager.cpp" />
     <ClCompile Include="DeadScene.cpp" />
+    <ClCompile Include="Elevator.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameStartScene.cpp" />
     <ClCompile Include="Image.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="DataManager.h" />
     <ClInclude Include="DeadScene.h" />
+    <ClInclude Include="Elevator.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameStartScene.h" />
     <ClInclude Include="Image.h" />

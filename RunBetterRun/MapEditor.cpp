@@ -323,7 +323,7 @@ void MapEditor::PlaceStartPoint(int x,int y)
 	for(size_t i = 0; i < tiles.size(); i++) {
 		if(tiles[i].roomType == RoomType::START) {
 			tiles[i].roomType = RoomType::FLOOR;
-			tiles[i].tilePos = 10;
+			tiles[i].tilePos = 20;
 		}
 	}
 
@@ -411,7 +411,7 @@ void MapEditor::AddSprite(FPOINT position,Texture* texture,SpriteType type)
 
 	if(type == SpriteType::KEY)
 	{
-		newSprite.aniInfo = {0.1f,0.1f,{456,488},{10,1},{0,0}};
+		newSprite.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
 	} 
 	else if(type == SpriteType::MONSTER)
 	{
@@ -529,7 +529,7 @@ void MapEditor::PrepareDataForSave()
 			{
 				int index = y * mapWidth + x;
 				tiles[index].roomType = RoomType::WALL;
-				tiles[index].tilePos = 4;  // 벽 타일 인덱스
+				tiles[index].tilePos = 12;  // 벽 타일 인덱스
 			}
 		}
 	}

@@ -530,7 +530,7 @@ void RayCast::RenderObstacle(Ray& ray, int column)
 			while(y < endY)
 			{
 				pixel.y = y++;
-				RenderPixel(pixel,GetDistanceShadeColor(color,ray.distance,SHADE_VALUE));
+				RenderPixel(pixel,GetDistanceShadeColor(color,ray.distance, SHADE_VALUE));
 			}
 		} else
 			++y;
@@ -559,16 +559,19 @@ void RayCast::RenderCeilingFloor(Ray& ray, int column)
         MapData* md = MapManager::GetInstance()->GetMapData();
         DWORD mapIndex = INT(currentFloor.y) * md->width + INT(currentFloor.x);
 		mapIndex = min(md->width * md->height - 1,mapIndex);
-        int tileIndex = md->tiles[mapIndex].tilePos;
-		int tileCelingIndex = max(tileIndex - INT(md->textureTileRowSize), 0);
+        DWORD tileCeilingIndex = md->tiles[mapIndex].tilePos;
+		if(tileCeilingIndex < md->textureTileRowSize * 2)
+			tileCeilingIndex = 17;
+		DWORD tileFloorIndex = min(tileCeilingIndex + md->textureTileRowSize, md->textureTileRowSize * md->textureTileColumnSize - 1);
+		
         FPOINT texture = { INT(currentFloor.x * md->textureTileSize) % md->textureTileSize,
             INT(max(currentFloor.y, 0) * md->textureTileSize) % md->textureTileSize };
         int endY = min(y + renderScale, WINSIZE_Y);
         while (y < endY)
         {
             pixel.y = y;
-            RenderPixel(pixel, GetDistanceShadeColor(tileIndex, texture, screenHeightPixelDepths[y]));
-            RenderPixel({ pixel.x, WINSIZE_Y - (pixel.y + 1) }, GetDistanceShadeColor(tileCelingIndex, texture, screenHeightPixelDepths[y++]));
+            RenderPixel(pixel, GetDistanceShadeColor(tileFloorIndex, texture, screenHeightPixelDepths[y]));
+            RenderPixel({ pixel.x, WINSIZE_Y - (pixel.y + 1) }, GetDistanceShadeColor(tileCeilingIndex, texture, screenHeightPixelDepths[y++]));
         }
     }
 }
@@ -609,7 +612,7 @@ COLORREF RayCast::GetDistanceShadeColor(int tile, FPOINT texturePixel, float dis
 
     COLORREF color = md->texture->bmp[INT(texturePixel.y * md->texture->bmpWidth + texturePixel.x)];
 
-    if (divide <= 1.0f)
+    if (divide <= 1.0f || column == md->textureTileRowSize - 1)
         return color;
     else
         return RGB(INT(GetRValue(color) / divide),
