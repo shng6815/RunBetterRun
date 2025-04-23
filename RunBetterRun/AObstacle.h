@@ -6,10 +6,11 @@
 class AObstacle
 {
 protected:
-	Obstacle obstacle;
+	Obstacle	obstacle;
+	BOOL		active;
 
 public:
-	virtual HRESULT Init(POINT pos,Direction dir);
+	virtual HRESULT Init(void);
 	virtual void Release(void);
 	virtual BOOL Action(void) = 0;
 	virtual void Update(void);

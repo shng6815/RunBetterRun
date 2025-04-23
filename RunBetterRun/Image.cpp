@@ -210,6 +210,37 @@ void Image::RenderResized(HDC hdc,int destX,int destY,int width,int height)
 	}
 }
 
+void Image::RenderResized(HDC hdc,int destX,int destY,int width,int height,int frameIndex)
+{
+	imageInfo->currFrameX = frameIndex;
+
+	if(isTransparent)
+	{
+		GdiTransparentBlt(hdc,
+			destX,destY,
+			width,height,  // 원하는 크기로 렌더링
+			imageInfo->hMemDC,
+			imageInfo->frameWidth * imageInfo->currFrameX,
+			imageInfo->frameHeight * imageInfo->currFrameY,
+			imageInfo->frameWidth,imageInfo->frameHeight,
+			transColor);
+	} else
+	{
+		StretchBlt(
+			hdc,                // 복사 목적지 DC
+			destX,destY,       // 복사 목적지 위치
+			width,height,      // 원하는 크기로 렌더링
+			imageInfo->hMemDC,  // 원본 DC
+			imageInfo->frameWidth * imageInfo->currFrameX,  // 프레임 X 위치
+			imageInfo->frameHeight * imageInfo->currFrameY, // 프레임 Y 위치
+			imageInfo->frameWidth,   // 원본에서 복사될 가로크기(프레임 너비)
+			imageInfo->frameHeight,  // 원본에서 복사될 세로크기(프레임 높이)
+			SRCCOPY             // 복사 옵션
+		);
+	}
+
+}
+
 void Image::RenderResized(HDC hdc,int destX,int destY,int width,int height,
 						 int srcX,int srcY,int srcWidth,int srcHeight)
 {

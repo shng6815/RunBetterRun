@@ -68,24 +68,6 @@ bool VideoManager::PlayVideo(const wchar_t* filePath,float length)
 		&pPlayer
 	);
 
-	// 비디오 크기를 윈도우에 맞게 설정
-	if(pPlayer) {
-		// 비디오가 전체 창을 채우도록 확장
-		SIZE videoSize = {mainRect.right - mainRect.left,mainRect.bottom - mainRect.top};
-		pPlayer->SetVideoSourceRect(NULL);  // 원본 비디오 전체 사용
-		pPlayer->UpdateVideo();
-
-		// 추가 옵션으로 화면 비율 유지 해제
-		IMFVideoDisplayControl* pVideoDisplay = NULL;
-		if(SUCCEEDED(MFGetService(pPlayer,MR_VIDEO_RENDER_SERVICE,
-			IID_IMFVideoDisplayControl,(void**)&pVideoDisplay))) {
-			// 화면 비율 무시하고 창 전체 사용
-			pVideoDisplay->SetAspectRatioMode(MFVideoARMode_None);
-			pVideoDisplay->Release();
-		}
-	}
-
-
 	if(!pPlayer) {
 		DestroyWindow(videoWindow);
 		videoWindow = NULL;

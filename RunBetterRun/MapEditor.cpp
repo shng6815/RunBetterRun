@@ -1128,7 +1128,7 @@ void MapEditor::SaveMap(const wchar_t* filePath)
 			{
 				int index = y * mapWidth + x;
 				tiles[index].roomType = RoomType::WALL;
-				tiles[index].tilePos = 4;  // 벽 타일 인덱스
+				tiles[index].tilePos = 12;  // 벽 타일 인덱스
 			}
 		}
 	}

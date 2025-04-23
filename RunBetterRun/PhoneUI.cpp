@@ -1,5 +1,6 @@
 #include "PhoneUI.h"
 #include "MinimapUI.h"
+#include "NumberUI.h"
 #include "Image.h"
 #include <ctime>
 
@@ -29,9 +30,19 @@ HRESULT PhoneUI::Init(UIType type,FPOINT pos,FPOINT size,INT layer)
 	FPOINT minimapPos = {pos.x + size.x * REL_X,pos.y + size.y * REL_Y};
 	FPOINT minimapSize = {size.x * REL_W,size.y * REL_H};
 
+	FPOINT relPos = {REL_X,REL_Y};
+	FPOINT relSize = {REL_W,REL_H};
+
 	MinimapUI* minimapUI = new MinimapUI();
-	minimapUI->Init(type,minimapPos,minimapSize,1);
-	uiUnits.push_back(minimapUI);
+	minimapUI->Init(type,relPos,relSize,this,1);
+	
+	// 남은 아이템 수의 UI를 위한 상대적 위치와 크기 설정
+
+	relPos = {0.5f,0.07f};
+	relSize = {0.8f,0.2f};
+	// 상대적 위치와 크기를 사용하여 UIUnit 초기화
+	NumberUI* numberUI = new NumberUI();
+	numberUI->Init(type,relPos,relSize,this,1);
 
 	toggleTime = 0.5f;
 	toggleDelay = 0.f;
@@ -99,6 +110,15 @@ void PhoneUI::Update()
 	{
 		UpdateWobbleEffect();
 	}
+
+	// UI 유닛 업데이트
+	for(auto& uiUnit : uiUnits)
+	{
+		if(uiUnit)
+		{
+			uiUnit->Update();
+		}
+	}
 }
 
 void PhoneUI::Release()
@@ -141,29 +161,6 @@ void PhoneUI::ToggleActive()
 		isSlideIn = true;
 		isActive = true;
 		pos = screenOutPos;
-	}
-}
-
-void PhoneUI::UpdateUIUnitsPosition()
-{
-	if(!uiUnits.empty())
-	{
-		const float REL_X = 20.f / 200;
-		const float REL_Y = 77.f / 300;
-		const float REL_W = (200 - 40) / 200.f;
-		const float REL_H = (300 - 120) / 300.f;
-
-		for(auto& uiUnit : uiUnits)
-		{
-			if(uiUnit)
-			{
-				FPOINT minimapPos = {pos.x + size.x * REL_X,pos.y + size.y * REL_Y};
-				uiUnit->SetPosition(minimapPos);
-
-				FPOINT minimapSize = {size.x * REL_W,size.y * REL_H};
-				uiUnit->SetSize(minimapSize);
-			}
-		}
 	}
 }
 
@@ -240,9 +237,6 @@ void PhoneUI::UpdateStateChangeAnimation()
 		// 흔들림 효과의 기준 위치 업데이트
 		basePos = pos;
 	}
-
-	// UI 유닛 위치 업데이트
-	UpdateUIUnitsPosition();
 }
 
 void PhoneUI::UpdateWobbleEffect()
@@ -294,9 +288,6 @@ void PhoneUI::UpdateWobbleEffect()
 
 	// 현재 위치 업데이트
 	pos = newPos;
-
-	// UI 유닛 위치 업데이트
-	UpdateUIUnitsPosition();
 }
 
 void PhoneUI::ToggleUdate()
@@ -393,9 +384,6 @@ void PhoneUI::ToggleUdate()
 				basePos = pos;
 			}
 		}
-
-		// MinimapUI 위치 업데이트
-		UpdateUIUnitsPosition();
 	}
 }
 
@@ -455,7 +443,4 @@ void PhoneUI::UpdateItemShakeEffect()
 		currentShakeIntensity = 0.0f;
 		pos = basePos; // 원래 위치로 복귀
 	}
-
-	// UI 유닛 위치 업데이트
-	UpdateUIUnitsPosition();
 }

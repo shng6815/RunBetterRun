@@ -6,93 +6,7 @@
 #include "ItemManager.h"
 #include "Key.h"
 
-void MinimapUI::DrawMiniMapWithRotation(HDC hdc,int drawSize,float angle)
-{
-	const int fullSize = static_cast<int>(ceilf(drawSize * 2));
-	const float center = fullSize / 2.0f;
-
-	HDC baseDC = CreateCompatibleDC(hdc);
-	HBITMAP baseBmp = CreateCompatibleBitmap(hdc,fullSize,fullSize);
-	HBITMAP oldBaseBmp = (HBITMAP)SelectObject(baseDC,baseBmp);
-
-	static const COLORREF kMaskColor = RGB(255,0,255);
-	HBRUSH bgBrush = CreateSolidBrush(kMaskColor);
-	RECT fullRect = {0,0,fullSize,fullSize};
-	FillRect(baseDC,&fullRect,bgBrush);
-
-	// 내부 미니맵 그리기
-	int offset = (fullSize - drawSize) / 2;
-
-	HDC miniDC = CreateCompatibleDC(hdc);
-	HBITMAP miniBmp = CreateCompatibleBitmap(hdc,drawSize,drawSize);
-	HBITMAP oldMiniBmp = (HBITMAP)SelectObject(miniDC,miniBmp);
-
-	RECT miniRect = {0,0,drawSize,drawSize};
-	FillRect(miniDC,&miniRect,bgBrush); // 재사용
-	DrawMiniMapToDC(miniDC,drawSize);
-
-	BitBlt(baseDC,offset,offset,drawSize,drawSize,miniDC,0,0,SRCCOPY);
-
-	// 회전
-	HDC rotDC = CreateCompatibleDC(hdc);
-	HBITMAP rotBmp = CreateCompatibleBitmap(hdc,fullSize,fullSize);
-	HBITMAP oldRotBmp = (HBITMAP)SelectObject(rotDC,rotBmp);
-
-	FillRect(rotDC,&fullRect,bgBrush); // 회전용 배경
-
-	SetGraphicsMode(rotDC,GM_ADVANCED);
-
-	XFORM xform = {
-		cosf(angle),sinf(angle),
-		-sinf(angle),cosf(angle),
-		center * (1 - cosf(angle)) + center * sinf(angle),
-		center * (1 - cosf(angle)) - center * sinf(angle)
-	};
-
-	XFORM oldXform;
-	GetWorldTransform(rotDC,&oldXform);
-	SetWorldTransform(rotDC,&xform);
-
-	BitBlt(rotDC,0,0,fullSize,fullSize,baseDC,0,0,SRCCOPY);
-	SetWorldTransform(rotDC,&oldXform);
-
-	// 출력
-	int cutOffset = (fullSize - drawSize) / 2;
-	TransparentBlt(hdc,0,0,drawSize,drawSize,
-				   rotDC,cutOffset,cutOffset,drawSize,drawSize,
-				   kMaskColor);
-
-	// 정리
-	DeleteObject(bgBrush);
-	SelectObject(baseDC,oldBaseBmp);
-	DeleteObject(baseBmp);
-	DeleteDC(baseDC);
-
-	SelectObject(miniDC,oldMiniBmp);
-	DeleteObject(miniBmp);
-	DeleteDC(miniDC);
-
-	SelectObject(rotDC,oldRotBmp);
-	DeleteObject(rotBmp);
-	DeleteDC(rotDC);
-}
-
-HRESULT MinimapUI::Init(UIType type,FPOINT pos,FPOINT size,INT layer)
-{
-	isActive = true;
-
-	this->uiType = type;
-	this->pos = pos;
-	this->size = size;
-	this->layer = layer;
-
-	return S_OK;
-}
-
 void MinimapUI::Release()
-{}
-
-void MinimapUI::Update()
 {}
 
 void MinimapUI::Render(HDC hdc)
@@ -235,4 +149,75 @@ void MinimapUI::DrawMiniMapToDC(HDC hdc,int drawSize)
 		static_cast<int>(drawSize / 2.0f + halfTile/1.5f));
 
 	DeleteObject(playerBrush);
+}
+
+void MinimapUI::DrawMiniMapWithRotation(HDC hdc,int drawSize,float angle)
+{
+	const int fullSize = static_cast<int>(ceilf(drawSize * 2));
+	const float center = fullSize / 2.0f;
+
+	HDC baseDC = CreateCompatibleDC(hdc);
+	HBITMAP baseBmp = CreateCompatibleBitmap(hdc,fullSize,fullSize);
+	HBITMAP oldBaseBmp = (HBITMAP)SelectObject(baseDC,baseBmp);
+
+	static const COLORREF kMaskColor = RGB(255,0,255);
+	HBRUSH bgBrush = CreateSolidBrush(kMaskColor);
+	RECT fullRect = {0,0,fullSize,fullSize};
+	FillRect(baseDC,&fullRect,bgBrush);
+
+	// 내부 미니맵 그리기
+	int offset = (fullSize - drawSize) / 2;
+
+	HDC miniDC = CreateCompatibleDC(hdc);
+	HBITMAP miniBmp = CreateCompatibleBitmap(hdc,drawSize,drawSize);
+	HBITMAP oldMiniBmp = (HBITMAP)SelectObject(miniDC,miniBmp);
+
+	RECT miniRect = {0,0,drawSize,drawSize};
+	FillRect(miniDC,&miniRect,bgBrush); // 재사용
+	DrawMiniMapToDC(miniDC,drawSize);
+
+	BitBlt(baseDC,offset,offset,drawSize,drawSize,miniDC,0,0,SRCCOPY);
+
+	// 회전
+	HDC rotDC = CreateCompatibleDC(hdc);
+	HBITMAP rotBmp = CreateCompatibleBitmap(hdc,fullSize,fullSize);
+	HBITMAP oldRotBmp = (HBITMAP)SelectObject(rotDC,rotBmp);
+
+	FillRect(rotDC,&fullRect,bgBrush); // 회전용 배경
+
+	SetGraphicsMode(rotDC,GM_ADVANCED);
+
+	XFORM xform = {
+		cosf(angle),sinf(angle),
+		-sinf(angle),cosf(angle),
+		center * (1 - cosf(angle)) + center * sinf(angle),
+		center * (1 - cosf(angle)) - center * sinf(angle)
+	};
+
+	XFORM oldXform;
+	GetWorldTransform(rotDC,&oldXform);
+	SetWorldTransform(rotDC,&xform);
+
+	BitBlt(rotDC,0,0,fullSize,fullSize,baseDC,0,0,SRCCOPY);
+	SetWorldTransform(rotDC,&oldXform);
+
+	// 출력
+	int cutOffset = (fullSize - drawSize) / 2;
+	TransparentBlt(hdc,0,0,drawSize,drawSize,
+				   rotDC,cutOffset,cutOffset,drawSize,drawSize,
+				   kMaskColor);
+
+	// 정리
+	DeleteObject(bgBrush);
+	SelectObject(baseDC,oldBaseBmp);
+	DeleteObject(baseBmp);
+	DeleteDC(baseDC);
+
+	SelectObject(miniDC,oldMiniBmp);
+	DeleteObject(miniBmp);
+	DeleteDC(miniDC);
+
+	SelectObject(rotDC,oldRotBmp);
+	DeleteObject(rotBmp);
+	DeleteDC(rotDC);
 }

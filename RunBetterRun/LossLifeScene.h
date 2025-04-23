@@ -9,11 +9,7 @@ class LossLifeScene : public GameObject
 {
 private:
 	Image* bg;
-	float delayTime;
-
 	IMFPMediaPlayer*  pPlayer     = nullptr;
-	float videoTimer;  // 비디오 재생 시간 체크용
-	float videoLength;
 
 public:
 

@@ -10,10 +10,12 @@ protected:
 	Sprite sprite;
 	float speed;
 	FPOINT targetPosition;
+	Direction direction;
 	
 	virtual void Action(void);
 	virtual void Catch(void);
 	BOOL CanMoveToPosition(FPOINT pos);
+	void UpdateDirection(FPOINT newPos); 
 
 public:
 	virtual ~AMonster(void) {};
