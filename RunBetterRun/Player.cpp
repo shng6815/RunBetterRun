@@ -49,8 +49,19 @@ HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 		isFirstInit = false;
 	}
 
-	// ī�޶� ����
 	this->shakeFunc = shakeFunc;
+
+	if(FAILED(SoundManager::GetInstance()->LoadSound("Step","Sounds/SFX_Step.wav")))
+	{
+		MessageBox(g_hWnd,TEXT("SFX Load Failed"),TEXT("Error"),MB_OK);
+		return E_FAIL;
+	}
+
+	if(FAILED(SoundManager::GetInstance()->LoadSound("Heart","Sounds/SFX_Heart.wav")))
+	{
+		MessageBox(g_hWnd,TEXT("SFX Load Failed"),TEXT("Error"),MB_OK);
+		return E_FAIL;
+	}
 
 	return S_OK;
 }
@@ -71,7 +82,6 @@ void Player::Update()
 
     fov += (targetFOV - fov) * deltaTime * fovLerpSpeed;
     UpdateFOV();
-
 }
 
 void Player::Render(HDC hdc)

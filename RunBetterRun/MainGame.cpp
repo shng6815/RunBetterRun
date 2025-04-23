@@ -32,12 +32,6 @@ HRESULT MainGame::Init()
 		return E_FAIL;
 	}
 
-	if(FAILED(SoundManager::GetInstance()->LoadSound("Step","Sounds/SFX_Step.wav")))
-	{
-		MessageBox(g_hWnd,TEXT("SFX Load Failed"),TEXT("Error"),MB_OK);
-		return E_FAIL;
-	}
-
 	SoundManager::GetInstance()->PlayMusic("BGM",true,0.8f);
 
 	VideoManager::Init();

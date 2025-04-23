@@ -11,6 +11,7 @@
 #include "ObstacleManager.h"
 #include "Pile.h"
 #include "DataManager.h"
+#include "SoundManager.h"
 
 HRESULT MainGameScene::Init()
 {
@@ -66,6 +67,10 @@ HRESULT MainGameScene::Init()
 	backBufferBitmap = CreateCompatibleBitmap(screenDC, rc.right, rc.bottom);
 	oldBitmap = (HBITMAP)SelectObject(backBufferDC, backBufferBitmap);
 	ReleaseDC(g_hWnd, screenDC);
+
+	SoundManager::GetInstance()->LoadMusic("GameSceneBGM","Sounds/BGM_InGame.wav");
+
+	SoundManager::GetInstance()->PlayMusic("GameSceneBGM",true,0.5f);
 
 	/*ItemManager::GetInstance()->PutItem(new Key({ 21.5, 10.5 }));
 	MonsterManager::GetInstance()->PutMonster(new Tentacle({ 21.5, 8.5 }));
