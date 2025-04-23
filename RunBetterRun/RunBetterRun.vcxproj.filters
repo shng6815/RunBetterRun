@@ -153,9 +153,6 @@
     <ClCompile Include="Pile.cpp">
       <Filter>InGame\Map</Filter>
     </ClCompile>
-    <ClCompile Include="VideoManager.cpp">
-      <Filter>Core\Source</Filter>
-    </ClCompile>
     <ClCompile Include="MapEditor.cpp">
       <Filter>Core\Editor</Filter>
     </ClCompile>
@@ -164,6 +161,30 @@
     </ClCompile>
     <ClCompile Include="SoundManager.cpp">
       <Filter>InGame\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="Insight.cpp">
+      <Filter>InGame\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Phone.cpp">
+      <Filter>InGame\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Stun.cpp">
+      <Filter>InGame\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="JumpscareScene.cpp">
+      <Filter>InGame\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="VideoManager.cpp">
+      <Filter>InGame\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="OpeningScene.cpp">
+      <Filter>InGame\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Elevator.cpp">
+      <Filter>InGame\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="NumberUI.cpp">
+      <Filter>InGame\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -278,20 +299,38 @@
     <ClInclude Include="Pile.h">
       <Filter>InGame\Map</Filter>
     </ClInclude>
-    <ClInclude Include="VideoManager.h">
-      <Filter>Core\Header</Filter>
-    </ClInclude>
     <ClInclude Include="MapEditor.h">
       <Filter>Core\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Monster.h">
-      <Filter>Core\Header</Filter>
     </ClInclude>
     <ClInclude Include="MinimapUI.h">
       <Filter>InGame\UI</Filter>
     </ClInclude>
     <ClInclude Include="SoundManager.h">
       <Filter>InGame\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Phone.h">
+      <Filter>InGame\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Stun.h">
+      <Filter>InGame\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Insight.h">
+      <Filter>InGame\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="OpeningScene.h">
+      <Filter>InGame\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="VideoManager.h">
+      <Filter>InGame\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="JumpscareScene.h">
+      <Filter>InGame\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Elevator.h">
+      <Filter>InGame\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="NumberUI.h">
+      <Filter>InGame\UI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

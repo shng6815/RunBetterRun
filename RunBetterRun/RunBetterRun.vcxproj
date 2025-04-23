@@ -148,6 +148,7 @@
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="ImageManager.cpp" />
     <ClCompile Include="AItem.cpp" />
+    <ClCompile Include="Insight.cpp" />
     <ClCompile Include="ItemManager.cpp" />
     <ClCompile Include="JumpscareScene.cpp" />
     <ClCompile Include="Key.cpp" />
@@ -160,10 +161,10 @@
     <ClCompile Include="MinimapUI.cpp" />
     <ClCompile Include="AMonster.cpp" />
     <ClCompile Include="MapEditor.cpp" />
-
     <ClCompile Include="NumberUI.cpp" />
     <ClCompile Include="ObstacleManager.cpp" />
     <ClCompile Include="OpeningScene.cpp" />
+    <ClCompile Include="Phone.cpp" />
     <ClCompile Include="PhoneUI.cpp" />
     <ClCompile Include="MonsterManager.cpp" />
     <ClCompile Include="Pile.cpp" />
@@ -173,6 +174,7 @@
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="SpriteManager.cpp" />
+    <ClCompile Include="Stun.cpp" />
     <ClCompile Include="Tentacle.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Timer.cpp" />
@@ -194,6 +196,7 @@
     <ClInclude Include="Image.h" />
     <ClInclude Include="ImageManager.h" />
     <ClInclude Include="AItem.h" />
+    <ClInclude Include="Insight.h" />
     <ClInclude Include="ItemManager.h" />
     <ClInclude Include="JumpscareScene.h" />
     <ClInclude Include="Key.h" />
@@ -209,6 +212,7 @@
     <ClInclude Include="NumberUI.h" />
     <ClInclude Include="ObstacleManager.h" />
     <ClInclude Include="OpeningScene.h" />
+    <ClInclude Include="Phone.h" />
     <ClInclude Include="PhoneUI.h" />
     <ClInclude Include="Pile.h" />
     <ClInclude Include="Player.h" />
@@ -219,6 +223,7 @@
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="structs.h" />
     <ClInclude Include="SpriteManager.h" />
+    <ClInclude Include="Stun.h" />
     <ClInclude Include="Tentacle.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Timer.h" />

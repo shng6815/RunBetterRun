@@ -10,7 +10,7 @@ HRESULT MonsterManager::Init()
 {
 	playerPos = Player::GetInstance()->GetCameraPos();
 	mapData = MapManager::GetInstance()->GetMapData();
-
+	stunTime = 0;
 	return S_OK;
 }
 
@@ -23,24 +23,29 @@ void MonsterManager::Release()
 
 void MonsterManager::Update()
 {
-    // 플레이어 위치 업데이트
-    playerPos = Player::GetInstance()->GetCameraPos();
-    float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
-	vector<FPOINT> paths;
+	float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
+	if(stunTime > 0)
+		stunTime -= deltaTime;
+	else
+	{
+		// 플레이어 위치 업데이트
+		playerPos = Player::GetInstance()->GetCameraPos();
+		vector<FPOINT> paths;
 
-    for (auto& monster : monsters)
-    {
-		FPOINT monsterPos = monster->GetPostion();
-		vector<FPOINT> path = FindPath(monsterPos, playerPos, paths);
-
-		if(path.size() >= 2)
+		for(auto& monster : monsters)
 		{
-			monster->SetTargetPosition(path[1]); // 몬스터의 방향 추가? - 방향에 따라서 몬스터 스프라이트가 바뀌어야함.
-			paths.insert(paths.end(),path.begin() + 1, path.end() - 1);
-		}
+			FPOINT monsterPos = monster->GetPostion();
+			vector<FPOINT> path = FindPath(monsterPos,playerPos,paths);
 
-		monster->Update();
-    }
+			if(path.size() >= 2)
+			{
+				monster->SetTargetPosition(path[1]); // 몬스터의 방향 추가? - 방향에 따라서 몬스터 스프라이트가 바뀌어야함.
+				paths.insert(paths.end(),path.begin() + 1,path.end() - 1);
+			}
+
+			monster->Update();
+		}
+	}
 }
 
 
