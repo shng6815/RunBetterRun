@@ -5,16 +5,15 @@
 
 BOOL Pile::Action(void)
 {
-	if(obstacle.distance <= OBSTACLE_SIZE && KeyManager::GetInstance()->IsStayKeyDown('E'))
+	if(active && obstacle.distance <= OBSTACLE_SIZE && KeyManager::GetInstance()->IsOnceKeyDown('E'))
 	{
-		float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
-		obstacle.aniInfo.currentTime -= deltaTime;
-
-		if(obstacle.aniInfo.currentTime < 0)
+		if(obstacle.aniInfo.currentFrame.x + 1 == obstacle.aniInfo.maxFrame.x)
 		{
-			obstacle.aniInfo.currentTime = obstacle.aniInfo.frameTime;
-			obstacle.aniInfo.currentFrame.x = (obstacle.aniInfo.currentFrame.x + 1) % obstacle.aniInfo.maxFrame.x;
+			active = FALSE;
+			obstacle.block = FALSE;
 		}
+		else
+			++obstacle.aniInfo.currentFrame.x;
 		return TRUE;
 	}
 	return FALSE;
@@ -22,7 +21,10 @@ BOOL Pile::Action(void)
 
 Pile::Pile(POINT pos,Direction dir)
 {
-	obstacle.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/jewel.bmp"));
-	obstacle.aniInfo = {0.1f,0.1f,{456,488},{10,1},{0,0}};
-	Init(pos,dir);
+	obstacle.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/elevator.bmp"));
+	obstacle.aniInfo = {0.3f,0.3f,{128,128},{8,1},{0,0}};
+	obstacle.pos = pos;
+	obstacle.dir = dir;
+	obstacle.block = TRUE;
+	obstacle.distance = 0;
 }

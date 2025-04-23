@@ -14,13 +14,14 @@ BOOL Key::Action(void)
 
 HRESULT Key::Init(FPOINT pos)
 {
-	sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/jewel.bmp"));
+	sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/soul.bmp"));
 	if(!sprite.texture)
 		return E_FAIL;
 	sprite.type = SpriteType::KEY;
 	sprite.pos = pos;
 	sprite.distance = 0;
-	sprite.aniInfo = {0.1f,0.1f,{456,488},{10,1},{0,0}};
+	FLOAT curTime = 0;
+	sprite.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
 	SpriteManager::GetInstance()->AddSprite(sprite);
 	ItemManager::GetInstance()->PushKey();
 	return S_OK;
