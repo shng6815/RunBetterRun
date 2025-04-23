@@ -85,7 +85,7 @@ HRESULT MapEditor::Init()
 	// 정보창
 	int infoHeight = 80;
 	int uiPadding = 20;
-	int rightPanelWidth = 300;
+	int rightPanelWidth = 250;
 
 	// 샘플 타일 영역 
 	sampleArea = {
@@ -99,7 +99,7 @@ HRESULT MapEditor::Init()
 		TILEMAPTOOL_X - rightPanelWidth - uiPadding,
 		infoHeight + uiPadding * 10,
 		TILEMAPTOOL_X - rightPanelWidth - uiPadding + SAMPLE_TILE_X * TILE_SIZE,
-		infoHeight + uiPadding * 10 + SAMPLE_TILE_Y * TILE_SIZE
+		infoHeight + uiPadding * 10 + SAMPLE_TILE_Y * TILE_SIZE + 300
 	};
 	// 맵 편집 영역 
 	int mapAreaWidth = sampleArea.left - (uiPadding * 2);
@@ -195,7 +195,7 @@ void MapEditor::Render(HDC hdc)
 	// 맵 영역 테두리 그리기
 	HPEN mapAreaPen = CreatePen(PS_SOLID,2,RGB(100,100,100));
 	HPEN oldPen = (HPEN)SelectObject(hdc,mapAreaPen);
-	Rectangle(hdc,mapArea.left- TILEMAPTOOL_X / 2,mapArea.top-2,mapArea.right + TILEMAPTOOL_X,mapArea.bottom+2);
+	Rectangle(hdc,mapArea.left - 2,mapArea.top - 2,mapArea.right + 2,mapArea.bottom + 2);
 	SelectObject(hdc,oldPen);
 	DeleteObject(mapAreaPen);
 
@@ -218,11 +218,11 @@ void MapEditor::RenderMapTiles(HDC hdc)
 	int tileHeight = (mapArea.bottom - mapArea.top) / (mapHeight / zoomLevel);
 	int tileSize = min(tileWidth,tileHeight);
 
-	// 화면에 표시될 타일 범위
-	int startX = (int)viewportOffset.x - 50;
-	int startY = (int)viewportOffset.y - 50;
-	int endX = min(mapWidth,(int)(viewportOffset.x + mapWidth / zoomLevel) + 50);
-	int endY = min(mapHeight,(int)(viewportOffset.y + mapHeight / zoomLevel) + 50);
+	// 화면에 보이는 타일 범위 
+	int startX = max(0,(int)viewportOffset.x);
+	int startY = max(0,(int)viewportOffset.y);
+	int endX = min(mapWidth,(int)(viewportOffset.x + mapWidth / zoomLevel) + 1);
+	int endY = min(mapHeight,(int)(viewportOffset.y + mapHeight / zoomLevel) + 1);
 
 	// 타일 렌더링
 	for(int y = startY; y < endY; y++) {
@@ -901,8 +901,10 @@ void MapEditor::RenderUI(HDC hdc)
 	}
 
 	// 단축키 안내
-	TextOut(hdc,20,45,L"1-5: Change Mode  F: Floor  W: Wall  Arrow Keys: Direction",62);
-	TextOut(hdc,600,45,L"S: Save  A: Save As  L: Load  C: Clear  +/-: Zoom  I: Toggle Center",66);
+	LPCWSTR shortcutText1 = L"1-5: Change Mode  F: Floor  W: Wall  Arrow Keys: Direction";
+	LPCWSTR shortcutText2 = L"S: Save  A: Save As  L: Load  C: Clear  +/-: Zoom  I: Toggle Center";
+	TextOut(hdc,20,45,shortcutText1,wcslen(shortcutText1));
+	TextOut(hdc,600,45,shortcutText2,wcslen(shortcutText2));
 
 	SelectObject(hdc,oldFont);
 	DeleteObject(infoFont);
@@ -1856,20 +1858,13 @@ void MapEditor::ConvertFromDataManager()
 		editorObstacles.push_back(obstacle);
 	}
 
-	// 뷰포트 초기화
 	viewportOffset = {0.0f,0.0f};
 	zoomLevel = 1.0f;
-
-	// 선택된 타일과 스프라이트 초기화
 	selectedTile = {0,0};
 	isSpriteSelected = false;
 	selectedSprite = {0,0};
-
-	// 드래그 관련 상태 초기화
 	isDragging = false;
 	isDraggingArea = false;
-
-	// 기타 상태 초기화 (필요에 따라 추가)
 	currentMode = EditMode::TILE;
 	selectedTileType = RoomType::FLOOR;
 	selectedObstacleDir = Direction::EAST;
