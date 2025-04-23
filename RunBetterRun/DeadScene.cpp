@@ -41,8 +41,7 @@ HRESULT DeadScene::Init()
 
 void DeadScene::Release()
 {
-	if(bg)
-		bg->Release();
+
 }
 
 void DeadScene::Update()
