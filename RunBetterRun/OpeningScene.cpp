@@ -1,0 +1,31 @@
+#include "OpeningScene.h"
+#include "VideoManager.h"
+
+HRESULT OpeningScene::Init()
+{
+	// 비디오 재생 시작
+	if(!VideoManager::PlayVideo(L"SceneAnimation/Opening.mp4",11.50f)) {
+		// 실패 시 바로 다음 씬으로
+		SceneManager::GetInstance()->ChangeScene("MainGameScene","LoadingScene");
+	}
+
+	return S_OK;
+}
+
+void OpeningScene::Release()
+{
+}
+
+void OpeningScene::Update()
+{
+}
+
+void OpeningScene::Render(HDC hdc)
+{
+	VideoManager::GetInstance()->Update();
+
+	// 비디오 종료 확인
+	if(VideoManager::IsFinished()) {
+		SceneManager::GetInstance()->ChangeScene("MainGameScene","LoadingScene");
+	}
+}

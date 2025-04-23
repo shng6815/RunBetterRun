@@ -12,7 +12,6 @@ using namespace std;
 class MonsterManager : public Singleton<MonsterManager>
 {
 private:
-	// A* 알고리즘을 위한 노드 구조체
 	struct PathNode {
 		int x, y;           // 위치
 		int g;              // 시작점에서 현재 노드까지의 비용
