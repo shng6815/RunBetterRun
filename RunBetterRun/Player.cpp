@@ -43,11 +43,11 @@ HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 
 	static bool isFirstInit = true;
 
-	if(isFirstInit)
+	/*if(isFirstInit)
 	{
 		playerLife = 3;
 		isFirstInit = false;
-	}
+	}*/
 
 	// ī�޶� ����
 	this->shakeFunc = shakeFunc;

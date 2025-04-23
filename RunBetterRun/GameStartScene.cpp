@@ -164,8 +164,7 @@ void GameStartScene::HandleButtonClick(Button & button)
 
 void GameStartScene::DrawTitle(HDC hdc)
 {
-	// 텍스트 색상을 빨간색으로 변경
-	SetTextColor(hdc,RGB(180,0,0));  // 진한 빨간색  
+	SetTextColor(hdc,RGB(180,0,0));   
 	SetBkMode(hdc,TRANSPARENT);
 
 	RECT rc;

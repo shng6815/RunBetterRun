@@ -51,7 +51,7 @@ void Tentacle::Catch(void)
 	Player*player = Player::GetInstance();
 	player->LossPlayerLife();
 
-	if(player->GetPlayerLife() == 0)
+	if(player->GetPlayerLife() <= 0)
 	{
 		SceneManager::GetInstance()->ChangeScene("DeadScene");
 	}
