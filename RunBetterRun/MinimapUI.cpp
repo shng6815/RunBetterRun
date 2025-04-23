@@ -105,6 +105,9 @@ void MinimapUI::DrawMiniMapToDC(HDC hdc,int drawSize)
 		}
 	}
 
+	SelectObject(hdc,oldPen);  // 원래 펜으로 복원
+	DeleteObject(floorBrush);
+
 	// 아이템(키) 그리기
 	HBRUSH keyBrush = CreateSolidBrush(RGB(238,130,238)); // 키 표시용 보라색
 	HPEN oldKeyPen = (HPEN)SelectObject(hdc,GetStockObject(NULL_PEN));
