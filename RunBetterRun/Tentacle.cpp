@@ -64,14 +64,14 @@ void Tentacle::Catch(void)
 
 HRESULT Tentacle::Init(FPOINT pos)
 {
-	sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/Enemy2.bmp"));
+	sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/Ballman.bmp"));
 	if(!sprite.texture)
 		return E_FAIL;
 	sprite.type = SpriteType::MONSTER;
 	sprite.pos = pos;
 	sprite.distance = 0;
 	//sprite.aniInfo = {0,0,{423,437},{1,1},{0,0}};
-	sprite.aniInfo = {0.1f,0.1f,{431,495},{10,36},{0,0}};
+	sprite.aniInfo = {0.18f,0.18f,{215,246},{10,36},{0,0}};
 	SpriteManager::GetInstance()->AddSprite(sprite);
 	targetPosition = pos;
 	speed = 1.5f;

@@ -56,6 +56,7 @@ void ItemManager::PushKey(void)
 
 void ItemManager::PopKey(void)
 {
+
 	if(--keyCount == 0)
 	{
 		keyCount;

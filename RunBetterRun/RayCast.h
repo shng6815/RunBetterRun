@@ -57,6 +57,7 @@ private:
 	Ray RayCastingObstacle(int column, Obstacle*& obstacle);
 
 	void RenderWall(Ray& ray, int column);
+	void RenderOutOfWorld(Ray& ray, int column);
 	void RenderCeilingFloor(Ray& ray, int column);
 	void RenderCeilingFloor(Ray& ray, int column, COLORREF ceiling, COLORREF floor);
 	void RenderObjects(DWORD start, DWORD end, list<Obstacle*>& obstacles);

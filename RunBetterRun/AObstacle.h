@@ -1,7 +1,7 @@
 #pragma once
 #include "structs.h"
 
-#define OBSTACLE_SIZE 0.3f
+#define OBSTACLE_SIZE 1.2f
 
 class AObstacle
 {
