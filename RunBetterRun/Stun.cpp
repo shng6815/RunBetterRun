@@ -11,13 +11,13 @@ BOOL Stun::Action(void)
 
 HRESULT Stun::Init(FPOINT pos)
 {
-	sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/soul.bmp"));
+	sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/amulet.bmp"));
 	if(!sprite.texture)
 		return E_FAIL;
 	sprite.type = SpriteType::ITEM;
 	sprite.pos = pos;
 	sprite.distance = 0;
-	sprite.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
+	sprite.aniInfo = {0,0,{250,250},{1,1},{0,0}};
 	SpriteManager::GetInstance()->AddSprite(sprite);
 	return S_OK;
 }
