@@ -79,7 +79,6 @@ void MainGame::Release()
 	KeyManager::GetInstance()->Release();
 	VideoManager::Release();
 	ImageManager::GetInstance()->Release();
-	MapManager::GetInstance()->Release();
 	SoundManager::GetInstance()->Release();
 }
 
@@ -120,6 +119,23 @@ LRESULT MainGame::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lPara
 		g_ptMouse.x = LOWORD(lParam);
 		g_ptMouse.y = HIWORD(lParam);
 		break;
+	case WM_MOUSEWHEEL:
+	{
+		int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+		bool isCtrlPressed = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
+
+		// 현재 씬이 MapEditor인 경우 처리
+		MapEditor* mapEditor = dynamic_cast<MapEditor*>(SceneManager::GetInstance()->currentScene);
+		if(mapEditor)
+		{
+			if(isCtrlPressed)
+			{
+				mapEditor->Zoom(delta > 0 ? 0.1f : -0.1f);
+				return 0;
+			}
+		}
+	}
+	break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;

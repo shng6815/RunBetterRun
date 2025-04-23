@@ -1,5 +1,6 @@
 #include "MapEditorRender.h"
 #include "MapEditor.h" 
+#include "MapEditorUI.h"
 
 void MapEditorRender::Init(Image* sampleTileImage,int tileSize)
 {
@@ -8,68 +9,88 @@ void MapEditorRender::Init(Image* sampleTileImage,int tileSize)
 }
 
 void MapEditorRender::RenderTiles(HDC hdc,const vector<Room>& tiles,int mapWidth,int mapHeight,
-								  RECT mapArea,POINT mousePos,bool mouseInMapArea)
+								 RECT mapArea,POINT mousePos,bool mouseInMapArea,
+								 float zoomLevel,FPOINT viewportOffset)
 {
 	if(!sampleTileImage) return;
 
-	int visibleWidth = VISIBLE_MAP_WIDTH;
-	int visibleHeight = VISIBLE_MAP_HEIGHT;
 
-	int tileWidth = (mapArea.right - mapArea.left) / visibleWidth;
-	int tileHeight = (mapArea.bottom - mapArea.top) / visibleHeight;
+	// 정사각형 타일 크기를 보장하기 위한 계산
+	int maxTilesX = VISIBLE_MAP_WIDTH / zoomLevel;
+	int maxTilesY = VISIBLE_MAP_HEIGHT / zoomLevel;
 
-	// 화면에 표시될 타일 수 계산
-	for(int y = 0; y < visibleHeight; y++)
+	// 맵 영역 크기
+	int mapAreaWidth = mapArea.right - mapArea.left;
+	int mapAreaHeight = mapArea.bottom - mapArea.top;
+
+	// 타일 크기를 계산 (가로, 세로 중 작은 값을 기준으로 정사각형 유지)
+	int tileWidth = mapAreaWidth / maxTilesX;
+	int tileHeight = mapAreaHeight / maxTilesY;
+	int tileSize = min(tileWidth,tileHeight);  
+
+	// 정사각형 타일을 기준으로 실제 표시 가능한 타일 수 다시 계산
+	int actualTilesX = mapAreaWidth / tileSize;
+	int actualTilesY = mapAreaHeight / tileSize;
+
+	// 맵 영역 중앙 정렬을 위한 오프셋 계산
+	int offsetX = (mapAreaWidth - (actualTilesX * tileSize)) / 2;
+	int offsetY = (mapAreaHeight - (actualTilesY * tileSize)) / 2;
+
+	// 화면에 표시될 맵 영역 계산
+	int startX = static_cast<int>(viewportOffset.x);
+	int startY = static_cast<int>(viewportOffset.y);
+	int endX = min(mapWidth,static_cast<int>(viewportOffset.x + actualTilesX) + 1);
+	int endY = min(mapHeight,static_cast<int>(viewportOffset.y + actualTilesY) + 1);
+
+	// 타일 렌더링
+	for(int y = startY; y < endY; y++)
 	{
-		for(int x = 0; x < visibleWidth; x++)
+		for(int x = startX; x < endX; x++)
 		{
-			// 타일 중앙 좌표 계산
-			int screenX = mapArea.left + x * tileWidth;
-			int screenY = mapArea.top + y * tileHeight;
+			// 화면 좌표 계산 (중앙 정렬 오프셋 포함)
+			int screenX = mapArea.left + offsetX + static_cast<int>((x - viewportOffset.x) * tileSize);
+			int screenY = mapArea.top + offsetY + static_cast<int>((y - viewportOffset.y) * tileSize);
 
-			// 1차원 배열에서 해당 타일의 인덱스 계산
+			// 맵 인덱스 계산 및 범위 체크
 			int index = y * mapWidth + x;
-			if(index >= tiles.size()) continue;  // 타일 범위를 벗어나면 건너뜀
+			if(index >= tiles.size()) continue;
 
-			// 해당 타일의 타입 정보 가져오기
+			// 타일 정보 가져오기
 			int tileIndex = tiles[index].tilePos;
+			int frameX = tileIndex % SAMPLE_TILE_X;
+			int frameY = tileIndex / SAMPLE_TILE_X;
 
-			// 타일시트에서의 프레임 좌표 계산
-			int frameX = tileIndex % SAMPLE_TILE_X;  // 열(X) 계산
-			int frameY = tileIndex / SAMPLE_TILE_X;  // 행(Y) 계산
-
-			// 타일 이미지 렌더
-			sampleTileImage->FrameRender(
+			// RenderResized 함수 사용 
+			sampleTileImage->RenderResized(
 				hdc,
 				screenX,
 				screenY,
-				frameX,frameY,
-				false,
-				true
+				tileSize,  
+				tileSize,  
+				frameX * TILE_SIZE,
+				frameY * TILE_SIZE,
+				TILE_SIZE,
+				TILE_SIZE
 			);
 
-			// 현재 편집 중인 타일 표시 (마우스 위치에 있는 타일)
+			// 마우스 위치에 있는 타일 표시
 			if(mouseInMapArea)
 			{
-				bool isEdge = (x == 0 || x == mapWidth - 1 || y == 0 || y == mapHeight - 1);
-
-				if(isEdge)
+				POINT mapPos = ui->ScreenToMap(mousePos,mapArea,mapWidth,mapHeight,zoomLevel,viewportOffset);
+				if(mapPos.x == x && mapPos.y == y)
 				{
-					HPEN edgePen = CreatePen(PS_SOLID,2,RGB(255,0,0));  // 빨간색 테두리
-					HPEN oldPen = (HPEN)SelectObject(hdc,edgePen);
+					HPEN selectPen = CreatePen(PS_SOLID,2,RGB(255,0,0));
+					HPEN oldPen = (HPEN)SelectObject(hdc,selectPen);
 					SelectObject(hdc,GetStockObject(NULL_BRUSH));
 
-					RECT edgeRect = {
-						screenX - tileWidth / 2,
-						screenY - tileHeight / 2,
-						screenX + tileWidth / 2,
-						screenY + tileHeight / 2
-					};
-
-					Rectangle(hdc,edgeRect.left,edgeRect.top,edgeRect.right,edgeRect.bottom);
+					Rectangle(hdc,
+						screenX,
+						screenY,
+						screenX + tileSize,
+						screenY + tileSize);
 
 					SelectObject(hdc,oldPen);
-					DeleteObject(edgePen);
+					DeleteObject(selectPen);
 				}
 			}
 		}
@@ -80,37 +101,43 @@ void MapEditorRender::RenderSampleTiles(HDC hdc,RECT sampleArea,POINT selectedTi
 {
 	if(!sampleTileImage) return;
 
-	// 타일 크기 계산 수정
+	// 타일 크기 계산
 	int sampleTileWidth = (sampleArea.right - sampleArea.left) / SAMPLE_TILE_X;
 	int sampleTileHeight = (sampleArea.bottom - sampleArea.top) / SAMPLE_TILE_Y;
+
+	// 정사각형 타일 보장
+	int sampleTileSize = min(sampleTileWidth,sampleTileHeight);
+
+	// 중앙 정렬 오프셋
+	int offsetX = (sampleArea.right - sampleArea.left - (SAMPLE_TILE_X * sampleTileSize)) / 2;
+	int offsetY = (sampleArea.bottom - sampleArea.top - (SAMPLE_TILE_Y * sampleTileSize)) / 2;
 
 	// 타일 렌더링
 	for(int y = 0; y < SAMPLE_TILE_Y; y++)
 	{
-		int posY = sampleArea.top + y * sampleTileHeight;
 		for(int x = 0; x < SAMPLE_TILE_X; x++)
 		{
-			// 타일 중앙 좌표 계산
-			int posX = sampleArea.left + x * sampleTileWidth;
-
+			// 타일 중앙 좌표 계산 (오프셋 적용)
+			int posX = sampleArea.left + offsetX + x * sampleTileSize + sampleTileSize / 2;
+			int posY = sampleArea.top + offsetY + y * sampleTileSize + sampleTileSize / 2;
 
 			// 타일 렌더링
-			sampleTileImage->FrameRender(hdc,posX, posY, x, y, false,false);
+			sampleTileImage->FrameRender(hdc,posX,posY,x,y,false,true);
 
 			// 선택된 타일 강조 표시
 			if(x == selectedTile.x && y == selectedTile.y)
 			{
 				HPEN selectPen = CreatePen(PS_SOLID,3,RGB(255,0,0));
-				HBRUSH selectBrush = CreateSolidBrush(RGB(255,230,230)); 
+				HBRUSH selectBrush = CreateSolidBrush(RGB(255,230,230));
 
 				HPEN oldPen = (HPEN)SelectObject(hdc,selectPen);
 				HBRUSH oldBrush = (HBRUSH)SelectObject(hdc,selectBrush);
 
 				Rectangle(hdc,
-						 posX,
-						 posY,
-						 posX + sampleTileWidth,
-						 posY + sampleTileHeight);
+						 posX - sampleTileSize/2,
+						 posY - sampleTileSize/2,
+						 posX + sampleTileSize/2,
+						 posY + sampleTileSize/2);
 
 				SelectObject(hdc,oldPen);
 				SelectObject(hdc,oldBrush);
@@ -121,106 +148,128 @@ void MapEditorRender::RenderSampleTiles(HDC hdc,RECT sampleArea,POINT selectedTi
 	}
 }
 	
-void MapEditorRender::RenderSprites(HDC hdc,const vector<Sprite>& sprites,RECT mapArea)
+void MapEditorRender::RenderSprites(HDC hdc,const vector<Sprite>& sprites,RECT mapArea,
+								   float zoomLevel,FPOINT viewportOffset)
 {
-	int visibleWidth = VISIBLE_MAP_WIDTH;
-	int visibleHeight = VISIBLE_MAP_HEIGHT;
+	// 정사각형 타일 크기 계산
+	int mapAreaWidth = mapArea.right - mapArea.left;
+	int mapAreaHeight = mapArea.bottom - mapArea.top;
 
-	int tileWidth = (mapArea.right - mapArea.left) / visibleWidth;
-	int tileHeight = (mapArea.bottom - mapArea.top) / visibleHeight;
+	int maxTilesX = VISIBLE_MAP_WIDTH / zoomLevel;
+	int maxTilesY = VISIBLE_MAP_HEIGHT / zoomLevel;
+
+	int tileWidth = mapAreaWidth / maxTilesX;
+	int tileHeight = mapAreaHeight / maxTilesY;
+	int tileSize = min(tileWidth,tileHeight);
+
+	// 중앙 정렬 오프셋
+	int offsetX = (mapAreaWidth - (maxTilesX * tileSize)) / 2;
+	int offsetY = (mapAreaHeight - (maxTilesY * tileSize)) / 2;
 
 	for(const auto& sprite : sprites)
 	{
-		int tileX = static_cast<int>(sprite.pos.x - 0.5f);
-		int tileY = static_cast<int>(sprite.pos.y - 0.5f);
+		// 스프라이트 위치 (타일 좌표)
+		float spriteX = sprite.pos.x;
+		float spriteY = sprite.pos.y;
 
-		if(tileX >= 0 && tileX < visibleWidth && tileY >= 0 && tileY < visibleHeight)
+		// 뷰포트 상대적 위치 계산
+		float relX = spriteX - viewportOffset.x;
+		float relY = spriteY - viewportOffset.y;
+
+		// 화면에 보이는지 확인
+		if(relX >= -0.5f && relX < maxTilesX + 0.5f &&
+		   relY >= -0.5f && relY < maxTilesY + 0.5f)
 		{
-			int screenX = mapArea.left + tileX * tileWidth + (tileWidth / 4);
-			int screenY = mapArea.top + tileY * tileHeight + (tileHeight / 4);
+			// 스크린 좌표 계산 - 정확한 위치 반영
+			int screenX = mapArea.left + offsetX + static_cast<int>(relX * tileSize);
+			int screenY = mapArea.top + offsetY + static_cast<int>(relY * tileSize);
 
+			// 스프라이트 타입에 따라 색상 설정
 			COLORREF color = (sprite.type == SpriteType::KEY) ? RGB(0,0,255) :
 				(sprite.type == SpriteType::MONSTER) ? RGB(255,0,0) :
 				RGB(128,128,128);
 
+			// 스프라이트 렌더링 (원의 중심이 타일 중심에 오도록)
+			int spriteSize = static_cast<int>(tileSize * 0.6f);
 			HBRUSH spriteBrush = CreateSolidBrush(color);
 			HBRUSH oldBrush = (HBRUSH)SelectObject(hdc,spriteBrush);
 
 			Ellipse(hdc,
-				   screenX - (tileWidth / 3),
-				   screenY - (tileHeight / 3),
-				   screenX + (tileWidth / 3),
-				   screenY + (tileHeight / 3));
+				   screenX - spriteSize/2,
+				   screenY - spriteSize/2,
+				   screenX + spriteSize/2,
+				   screenY + spriteSize/2);
 
 			SelectObject(hdc,oldBrush);
 			DeleteObject(spriteBrush);
 		}
 	}
-
-	// 스프라이트 카운트 정보
-	int itemCount = 0,monsterCount = 0;
-	for(const auto& sprite : sprites)
-	{
-		if(sprite.type == SpriteType::KEY) itemCount++;
-		else if(sprite.type == SpriteType::MONSTER) monsterCount++;
-	}
-
-	TCHAR szCount[128];
-	wsprintf(szCount,TEXT("Items: %d, Monsters: %d"),itemCount,monsterCount);
-	TextOut(hdc,20, 0, szCount,lstrlen(szCount));
 }
 
-void MapEditorRender::RenderObstacles(HDC hdc,const vector<Obstacle>& obstacles,RECT mapArea)
+void MapEditorRender::RenderObstacles(HDC hdc,const vector<Obstacle>& obstacles,RECT mapArea,
+									 float zoomLevel,FPOINT viewportOffset)
 {
-	int visibleWidth = VISIBLE_MAP_WIDTH;
-	int visibleHeight = VISIBLE_MAP_HEIGHT;
+	// 타일 크기 계산 (정사각형 보장)
+	int mapAreaWidth = mapArea.right - mapArea.left;
+	int mapAreaHeight = mapArea.bottom - mapArea.top;
 
-	int tileWidth = (mapArea.right - mapArea.left) / visibleWidth;
-	int tileHeight = (mapArea.bottom - mapArea.top) / visibleHeight;
+	int maxTilesX = VISIBLE_MAP_WIDTH / zoomLevel;
+	int maxTilesY = VISIBLE_MAP_HEIGHT / zoomLevel;
+
+	int tileWidth = mapAreaWidth / maxTilesX;
+	int tileHeight = mapAreaHeight / maxTilesY;
+	int tileSize = min(tileWidth,tileHeight);
+
+	// 화면 중앙 정렬 오프셋
+	int offsetX = (mapAreaWidth - (maxTilesX * tileSize)) / 2;
+	int offsetY = (mapAreaHeight - (maxTilesY * tileSize)) / 2;
 
 	for(const auto& obstacle : obstacles)
 	{
 		int tileX = obstacle.pos.x;
 		int tileY = obstacle.pos.y;
 
-		if(tileX >= 0 && tileX < visibleWidth && tileY >= 0 && tileY < visibleHeight)
+		// 현재 보이는 영역 내에 있는지 확인
+		if(tileX >= viewportOffset.x && tileX < viewportOffset.x + maxTilesX &&
+		   tileY >= viewportOffset.y && tileY < viewportOffset.y + maxTilesY)
 		{
-			int screenX = mapArea.left + tileX * tileWidth;
-			int screenY = mapArea.top + tileY * tileHeight;
+			// 스크린 좌표 계산
+			int screenX = mapArea.left + offsetX + static_cast<int>((tileX - viewportOffset.x) * tileSize);
+			int screenY = mapArea.top + offsetY + static_cast<int>((tileY - viewportOffset.y) * tileSize);
 
-			COLORREF color = RGB(255,128,0);  // 주황색으로 장애물 표시
-
+			// 장애물 표시
+			COLORREF color = RGB(255,128,0);  // 주황색
 			HBRUSH obstacleBrush = CreateSolidBrush(color);
 			HPEN obstaclePen = CreatePen(PS_SOLID,2,RGB(200,0,0));
 
 			HBRUSH oldBrush = (HBRUSH)SelectObject(hdc,obstacleBrush);
 			HPEN oldPen = (HPEN)SelectObject(hdc,obstaclePen);
 
-			// 방향 표시
+			// 방향 표시 화살표 (크기는 타일 사이즈에 비례)
+			int arrowSize = tileSize / 3;
 			POINT arrowPoints[3];
-			int arrowSize = tileWidth / 3;
 
 			switch(obstacle.dir)
 			{
 			case Direction::NORTH:
-			arrowPoints[0] = {screenX,screenY - arrowSize};
-			arrowPoints[1] = {screenX - arrowSize/2,screenY + arrowSize/2};
-			arrowPoints[2] = {screenX + arrowSize/2,screenY + arrowSize/2};
+			arrowPoints[0] = {screenX + tileSize/2,screenY + tileSize/4};
+			arrowPoints[1] = {screenX + tileSize/4,screenY + tileSize*3/4};
+			arrowPoints[2] = {screenX + tileSize*3/4,screenY + tileSize*3/4};
 			break;
 			case Direction::SOUTH:
-			arrowPoints[0] = {screenX,screenY + arrowSize};
-			arrowPoints[1] = {screenX - arrowSize/2,screenY - arrowSize/2};
-			arrowPoints[2] = {screenX + arrowSize/2,screenY - arrowSize/2};
+			arrowPoints[0] = {screenX + tileSize/2,screenY + tileSize*3/4};
+			arrowPoints[1] = {screenX + tileSize/4,screenY + tileSize/4};
+			arrowPoints[2] = {screenX + tileSize*3/4,screenY + tileSize/4};
 			break;
 			case Direction::WEST:
-			arrowPoints[0] = {screenX - arrowSize,screenY};
-			arrowPoints[1] = {screenX + arrowSize/2,screenY - arrowSize/2};
-			arrowPoints[2] = {screenX + arrowSize/2,screenY + arrowSize/2};
+			arrowPoints[0] = {screenX + tileSize/4,screenY + tileSize/2};
+			arrowPoints[1] = {screenX + tileSize*3/4,screenY + tileSize/4};
+			arrowPoints[2] = {screenX + tileSize*3/4,screenY + tileSize*3/4};
 			break;
 			case Direction::EAST:
-			arrowPoints[0] = {screenX + arrowSize,screenY};
-			arrowPoints[1] = {screenX - arrowSize/2,screenY - arrowSize/2};
-			arrowPoints[2] = {screenX - arrowSize/2,screenY + arrowSize/2};
+			arrowPoints[0] = {screenX + tileSize*3/4,screenY + tileSize/2};
+			arrowPoints[1] = {screenX + tileSize/4,screenY + tileSize/4};
+			arrowPoints[2] = {screenX + tileSize/4,screenY + tileSize*3/4};
 			break;
 			}
 
@@ -235,49 +284,63 @@ void MapEditorRender::RenderObstacles(HDC hdc,const vector<Obstacle>& obstacles,
 }
 
 void MapEditorRender::RenderStartPosition(HDC hdc,FPOINT startPos,const vector<Room>& tiles,
-										   int mapWidth,RECT mapArea)
+										 int mapWidth,RECT mapArea,float zoomLevel,FPOINT viewportOffset)
 {
-	int visibleWidth = VISIBLE_MAP_WIDTH;
-	int visibleHeight = VISIBLE_MAP_HEIGHT;
+	// 타일 크기 계산 (정사각형 보장)
+	int mapAreaWidth = mapArea.right - mapArea.left;
+	int mapAreaHeight = mapArea.bottom - mapArea.top;
 
-	int tileWidth = (mapArea.right - mapArea.left) / visibleWidth;
-	int tileHeight = (mapArea.bottom - mapArea.top) / visibleHeight;
+	int maxTilesX = VISIBLE_MAP_WIDTH / zoomLevel;
+	int maxTilesY = VISIBLE_MAP_HEIGHT / zoomLevel;
+
+	int tileWidth = mapAreaWidth / maxTilesX;
+	int tileHeight = mapAreaHeight / maxTilesY;
+	int tileSize = min(tileWidth,tileHeight);
+
+	// 화면 중앙 정렬 오프셋
+	int offsetX = (mapAreaWidth - (maxTilesX * tileSize)) / 2;
+	int offsetY = (mapAreaHeight - (maxTilesY * tileSize)) / 2;
 
 	// 시작 위치 계산
 	int startX = static_cast<int>(startPos.x - 0.5f);
 	int startY = static_cast<int>(startPos.y - 0.5f);
 
-	if(startX >= 0 && startX < visibleWidth && startY >= 0 && startY < visibleHeight)
+	// 현재 보이는 영역 내에 있는지 확인
+	if(startX >= viewportOffset.x && startX < viewportOffset.x + maxTilesX &&
+	   startY >= viewportOffset.y && startY < viewportOffset.y + maxTilesY)
 	{
-		int screenX = mapArea.left + startX * tileWidth + (tileWidth / 2);
-		int screenY = mapArea.top + startY * tileHeight + (tileHeight / 2);
+		// 스크린 좌표 계산
+		int screenX = mapArea.left + offsetX + static_cast<int>((startX - viewportOffset.x) * tileSize);
+		int screenY = mapArea.top + offsetY + static_cast<int>((startY - viewportOffset.y) * tileSize);
 
-		HBRUSH greenBrush = CreateSolidBrush(RGB(0,255,0)); // 밝은 녹색
+		// 시작 위치 표시
+		HBRUSH greenBrush = CreateSolidBrush(RGB(0,255,0)); // 녹색
 		HPEN greenPen = CreatePen(PS_SOLID,3,RGB(0,160,0));
 
 		HBRUSH oldBrush = (HBRUSH)SelectObject(hdc,greenBrush);
 		HPEN oldPen = (HPEN)SelectObject(hdc,greenPen);
 
-		// 원 그리기
+		// 원 그리기 (크기는 타일 사이즈의 2/3)
+		int circleSize = tileSize * 2/3;
 		Ellipse(hdc,
-			   screenX - tileWidth/3,
-			   screenY - tileHeight/3,
-			   screenX + tileWidth/3,
-			   screenY + tileHeight/3);
+			   screenX + (tileSize - circleSize) / 2,
+			   screenY + (tileSize - circleSize) / 2,
+			   screenX + (tileSize + circleSize) / 2,
+			   screenY + (tileSize + circleSize) / 2);
 
 		// "S" 표시 추가
 		SetTextColor(hdc,RGB(0,0,0));
 		SetBkMode(hdc,TRANSPARENT);
-		HFONT font = CreateFont(tileHeight/3,0,0,0,FW_BOLD,FALSE,FALSE,FALSE,
+		HFONT font = CreateFont(tileSize/3,0,0,0,FW_BOLD,FALSE,FALSE,FALSE,
 							   DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
 							   DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Arial"));
 		HFONT oldFont = (HFONT)SelectObject(hdc,font);
 
 		RECT textRect = {
-			screenX - tileWidth/4,
-			screenY - tileHeight/4,
-			screenX + tileWidth/4,
-			screenY + tileHeight/4
+			screenX + tileSize/4,
+			screenY + tileSize/4,
+			screenX + tileSize*3/4,
+			screenY + tileSize*3/4
 		};
 		DrawText(hdc,TEXT("S"),-1,&textRect,DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
@@ -290,7 +353,7 @@ void MapEditorRender::RenderStartPosition(HDC hdc,FPOINT startPos,const vector<R
 	}
 }
 
-void MapEditorRender::RenderModeInfo(HDC hdc,EditorMode mode, RoomType selectedRoomType)
+void MapEditorRender::RenderModeInfo(HDC hdc,EditorMode mode, RoomType selectedRoomType,float zoomLevel)
 {
 	TCHAR szText[128];
 	LPCWSTR modeName = TEXT("Tile");
@@ -348,6 +411,11 @@ void MapEditorRender::RenderModeInfo(HDC hdc,EditorMode mode, RoomType selectedR
 	SetTextColor(hdc,roomTypeColor);
 	wsprintf(szText,TEXT("Tile Type: %s"),roomTypeName);
 	TextOut(hdc,20,50,szText,lstrlen(szText));
+
+	// 확대/축소 비율 표시 추가
+	TCHAR szZoom[32];
+	wsprintf(szZoom,TEXT("Zoom: %.0f%%"),zoomLevel * 100.0f);
+	TextOut(hdc,20,80,szZoom,lstrlen(szZoom));
 
 	SelectObject(hdc,oldFont);
 	DeleteObject(hFont);

@@ -112,6 +112,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_WIN32_WINNT=0x0602;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>SDL2/include;SDL2_mixer/include</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -157,8 +158,6 @@
     <ClCompile Include="MinimapUI.cpp" />
     <ClCompile Include="AMonster.cpp" />
     <ClCompile Include="MapEditor.cpp" />
-    <ClCompile Include="MapEditorRender.cpp" />
-    <ClCompile Include="MapEditorUI.cpp" />
     <ClCompile Include="ObstacleManager.cpp" />
     <ClCompile Include="PhoneUI.cpp" />
     <ClCompile Include="MonsterManager.cpp" />
@@ -197,11 +196,8 @@
     <ClInclude Include="MainGame.h" />
     <ClInclude Include="MainGameScene.h" />
     <ClInclude Include="MinimapUI.h" />
-    <ClInclude Include="Monster.h" />
     <ClInclude Include="AMonster.h" />
     <ClInclude Include="MapEditor.h" />
-    <ClInclude Include="MapEditorRender.h" />
-    <ClInclude Include="MapEditorUI.h" />
     <ClInclude Include="MonsterManager.h" />
     <ClInclude Include="ObstacleManager.h" />
     <ClInclude Include="PhoneUI.h" />
