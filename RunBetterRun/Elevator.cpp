@@ -22,7 +22,6 @@ BOOL Elevator::Action(void)
 			status = DoorStatus::Opening;
 			return TRUE;
 			case Elevator::DoorStatus::Open:
-			obstacle.block = TRUE;
 			status = DoorStatus::Closing;
 			return TRUE;
 			case Elevator::DoorStatus::Final:
@@ -51,7 +50,10 @@ void Elevator::Update(void)
 		if(obstacle.aniInfo.currentFrame.x > 0)
 			--obstacle.aniInfo.currentFrame.x;
 		else
+		{
 			status = DoorStatus::Close;
+			obstacle.block = TRUE;
+		}
 		break;
 		case Elevator::DoorStatus::Opening:
 		++obstacle.aniInfo.currentFrame.x;

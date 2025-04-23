@@ -4,8 +4,8 @@
 
 BOOL Phone::Action(void)
 {
-	// Pick Up a PhoneUI
-	return 0;
+	// Pick Up PhoneUI
+	return TRUE;
 }
 
 HRESULT Phone::Init(FPOINT pos)

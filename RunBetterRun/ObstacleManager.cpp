@@ -45,11 +45,21 @@ void ObstacleManager::Update(void)
 		obstacle->Update();
 	}
 
+	if(elevator)
+	{
+		elevator->Distance(player);
+		elevator->Update();
+		elevator->Action();
+		return;
+	}
+
 	for(auto& obstacle: obstacles)
 	{
 		if(obstacle->Action())
 			break;
 	}
+
+
 }
 
 void ObstacleManager::PutObstacle(AObstacle* obstacle)

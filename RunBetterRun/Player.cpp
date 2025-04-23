@@ -7,7 +7,7 @@
 
 HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 {
-    fov = 0.67f;
+    fov = 0.66f;
     targetFOV = fov;
 
 	FPOINT startPos = DataManager::GetInstance()->GetStartPosition();
