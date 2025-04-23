@@ -175,7 +175,7 @@ void MapManager::SetTile(int x,int y,RoomType tileType,int index)
 
 HRESULT MapManager::InitializeTexture()
 {
-	mapData.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/tiles.bmp"));
+	mapData.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/tiles32x32.bmp"));
 	if(!mapData.texture)
 		return E_FAIL;
 	mapData.textureTileSize = 128;

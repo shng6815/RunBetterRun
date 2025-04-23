@@ -1136,7 +1136,7 @@ void MapEditor::SaveMap(const wchar_t* filePath)
 	// 데이터 매니저에 맵 데이터 전달
 	DataManager::GetInstance()->ClearAllData();
 	DataManager::GetInstance()->SetMapData(tiles,mapWidth,mapHeight);
-	DataManager::GetInstance()->SetTextureInfo(L"Image/tiles32x32.bmp",128,SAMPLE_TILE_X,SAMPLE_TILE_Y);
+	DataManager::GetInstance()->SetTextureInfo(L"Image/tiles.bmp",128,SAMPLE_TILE_X,SAMPLE_TILE_Y);
 	DataManager::GetInstance()->SetStartPosition(startPosition);
 
 	// 아이템, 몬스터, 장애물 데이터 추가
