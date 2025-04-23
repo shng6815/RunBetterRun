@@ -143,7 +143,7 @@ void MinimapUI::DrawMiniMapToDC(HDC hdc,int drawSize)
 	const int radiusX = static_cast<int>(ceilf(tilesVisibleX * 0.75f));
 	const int radiusY = static_cast<int>(ceilf(tilesVisibleY * 0.75f));
 
-	HBRUSH floorBrush = CreateSolidBrush(RGB(100,100,100)); // 더 밝은 색상
+	HBRUSH floorBrush = CreateSolidBrush(RGB(30,30,30)); // 더 밝은 색상
 	HPEN oldPen = (HPEN)SelectObject(hdc,GetStockObject(NULL_PEN));
 	SelectObject(hdc,floorBrush);
 
@@ -186,6 +186,7 @@ void MinimapUI::DrawMiniMapToDC(HDC hdc,int drawSize)
 
 	for(const auto& item : ItemManager::GetInstance()->GetItems())
 	{
+		
 		Key* key = dynamic_cast<Key*>(item);
 		if(key)
 		{
