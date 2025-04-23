@@ -22,7 +22,7 @@ HRESULT MainGame::Init()
 	ImageManager::GetInstance()->Init();
 	KeyManager::GetInstance()->Init();
 	SceneManager::GetInstance()->Init();
-	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
+	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
 
 	SoundManager::GetInstance()->Init();
 
@@ -83,7 +83,6 @@ void MainGame::Release()
 	KeyManager::GetInstance()->Release();
 	VideoManager::Release();
 	ImageManager::GetInstance()->Release();
-	MapManager::GetInstance()->Release();
 	SoundManager::GetInstance()->Release();
 }
 
@@ -101,10 +100,7 @@ void MainGame::Render()
 	SceneManager::GetInstance()->Render(hBackBufferDC);
 
 	TimerManager::GetInstance()->Render(hBackBufferDC);
-	/*wsprintf(szText, TEXT("Mouse X : %d, Y : %d"), g_ptMouse.x, g_ptMouse.y);
-	TextOut(hBackBufferDC, 20, 60, szText, wcslen(szText));*/
 
-	// 백버퍼에 있는 내용을 메인 hdc에 복사
 	backBuffer->Render(hdc);
 }
 
@@ -124,6 +120,22 @@ LRESULT MainGame::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lPara
 		g_ptMouse.x = LOWORD(lParam);
 		g_ptMouse.y = HIWORD(lParam);
 		break;
+	case WM_MOUSEWHEEL:
+	{
+		int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+		bool isCtrlPressed = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
+
+		MapEditor* mapEditor = dynamic_cast<MapEditor*>(SceneManager::GetInstance()->currentScene);
+		if(mapEditor)
+		{
+			if(isCtrlPressed)
+			{
+				mapEditor->Zoom(delta > 0 ? 0.1f : -0.1f);
+				return 0;
+			}
+		}
+	}
+	break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;

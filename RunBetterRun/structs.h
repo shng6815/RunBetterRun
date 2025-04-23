@@ -17,6 +17,10 @@ enum class UIType: BYTE
 	NONE, PLAYING, GAMEOVER, PAUSE, TITLE
 };
 
+enum class EditMode
+{
+	TILE,START,OBSTACLE,MONSTER,ITEM
+};
 typedef struct tagTexture
 {
 	vector<COLORREF>	bmp;
