@@ -5,7 +5,6 @@
 #include "SpriteManager.h"
 #include "ItemManager.h"
 #include "UIManager.h"
-#include "PhoneUI.h"
 #include "Key.h"
 #include "Tentacle.h"
 #include "ObstacleManager.h"
@@ -57,9 +56,6 @@ HRESULT MainGameScene::Init()
 
 	UIManager::GetInstance()->Init();
 	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
-	PhoneUI* uiUnit = new PhoneUI();
-	uiUnit->Init(UIType::PLAYING, FPOINT{ 100, WINSIZE_Y - 500 }, FPOINT{ 300, 400 }, 0);
-	UIManager::GetInstance()->AddUIUnit("PhoneUI", uiUnit);
 
 	status = SceneStatus::IN_GAME;
 	while(ShowCursor(FALSE) >= 0);
