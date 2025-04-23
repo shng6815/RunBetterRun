@@ -1,5 +1,6 @@
 #include "OpeningScene.h"
 #include "VideoManager.h"
+#include "KeyManager.h"
 
 HRESULT OpeningScene::Init()
 {
@@ -18,6 +19,11 @@ void OpeningScene::Release()
 
 void OpeningScene::Update()
 {
+	if(KeyManager::GetInstance()->IsOnceKeyDown(VK_LBUTTON))
+	{
+		VideoManager::GetInstance()->CloseVideoWindow();
+		SceneManager::GetInstance()->ChangeScene("MainGameScene","LoadingScene");
+	}
 }
 
 void OpeningScene::Render(HDC hdc)
@@ -25,7 +31,7 @@ void OpeningScene::Render(HDC hdc)
 	VideoManager::GetInstance()->Update();
 
 	// 비디오 종료 확인
-	if(VideoManager::IsFinished()) {
+	if(VideoManager::GetInstance()->IsFinished()) {
 		SceneManager::GetInstance()->ChangeScene("MainGameScene","LoadingScene");
 	}
 }
