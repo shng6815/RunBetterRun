@@ -57,8 +57,8 @@ void Tentacle::Catch(void)
 	}
 
 	else {
-		//SceneManager::GetInstance()->ChangeScene("JumpscareScene");
-		SceneManager::GetInstance()->ChangeScene("DeadScene");
+		SceneManager::GetInstance()->ChangeScene("JumpscareScene");
+		//SceneManager::GetInstance()->ChangeScene("DeadScene");
 	}
 
 }
