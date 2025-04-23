@@ -23,6 +23,7 @@ private:
 	RoomType selectedTileType;
 	Direction selectedObstacleDir;
 	POINT selectedTile;
+	POINT selectedSprite;
 
 	// 맵 데이터
 	vector<Room> tiles;
@@ -34,7 +35,9 @@ private:
 	// UI 요소
 	RECT mapArea;
 	RECT sampleArea;
+	RECT sampleSpriteArea;
 	Image* sampleTileImage;
+	Image* sampleSpriteImage;
 
 	// 확대/축소 및 스크롤
 	float zoomLevel;
@@ -46,8 +49,11 @@ private:
 	POINT mousePos;
 	bool mouseInMapArea;
 	bool mouseInSampleArea;
+	bool mouseInSpriteArea;
+	bool isSpriteSelected;
+	bool useCenter;
 
-	// 편집 함수
+	// 편집 
 	void HandleInput();
 	void PlaceTile(int x,int y);
 	void PlaceStart(int x,int y);
@@ -59,15 +65,16 @@ private:
 	// 좌표 변환
 	POINT ScreenToTile(POINT screenPos);
 	POINT TileToScreen(POINT tilePos);
-
+	FPOINT CalculateSpritePosition(int x,int y);
 	// 파일 처리
 	void SaveMap(const wchar_t* filePath);
 	void LoadMap(const wchar_t* filePath);
 	void ClearMap();
 
-	// 렌더링 헬퍼
+	// 렌더
 	void RenderMapTiles(HDC hdc);
 	void RenderSampleTiles(HDC hdc);
+	void RenderSampleSprites(HDC hdc);
 	void RenderSprites(HDC hdc);
 	void RenderObstacles(HDC hdc);
 	void RenderUI(HDC hdc);

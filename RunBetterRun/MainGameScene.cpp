@@ -143,7 +143,7 @@ void MainGameScene::Update()
 
 		break;
 	case MainGameScene::SceneStatus::QUIT:
-		break;
+	break;
 	default:
 		break;
 	}

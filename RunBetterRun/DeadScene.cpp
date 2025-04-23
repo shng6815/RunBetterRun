@@ -77,6 +77,7 @@ void DeadScene::Update()
 
 			Player::GetInstance()->InitPlayerLife();
 			SceneManager::GetInstance()->ChangeScene("GameStartScene", "LoadingScene");
+			while(ShowCursor(TRUE) < 0);
 		}
 	}
 }

@@ -18,7 +18,12 @@ MapEditor::MapEditor():
 	isDragging(false),
 	mouseInMapArea(false),
 	mouseInSampleArea(false),
-	sampleTileImage(nullptr)
+	mouseInSpriteArea(false),
+	sampleTileImage(nullptr),
+	sampleSpriteImage(nullptr),
+	isSpriteSelected(false),
+	selectedSprite({0,0}),
+	useCenter(false)
 {}
 
 MapEditor::~MapEditor()
@@ -37,7 +42,7 @@ HRESULT MapEditor::Init()
 
 			if(x == 0 || y == 0 || x == mapWidth - 1 || y == mapHeight - 1) {
 				tiles[index].roomType = RoomType::WALL;
-				tiles[index].tilePos = 4; 
+				tiles[index].tilePos = 4;
 			} else {
 				tiles[index].roomType = RoomType::FLOOR;
 				tiles[index].tilePos = 10;
@@ -59,9 +64,20 @@ HRESULT MapEditor::Init()
 		SAMPLE_TILE_X,SAMPLE_TILE_Y,
 		true,RGB(255,0,255));
 
-	if(!sampleTileImage) {
+	sampleSpriteImage = ImageManager::GetInstance()->AddImage(
+						"EditorSpriteSheet",L"Image/horrorMapTiles2.bmp",
+						11 * TILE_SIZE,11 * TILE_SIZE,11,11,true,RGB(255,0,255)
+	);
+
+	if(!sampleTileImage || !sampleSpriteImage)
+	{
 		return E_FAIL;
 	}
+
+	// 초기 선택값 설정
+	selectedSprite = {0,0};
+	isSpriteSelected = false;
+	mouseInSpriteArea = false;
 
 	// 정보창
 	int infoHeight = 80;
@@ -71,18 +87,24 @@ HRESULT MapEditor::Init()
 	// 샘플 타일 영역 
 	sampleArea = {
 		TILEMAPTOOL_X - rightPanelWidth - uiPadding,
-		infoHeight + uiPadding * 2, 
+		infoHeight + uiPadding * 2,
 		TILEMAPTOOL_X - rightPanelWidth - uiPadding + SAMPLE_TILE_X * TILE_SIZE,
 		infoHeight + uiPadding * 2 + SAMPLE_TILE_Y * TILE_SIZE
 	};
 
+	sampleSpriteArea =  {
+		TILEMAPTOOL_X - rightPanelWidth - uiPadding,
+		infoHeight + uiPadding * 10,
+		TILEMAPTOOL_X - rightPanelWidth - uiPadding + SAMPLE_TILE_X * TILE_SIZE,
+		infoHeight + uiPadding * 10 + SAMPLE_TILE_Y * TILE_SIZE
+	};
 	// 맵 편집 영역 
 	int mapAreaWidth = sampleArea.left - (uiPadding * 2);
 	int mapAreaHeight = TILEMAPTOOL_Y - (infoHeight + uiPadding * 4);
 
 	mapArea = {
 		uiPadding,
-		infoHeight + uiPadding, 
+		infoHeight + uiPadding,
 		uiPadding + mapAreaWidth,
 		infoHeight + uiPadding + mapAreaHeight
 	};
@@ -111,6 +133,7 @@ void MapEditor::Update()
 	// 마우스 위치 확인
 	mouseInMapArea = PtInRect(&mapArea,mousePos);
 	mouseInSampleArea = PtInRect(&sampleArea,mousePos);
+	mouseInSpriteArea = PtInRect(&sampleSpriteArea,mousePos);
 
 	if(KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE))
 	{
@@ -145,108 +168,108 @@ void MapEditor::Render(HDC hdc)
 
 	// 샘플 타일 렌더링
 	RenderSampleTiles(hdc);
-
+	RenderSampleSprites(hdc);
 	// UI 정보 렌더링
 	RenderUI(hdc);
 }
 
 void MapEditor::RenderMapTiles(HDC hdc)
 {
-    if (!sampleTileImage) return;
-    
-    // 타일 크기 계산 (확대/축소 적용)
-    int tileWidth = (mapArea.right - mapArea.left) / (mapWidth / zoomLevel);
-    int tileHeight = (mapArea.bottom - mapArea.top) / (mapHeight / zoomLevel);
-    int tileSize = min(tileWidth, tileHeight);
-    
-    // 화면에 표시될 타일 범위
-    int startX = (int)viewportOffset.x;
-    int startY = (int)viewportOffset.y;
-    int endX = min(mapWidth, (int)(viewportOffset.x + mapWidth / zoomLevel) + 1);
-    int endY = min(mapHeight, (int)(viewportOffset.y + mapHeight / zoomLevel) + 1);
-    
-    // 타일 렌더링
-    for (int y = startY; y < endY; y++) {
-        for (int x = startX; x < endX; x++) {
-            // 스크린 좌표 계산
-            POINT screenPos = TileToScreen({x, y});
-            
-            // 타일 정보 가져오기
-            int index = y * mapWidth + x;
-            if (index >= tiles.size()) continue;
-            
-            int tilePos = tiles[index].tilePos;
-            int frameX = tilePos % SAMPLE_TILE_X;
-            int frameY = tilePos / SAMPLE_TILE_X;
-            
-            // 타일 렌더링
-            sampleTileImage->FrameRender(
-                hdc,
-                screenPos.x + tileSize / 2,
-                screenPos.y + tileSize / 2,
-                frameX, frameY,
-                false, true
-            );
-            
-            // 시작 위치 표시
-            if (tiles[index].roomType == RoomType::START) {
-                HBRUSH startBrush = CreateSolidBrush(RGB(0, 200, 0));
-                HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, startBrush);
-                Ellipse(
-                    hdc,
-                    screenPos.x + tileSize / 4,
-                    screenPos.y + tileSize / 4,
-                    screenPos.x + 3 * tileSize / 4,
-                    screenPos.y + 3 * tileSize / 4
-                );
-                SelectObject(hdc, oldBrush);
-                DeleteObject(startBrush);
-            }
-            
-            // 마우스 위치의 타일 표시 - 현재 모드에 맞는 색상 사용
-            if (mouseInMapArea) {
-                POINT tilePos = ScreenToTile(mousePos);
-                if (tilePos.x == x && tilePos.y == y) {
-                    // 모드별 색상 설정
-                    COLORREF highlightColor;
-                    switch (currentMode) {
-                    case EditMode::TILE:
-                        highlightColor = RGB(255, 255, 0); // 노란색
-                        break;
-                    case EditMode::START:
-                        highlightColor = RGB(0, 255, 0);   // 녹색
-                        break;
-                    case EditMode::OBSTACLE:
-                        highlightColor = RGB(255, 128, 0); // 주황색
-                        break;
-                    case EditMode::MONSTER:
-                        highlightColor = RGB(255, 0, 0);   // 빨간색
-                        break;
-                    case EditMode::ITEM:
-                        highlightColor = RGB(0, 0, 255);   // 파란색
-                        break;
-                    default:
-                        highlightColor = RGB(255, 0, 0);   // 기본값
-                    }
-                    
-                    HPEN highlightPen = CreatePen(PS_SOLID, 2, highlightColor);
-                    HPEN oldPen = (HPEN)SelectObject(hdc, highlightPen);
-                    SelectObject(hdc, GetStockObject(NULL_BRUSH));
-                    
-                    Rectangle(
-                        hdc,
-                        screenPos.x,
-                        screenPos.y,
-                        screenPos.x + tileSize,
-                        screenPos.y + tileSize
-                    );
-                    
-                    SelectObject(hdc, oldPen);
-                    DeleteObject(highlightPen);
-                }
-            }
-        }
-    }
+	if(!sampleTileImage) return;
+
+	// 타일 크기 계산 (확대/축소 적용)
+	int tileWidth = (mapArea.right - mapArea.left) / (mapWidth / zoomLevel);
+	int tileHeight = (mapArea.bottom - mapArea.top) / (mapHeight / zoomLevel);
+	int tileSize = min(tileWidth,tileHeight);
+
+	// 화면에 표시될 타일 범위
+	int startX = (int)viewportOffset.x;
+	int startY = (int)viewportOffset.y;
+	int endX = min(mapWidth,(int)(viewportOffset.x + mapWidth / zoomLevel) + 1);
+	int endY = min(mapHeight,(int)(viewportOffset.y + mapHeight / zoomLevel) + 1);
+
+	// 타일 렌더링
+	for(int y = startY; y < endY; y++) {
+		for(int x = startX; x < endX; x++) {
+			// 스크린 좌표 계산
+			POINT screenPos = TileToScreen({x,y});
+
+			// 타일 정보 가져오기
+			int index = y * mapWidth + x;
+			if(index >= tiles.size()) continue;
+
+			int tilePos = tiles[index].tilePos;
+			int frameX = tilePos % SAMPLE_TILE_X;
+			int frameY = tilePos / SAMPLE_TILE_X;
+
+			// 타일 렌더링
+			sampleTileImage->FrameRender(
+				hdc,
+				screenPos.x + tileSize / 2,
+				screenPos.y + tileSize / 2,
+				frameX,frameY,
+				false,true
+			);
+
+			// 시작 위치 표시
+			if(tiles[index].roomType == RoomType::START) {
+				HBRUSH startBrush = CreateSolidBrush(RGB(0,200,0));
+				HBRUSH oldBrush = (HBRUSH)SelectObject(hdc,startBrush);
+				Ellipse(
+					hdc,
+					screenPos.x + tileSize / 4,
+					screenPos.y + tileSize / 4,
+					screenPos.x + 3 * tileSize / 4,
+					screenPos.y + 3 * tileSize / 4
+				);
+				SelectObject(hdc,oldBrush);
+				DeleteObject(startBrush);
+			}
+
+			// 마우스 위치의 타일 표시 - 현재 모드에 맞는 색상 사용
+			if(mouseInMapArea) {
+				POINT tilePos = ScreenToTile(mousePos);
+				if(tilePos.x == x && tilePos.y == y) {
+					// 모드별 색상 설정
+					COLORREF highlightColor;
+					switch(currentMode) {
+					case EditMode::TILE:
+					highlightColor = RGB(255,255,0); // 노란색
+					break;
+					case EditMode::START:
+					highlightColor = RGB(0,255,0);   // 녹색
+					break;
+					case EditMode::OBSTACLE:
+					highlightColor = RGB(255,128,0); // 주황색
+					break;
+					case EditMode::MONSTER:
+					highlightColor = RGB(255,0,0);   // 빨간색
+					break;
+					case EditMode::ITEM:
+					highlightColor = RGB(0,0,255);   // 파란색
+					break;
+					default:
+					highlightColor = RGB(255,0,0);   // 기본값
+					}
+
+					HPEN highlightPen = CreatePen(PS_SOLID,2,highlightColor);
+					HPEN oldPen = (HPEN)SelectObject(hdc,highlightPen);
+					SelectObject(hdc,GetStockObject(NULL_BRUSH));
+
+					Rectangle(
+						hdc,
+						screenPos.x,
+						screenPos.y,
+						screenPos.x + tileSize,
+						screenPos.y + tileSize
+					);
+
+					SelectObject(hdc,oldPen);
+					DeleteObject(highlightPen);
+				}
+			}
+		}
+	}
 }
 
 void MapEditor::RenderSampleTiles(HDC hdc)
@@ -310,6 +333,97 @@ void MapEditor::RenderSampleTiles(HDC hdc)
 	DeleteObject(sampleBgBrush);
 }
 
+void MapEditor::RenderSampleSprites(HDC hdc)
+{
+	if(!sampleTileImage) return;
+
+	// 샘플 영역 배경 및 테두리
+	HBRUSH sampleBgBrush = CreateSolidBrush(RGB(240,240,240));
+	HBRUSH oldBrush = (HBRUSH)SelectObject(hdc,sampleBgBrush);
+	HPEN samplePen = CreatePen(PS_SOLID,2,RGB(150,50,50));
+	HPEN oldPen = (HPEN)SelectObject(hdc,samplePen);
+
+	// 샘플 영역 배경
+	Rectangle(hdc,sampleSpriteArea.left-5,sampleSpriteArea.top-25,sampleSpriteArea.right+5,sampleSpriteArea.bottom+100);
+
+	// 샘플 영역 제목
+	SetBkMode(hdc,TRANSPARENT);
+	SetTextColor(hdc,RGB(0,0,0));
+	HFONT titleFont = CreateFont(18,0,0,0,FW_BOLD,FALSE,FALSE,FALSE,
+							   DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
+							   DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Arial"));
+	HFONT oldFont = (HFONT)SelectObject(hdc,titleFont);
+
+	TextOut(hdc,sampleSpriteArea.left,sampleSpriteArea.top-20,L"Sample Sprites",14);
+
+	SelectObject(hdc,oldFont);
+	DeleteObject(titleFont);
+
+	// 스프라이트 타입 레이블 그리기
+	HFONT labelFont = CreateFont(14,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,
+							  DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
+							  DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Arial"));
+	oldFont = (HFONT)SelectObject(hdc,labelFont);
+
+	// 스프라이트 타입 텍스트 배열
+	const LPCWSTR spriteLabels[] = {L"Item",L"Monster",L"Obstacle",L"Elevator"};
+
+	// 스프라이트 타일시트 행 수 (현재는 1행으로 가정)
+	const int spriteRows = 1;
+	const int spriteCols = 4; // 가로 타일 수
+
+	// 스프라이트 크기 계산
+	int spriteWidth = sampleSpriteImage->GetFrameWidth();
+	int spriteHeight = sampleSpriteImage->GetFrameHeight();
+
+	// 각 스프라이트 그리기
+	for(int y = 0; y < spriteRows; y++) {
+		for(int x = 0; x < spriteCols; x++) {
+			// 스프라이트 위치 계산
+			int posX = sampleSpriteArea.left + x * (spriteWidth + 20) + spriteWidth/2;
+			int posY = sampleSpriteArea.top + y * (spriteHeight + 40) + spriteHeight/2;
+
+			// 스프라이트 그리기
+			sampleSpriteImage->FrameRender(
+				hdc,
+				posX,
+				posY,
+				x,y,
+				false,true
+			);
+
+			// 레이블 그리기
+			SetTextColor(hdc,RGB(0,0,0));
+			TextOut(hdc,
+				  posX - spriteWidth/2,
+				  posY + spriteHeight/2 + 5,
+				  spriteLabels[x],
+				  wcslen(spriteLabels[x]));
+
+			// 선택된 스프라이트 표시 (스프라이트가 선택되었고 현재 스프라이트가 선택된 것일 경우)
+			if(isSpriteSelected && x == selectedSprite.x && y == selectedSprite.y) {
+				HPEN selectionPen = CreatePen(PS_SOLID,3,RGB(255,50,50));
+				HPEN oldSelPen = (HPEN)SelectObject(hdc,selectionPen);
+				SelectObject(hdc,GetStockObject(NULL_BRUSH));
+
+				Rectangle(hdc,
+						posX - spriteWidth/2 - 2,
+						posY - spriteHeight/2 - 2,
+						posX + spriteWidth/2 + 2,
+						posY + spriteHeight/2 + 2);
+
+				SelectObject(hdc,oldSelPen);
+				DeleteObject(selectionPen);
+			}
+		}
+	}
+
+	SelectObject(hdc,oldPen);
+	DeleteObject(samplePen);
+	SelectObject(hdc,oldBrush);
+	DeleteObject(sampleBgBrush);
+}
+
 void MapEditor::RenderSprites(HDC hdc)
 {
 	// 타일 크기 계산 (확대/축소 적용)
@@ -334,13 +448,11 @@ void MapEditor::RenderSprites(HDC hdc)
 		// 스프라이트 종류에 따라 다른 색상 + 현재 모드와 일치하면 더 밝게
 		COLORREF color;
 		if(sprite.type == SpriteType::KEY) {
-			// 아이템
 			color = (currentMode == EditMode::ITEM) ?
-				RGB(100,100,255) : RGB(0,0,200);  // 파란색, 활성화시 더 밝게
+				RGB(100,100,255) : RGB(0,0,200);
 		} else {
-			// 몬스터
 			color = (currentMode == EditMode::MONSTER) ?
-				RGB(255,100,100) : RGB(200,0,0);  // 빨간색, 활성화시 더 밝게
+				RGB(255,100,100) : RGB(200,0,0);
 		}
 
 		// 스프라이트 렌더링 (크기는 타일의 1/4)
@@ -464,7 +576,7 @@ void MapEditor::RenderUI(HDC hdc)
 	break;
 	}
 
-	
+
 	SetTextColor(hdc,modeColor);
 	TextOut(hdc,20,15,modeText,wcslen(modeText));
 
@@ -476,27 +588,46 @@ void MapEditor::RenderUI(HDC hdc)
 
 	SetTextColor(hdc,RGB(255,255,255));
 	TCHAR tileTypeText[50];
-	switch(selectedTileType) {
-	case RoomType::FLOOR: wcscpy_s(tileTypeText,L"TILE TYPE: FLOOR"); break;
-	case RoomType::WALL: wcscpy_s(tileTypeText,L"TILE TYPE: WALL"); break;
-	default: wcscpy_s(tileTypeText,L"TILE TYPE: OTHER"); break;
+
+	switch(selectedTileType)
+	{
+	case RoomType::FLOOR:
+	wcscpy_s(tileTypeText,L"TILE TYPE: FLOOR");
+	break;
+	case RoomType::WALL:
+	wcscpy_s(tileTypeText,L"TILE TYPE: WALL");
+	break;
+	default:
+	wcscpy_s(tileTypeText,L"TILE TYPE: OTHER");
+	break;
 	}
 	TextOut(hdc,200,15,tileTypeText,wcslen(tileTypeText));
 
-	if(currentMode == EditMode::OBSTACLE) {
+	if(currentMode == EditMode::OBSTACLE)
+	{
 		TCHAR dirText[50];
-		switch(selectedObstacleDir) {
-		case Direction::NORTH: wcscpy_s(dirText,L"DIRECTION: NORTH"); break;
-		case Direction::SOUTH: wcscpy_s(dirText,L"DIRECTION: SOUTH"); break;
-		case Direction::EAST: wcscpy_s(dirText,L"DIRECTION: EAST"); break;
-		case Direction::WEST: wcscpy_s(dirText,L"DIRECTION: WEST"); break;
+		switch(selectedObstacleDir)
+		{
+		case Direction::NORTH:
+		wcscpy_s(dirText,L"DIRECTION: NORTH");
+		break;
+		case Direction::SOUTH:
+		wcscpy_s(dirText,L"DIRECTION: SOUTH");
+		break;
+		case Direction::EAST:
+		wcscpy_s(dirText,L"DIRECTION: EAST");
+		break;
+		case Direction::WEST:
+		wcscpy_s(dirText,L"DIRECTION: WEST");
+		break;
 		}
 		TextOut(hdc,400,15,dirText,wcslen(dirText));
 	}
 
 	// 현재 좌표
 	TCHAR posText[50];
-	if(mouseInMapArea) {
+	if(mouseInMapArea)
+	{
 		POINT tilePos = ScreenToTile(mousePos);
 		swprintf_s(posText,L"X: %d, Y: %d",tilePos.x,tilePos.y);
 		TextOut(hdc,600,15,posText,wcslen(posText));
@@ -533,6 +664,16 @@ void MapEditor::HandleInput()
 	else if(km->IsOnceKeyDown('L')) LoadMap(L"Map/EditorMap.dat");
 	else if(km->IsOnceKeyDown('C')) ClearMap();
 
+	if(km->IsOnceKeyDown('I'))
+	{
+		useCenter= !useCenter; // 토글
+
+		TCHAR message[100];
+		swprintf_s(message,L"Use Center: %s",
+				   useCenter ? L"Place At Center" : L"place");
+		MessageBox(g_hWnd,message,L"Mode: Center",MB_OK);
+	}
+
 	// 확대/축소
 	if(km->IsOnceKeyDown(VK_OEM_PLUS)) Zoom(0.1f);
 	else if(km->IsOnceKeyDown(VK_OEM_MINUS)) Zoom(-0.1f);
@@ -546,17 +687,66 @@ void MapEditor::HandleInput()
 	}
 
 	// 타일/오브젝트 배치 및 삭제
-	if(mouseInSampleArea && km->IsOnceKeyDown(VK_LBUTTON)) {
+	if(mouseInSampleArea && km->IsOnceKeyDown(VK_LBUTTON))
+	{
 		// 샘플 타일 선택
 		int relX = mousePos.x - sampleArea.left;
 		int relY = mousePos.y - sampleArea.top;
 
 		// 샘플 타일 범위 체크
-		if(relX >= 0 && relY >= 0) {
+		if(relX >= 0 && relY >= 0)
+		{
 			selectedTile.x = min(relX / TILE_SIZE,SAMPLE_TILE_X - 1);
 			selectedTile.y = min(relY / TILE_SIZE,SAMPLE_TILE_Y - 1);
+			isSpriteSelected = false;
 		}
-	} else if(mouseInMapArea) {
+	} else if(mouseInSpriteArea && km->IsOnceKeyDown(VK_LBUTTON)) {
+		// 스프라이트 선택 처리
+		int spriteWidth = sampleSpriteImage->GetFrameWidth();
+		int spriteHeight = sampleSpriteImage->GetFrameHeight();
+
+		// 클릭한 위치가 스프라이트 영역인지 확인
+		int spriteIndex = -1;
+
+		// 4개의 스프라이트가 있다고 가정 (아이템, 몬스터, 장애물, 엘레베이터)
+		for(int i = 0; i < 4; i++) {
+			int centerX = sampleSpriteArea.left + i * (spriteWidth + 20) + spriteWidth/2;
+			int centerY = sampleSpriteArea.top + spriteHeight/2;
+
+			RECT spriteRect = {
+				centerX - spriteWidth/2,
+				centerY - spriteHeight/2,
+				centerX + spriteWidth/2,
+				centerY + spriteHeight/2
+			};
+
+			if(PtInRect(&spriteRect,mousePos)) {
+				spriteIndex = i;
+				break;
+			}
+		}
+
+		if(spriteIndex >= 0) {
+			selectedSprite.x = spriteIndex;
+			selectedSprite.y = 0; // 현재는 1행만 있음
+			isSpriteSelected = true;
+
+			// 선택한 스프라이트 타입에 맞게 편집 모드 변경
+			switch(spriteIndex) {
+			case 0: // 아이템
+			ChangeEditMode(EditMode::ITEM);
+			break;
+			case 1: // 몬스터
+			ChangeEditMode(EditMode::MONSTER);
+			break;
+			case 2: // 장애물
+			case 3: // 엘레베이터
+			ChangeEditMode(EditMode::OBSTACLE);
+			break;
+			}
+		}
+	} else if(mouseInMapArea)
+	{
 		// 맵 편집
 		POINT tilePos = ScreenToTile(mousePos);
 
@@ -664,7 +854,7 @@ void MapEditor::PlaceObstacle(int x,int y)
 
 	for(size_t i = 0; i < editorObstacles.size(); i++) {
 		if(editorObstacles[i].pos.x == x && editorObstacles[i].pos.y == y) {
-			return; 
+			return;
 		}
 	}
 
@@ -685,44 +875,25 @@ void MapEditor::PlaceMonster(int x,int y)
 	// 맵 범위 검사
 	if(x < 0 || x >= mapWidth || y < 0 || y >= mapHeight)
 		return;
-
-	// 마우스의 정확한 위치를 사용하여 타일 내에서의 상대적 위치 계산
-	POINT tileScreenPos = TileToScreen({x,y});
-	if(tileScreenPos.x < 0 || tileScreenPos.y < 0) return; // 예외 처리
-
-	int tileWidth = (mapArea.right - mapArea.left) / (mapWidth / zoomLevel);
-	int tileHeight = (mapArea.bottom - mapArea.top) / (mapHeight / zoomLevel);
-	int tileSize = min(tileWidth,tileHeight);
-
-	// 타일 내에서의 상대 위치 (0.0 ~ 1.0)
-	float relativeX = (mousePos.x - tileScreenPos.x) / (float)tileSize;
-	float relativeY = (mousePos.y - tileScreenPos.y) / (float)tileSize;
-
-	// 범위 제한 (0.0 ~ 1.0)
-	relativeX = max(0.0f,min(1.0f,relativeX));
-	relativeY = max(0.0f,min(1.0f,relativeY));
-
-	// 스프라이트의 최종 위치 계산 (타일 좌표 + 타일 내 상대 위치)
-	FPOINT spritePos = {
-		x + relativeX,
-		y + relativeY
-	};
-
-	// 근처에 다른 스프라이트가 있는지 확인 (일정 거리 내에 있으면 배치 불가)
+	FPOINT spritePos = CalculateSpritePosition(x,y);
+	if(spritePos.x < 0)		return;
 	const float MIN_DISTANCE = 0.2f; // 최소 거리 (타일 크기의 20%)
 
-	for(const auto& sprite : editorSprites) {
+	for(const auto& sprite : editorSprites)
+	{
 		float dx = sprite.pos.x - spritePos.x;
 		float dy = sprite.pos.y - spritePos.y;
 		float distance = sqrt(dx*dx + dy*dy);
 
-		if(distance < MIN_DISTANCE) {
-			return; // 너무 가까운 위치에 이미 스프라이트가 있음
+		if(distance < MIN_DISTANCE)
+		{
+			return;
 		}
 	}
 
 	Texture* monsterTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/boss.bmp"));
-	if(!monsterTexture) {
+	if(!monsterTexture)
+	{
 		MessageBox(g_hWnd,TEXT("Monster texture not found!"),TEXT("Error"),MB_OK);
 		return;
 	}
@@ -743,29 +914,10 @@ void MapEditor::PlaceItem(int x,int y)
 	if(x < 0 || x >= mapWidth || y < 0 || y >= mapHeight)
 		return;
 
-	// 마우스의 정확한 위치를 사용하여 타일 내에서의 상대적 위치 계산
-	POINT tileScreenPos = TileToScreen({x,y});
-	if(tileScreenPos.x < 0 || tileScreenPos.y < 0) return; // 예외 처리
+	FPOINT spritePos = CalculateSpritePosition(x,y);
+	if(spritePos.x < 0)	return;
 
-	int tileWidth = (mapArea.right - mapArea.left) / (mapWidth / zoomLevel);
-	int tileHeight = (mapArea.bottom - mapArea.top) / (mapHeight / zoomLevel);
-	int tileSize = min(tileWidth,tileHeight);
-
-	// 타일 내에서의 상대 위치 (0.0 ~ 1.0)
-	float relativeX = (mousePos.x - tileScreenPos.x) / (float)tileSize;
-	float relativeY = (mousePos.y - tileScreenPos.y) / (float)tileSize;
-
-	// 범위 제한 (0.0 ~ 1.0)
-	relativeX = max(0.0f,min(1.0f,relativeX));
-	relativeY = max(0.0f,min(1.0f,relativeY));
-
-	// 스프라이트의 최종 위치 계산 (타일 좌표 + 타일 내 상대 위치)
-	FPOINT spritePos = {
-		x + relativeX,
-		y + relativeY
-	};
-
-	// 근처에 다른 스프라이트가 있는지 확인 (일정 거리 내에 있으면 배치 불가)
+	// 근처에 다른 스프라이트가 있는지 확인
 	const float MIN_DISTANCE = 0.2f; // 최소 거리 (타일 크기의 20%)
 
 	for(const auto& sprite : editorSprites) {
@@ -774,7 +926,7 @@ void MapEditor::PlaceItem(int x,int y)
 		float distance = sqrt(dx*dx + dy*dy);
 
 		if(distance < MIN_DISTANCE) {
-			return; // 너무 가까운 위치에 이미 스프라이트가 있음
+			return; 
 		}
 	}
 
@@ -820,16 +972,14 @@ void MapEditor::RemoveObject(int x,int y)
 	break;
 
 	case EditMode::START:
-	// 시작 위치는 삭제 불가
-	MessageBox(g_hWnd,L"Cannot delete start position. Place a new one instead.",L"Info",MB_OK);
 	break;
-
 	case EditMode::OBSTACLE:
-	// 장애물 삭제
 	for(auto it = editorObstacles.begin(); it != editorObstacles.end(); ) {
 		if(it->pos.x == x && it->pos.y == y) {
 			it = editorObstacles.erase(it);
-		} else {
+		} 
+		else
+		{
 			++it;
 		}
 	}
@@ -888,6 +1038,7 @@ void MapEditor::RemoveObject(int x,int y)
 	break;
 	}
 }
+
 POINT MapEditor::ScreenToTile(POINT screenPos)
 {
 	POINT result = {-1,-1}; // 기본값으로 유효하지 않은 좌표 설정
@@ -931,7 +1082,7 @@ POINT MapEditor::TileToScreen(POINT tilePos)
 		int tileHeight = (mapArea.bottom - mapArea.top) / (mapHeight / zoomLevel);
 		int tileSize = min(tileWidth,tileHeight);
 
-		if(tileSize <= 0) return result; 
+		if(tileSize <= 0) return result;
 
 		// 뷰포트 내 상대 위치
 		float relX = tilePos.x - viewportOffset.x;
@@ -943,6 +1094,46 @@ POINT MapEditor::TileToScreen(POINT tilePos)
 	}
 
 	return result;
+}
+
+FPOINT MapEditor::CalculateSpritePosition(int x,int y)
+{
+	FPOINT spritePos;
+
+	if(useCenter)
+	{
+		// 타일 중앙에 배치
+		spritePos = {
+			x + 0.5f,
+			y + 0.5f
+		};
+	} else
+	{
+		// 마우스의 정확한 위치를 사용하여 타일 내에서의 상대적 위치 계산
+		POINT tileScreenPos = TileToScreen({x,y});
+		if(tileScreenPos.x < 0 || tileScreenPos.y < 0)
+			return {-1,-1}; // 유효하지 않은 위치 반환
+
+		int tileWidth = (mapArea.right - mapArea.left) / (mapWidth / zoomLevel);
+		int tileHeight = (mapArea.bottom - mapArea.top) / (mapHeight / zoomLevel);
+		int tileSize = min(tileWidth,tileHeight);
+
+		// 타일 내에서의 상대 위치 (0.0 ~ 1.0)
+		float relativeX = (mousePos.x - tileScreenPos.x) / (float)tileSize;
+		float relativeY = (mousePos.y - tileScreenPos.y) / (float)tileSize;
+
+		// 범위 제한 (0.0 ~ 1.0)
+		relativeX = max(0.0f,min(1.0f,relativeX));
+		relativeY = max(0.0f,min(1.0f,relativeY));
+
+		// 스프라이트의 최종 위치 계산 (타일 좌표 + 타일 내 상대 위치)
+		spritePos = {
+			x + relativeX,
+			y + relativeY
+		};
+	}
+
+	return spritePos;
 }
 
 void MapEditor::ChangeEditMode(EditMode mode)
@@ -1044,8 +1235,7 @@ void MapEditor::Zoom(float delta)
 
 		viewportOffset.x += offsetX;
 		viewportOffset.y += offsetY;
-	} 
-	else 
+	} else
 	{
 		// 마우스가 맵 영역 밖이면 중앙 기준으로 확대/축소
 		zoomLevel = newZoom;
@@ -1077,8 +1267,7 @@ void MapEditor::MouseWheel(int delta)
 	if(KeyManager::GetInstance()->IsStayKeyDown(VK_CONTROL))
 	{
 		Zoom(delta > 0 ? 0.1f : -0.1f);
-	} 
-	else
+	} else
 	{
 		VerticalScroll(delta);
 	}
@@ -1091,8 +1280,7 @@ void MapEditor::VerticalScroll(int delta)
 	if(delta > 0)
 	{
 		viewportOffset.y = max(0.0f,viewportOffset.y - scrollAmount / zoomLevel);
-	} 
-	else
+	} else
 	{
 		float maxY = max(0.0f,mapHeight - mapHeight / zoomLevel);
 		viewportOffset.y = min(maxY,viewportOffset.y + scrollAmount / zoomLevel);
@@ -1106,8 +1294,7 @@ void MapEditor::HorizontalScroll(int delta)
 	if(delta > 0)
 	{
 		viewportOffset.x = max(0.0f,viewportOffset.x - scrollAmount / zoomLevel);
-	} 
-	else
+	} else
 	{
 		float maxX = max(0.0f,mapWidth - mapWidth / zoomLevel);
 		viewportOffset.x = min(maxX,viewportOffset.x + scrollAmount / zoomLevel);
@@ -1141,15 +1328,14 @@ void MapEditor::SaveMap(const wchar_t* filePath)
 
 	// 아이템, 몬스터, 장애물 데이터 추가
 	for(const auto& sprite : editorSprites) {
-		if(sprite.type == SpriteType::KEY) 
+		if(sprite.type == SpriteType::KEY)
 		{
 			ItemData item;
 			item.pos = sprite.pos;
 			item.aniInfo = {0.1f,0.1f,{456,488},{10,1},{0,0}}; // 기본 애니메이션 정보
 			item.itemType = 0; // Key
 			DataManager::GetInstance()->AddItemData(item);
-		} 
-		else if(sprite.type == SpriteType::MONSTER) 
+		} else if(sprite.type == SpriteType::MONSTER)
 		{
 			MonsterData monster;
 			monster.pos = sprite.pos;
@@ -1170,8 +1356,7 @@ void MapEditor::SaveMap(const wchar_t* filePath)
 	if(DataManager::GetInstance()->SaveMapFile(filePath))
 	{
 		MessageBox(g_hWnd,TEXT("Map saved successfully!"),TEXT("Success"),MB_OK);
-	}
-	else 
+	} else
 	{
 		MessageBox(g_hWnd,TEXT("Failed to save map!"),TEXT("Error"),MB_OK);
 	}
@@ -1179,7 +1364,7 @@ void MapEditor::SaveMap(const wchar_t* filePath)
 
 void MapEditor::LoadMap(const wchar_t* filePath)
 {
-	if(!DataManager::GetInstance()->LoadMapFile(filePath)) 
+	if(!DataManager::GetInstance()->LoadMapFile(filePath))
 	{
 		MessageBox(g_hWnd,TEXT("Failed to load map!"),TEXT("Error"),MB_OK);
 		return;
@@ -1249,8 +1434,7 @@ void MapEditor::ClearMap()
 			{
 				tiles[index].roomType = RoomType::WALL;
 				tiles[index].tilePos = 4; // 벽 타일 인덱스
-			} 
-			else 
+			} else
 			{
 				tiles[index].roomType = RoomType::FLOOR;
 				tiles[index].tilePos = 10; // 바닥 타일 인덱스
@@ -1261,7 +1445,7 @@ void MapEditor::ClearMap()
 	// 시작 위치 재설정
 	startPosition = {mapWidth / 2.0f,mapHeight / 2.0f};
 	int startIndex = (int)startPosition.y * mapWidth + (int)startPosition.x;
-	if(startIndex < tiles.size()) 
+	if(startIndex < tiles.size())
 	{
 		tiles[startIndex].roomType = RoomType::START;
 	}
