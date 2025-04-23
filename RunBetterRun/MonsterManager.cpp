@@ -28,7 +28,6 @@ void MonsterManager::Update()
 		stunTime -= deltaTime;
 	else
 	{
-		// 플레이어 위치 업데이트
 		playerPos = Player::GetInstance()->GetCameraPos();
 		vector<FPOINT> paths;
 
@@ -39,7 +38,7 @@ void MonsterManager::Update()
 
 			if(path.size() >= 2)
 			{
-				monster->SetTargetPosition(path[1]); // 몬스터의 방향 추가? - 방향에 따라서 몬스터 스프라이트가 바뀌어야함.
+				monster->SetTargetPosition(path[1]);
 				paths.insert(paths.end(),path.begin() + 1,path.end() - 1);
 			}
 

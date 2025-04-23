@@ -79,6 +79,8 @@ HRESULT MainGameScene::Init()
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,19},Direction::EAST));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,20},Direction::NORTH));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,18},Direction::SOUTH));*/
+
+	ObstacleManager::GetInstance()->PutObstacle(new Pile({19,23},Direction::EAST));
 	ObstacleManager::GetInstance()->PutObstacle(new Elevator({20, 23}, Direction::EAST));
 	ItemManager::GetInstance()->PutItem(new Display({21.5f,23.5f},TEXT("Image/drumtong.bmp")));
 	ItemManager::GetInstance()->PutItem(new Display({22.5f,23.5f},TEXT("Image/pipe.bmp")));

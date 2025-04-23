@@ -49,8 +49,8 @@ void ObstacleManager::Update(void)
 	{
 		elevator->Distance(player);
 		elevator->Update();
-		elevator->Action();
-		return;
+		if(elevator->Action())
+			return;
 	}
 
 	for(auto& obstacle: obstacles)
