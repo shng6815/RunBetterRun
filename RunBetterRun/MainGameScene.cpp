@@ -242,8 +242,6 @@ void MainGameScene::RenderPauseMenu(HDC hdc,PauseButton& button)
 	{
 		textColor = RGB(255,0,0);
 	}
-	// 버튼 그리기
-
 
 	SetTextColor(hdc,textColor);
 	SetBkMode(hdc,TRANSPARENT);
@@ -257,14 +255,14 @@ void MainGameScene::RenderPauseMenu(HDC hdc,PauseButton& button)
 
 	DrawText(hdc,button.text,-1,&button.rect,DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
-	// 호버 상태일 때 밑줄 그리기
+
 	if(button.state == PauseButtonState::HOVER || button.state == PauseButtonState::CLICKED) {
 		SIZE textSize;
 		GetTextExtentPoint32(hdc,button.text,wcslen(button.text),&textSize);
 
 		int lineX1 = button.rect.left + (button.rect.right - button.rect.left - textSize.cx) / 2;
 		int lineX2 = lineX1 + textSize.cx;
-		int lineY = button.rect.bottom - 5;  // 텍스트 아래 위치
+		int lineY = button.rect.bottom - 5;  
 
 		HPEN underlinePen = CreatePen(PS_SOLID,2,textColor);
 		HPEN oldPen = (HPEN)SelectObject(hdc,underlinePen);
@@ -291,20 +289,18 @@ void MainGameScene::InitButtons()
 	int menuX = (rc.right - menuWidth) / 2;
 	int menuY = (rc.bottom - menuHeight) / 2;
 
-	int buttonWidth = 300; // 더 넓게 조정
+	int buttonWidth = 300; 
 	int buttonHeight = 40;
 	int buttonSpacing = 50;
 
-	// 버튼의 시작 Y 위치 (메뉴 상단에서 90픽셀 아래에서 시작)
+	// 버튼의 시작 Y 위치
 	int startY = menuY + 90;
 
-	// 버튼 생성
 	buttons.resize(3);
 
 	// 버튼 중앙 정렬
 	int buttonX = menuX + (menuWidth - buttonWidth) / 2;
 
-	// 게임 시작 버튼
 	buttons[0].Init(
 		buttonX,
 		startY,
@@ -314,7 +310,7 @@ void MainGameScene::InitButtons()
 		L"REPLAY"
 	);
 
-	// 맵 에디터 버튼
+
 	buttons[1].Init(
 		buttonX,
 		startY + buttonHeight + buttonSpacing,
@@ -324,7 +320,7 @@ void MainGameScene::InitButtons()
 		L"Map Editer"
 	);
 
-	// 게임 종료 버튼
+
 	buttons[2].Init(
 		buttonX,
 		startY + (buttonHeight + buttonSpacing) * 2,
