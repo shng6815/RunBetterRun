@@ -4,11 +4,15 @@
 #include "ItemManager.h"
 #include "UIManager.h"
 #include "PhoneUI.h"
+#include "SoundManager.h"
 
 BOOL Key::Action(void)
 {
 	ItemManager::GetInstance()->PopKey();
 	(static_cast<PhoneUI*>(UIManager::GetInstance()->GetUIUnit("PhoneUI")))->ShakeOnItemGet();
+
+	SoundManager::GetInstance()->PlaySoundW("CollectKey");
+
 	return TRUE;
 }
 

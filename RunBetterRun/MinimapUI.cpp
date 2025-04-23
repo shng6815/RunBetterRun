@@ -5,19 +5,75 @@
 #include "Player.h"
 #include "ItemManager.h"
 #include "Key.h"
+#include "TimerManager.h"
+
+HRESULT MinimapUI::Init(UIType type,FPOINT relPos,FPOINT relSize,UIUnit* parent,INT layer)
+{
+	UIUnit::Init(type,relPos,relSize,parent,layer);
+
+	frameSkip = 8;
+	frameCounter = 0;
+	lastAngle = 0.0f;
+	cachedDC = nullptr;
+	cachedBitmap = nullptr;
+	oldCachedBitmap = nullptr;
+	needsUpdate = true;
+
+	return S_OK;
+}
+
+void MinimapUI::Update()
+{
+	UIUnit::Update();
+
+	frameCounter++;
+
+	// 플레이어의 현재 방향 각도 계산
+	auto dir = Player::GetInstance()->GetCameraVerDir();
+	float currentAngle = atan2f(dir.y,dir.x) + DEG_TO_RAD(-90);
+
+	float angleDiff = fabsf(currentAngle - lastAngle);
+	if(angleDiff > DEG_TO_RAD(10.0f)) { 
+		needsUpdate = true;
+	}
+
+	if(frameCounter >= frameSkip || needsUpdate) {
+		frameCounter = 0;
+		lastAngle = currentAngle;
+		needsUpdate = false;
+
+		if(cachedDC) {
+			SelectObject(cachedDC,oldCachedBitmap);
+			DeleteObject(cachedBitmap);
+			DeleteDC(cachedDC);
+			cachedDC = nullptr;
+		}
+	}
+}
 
 void MinimapUI::Release()
-{}
+{
+	if(cachedDC) {
+		SelectObject(cachedDC,oldCachedBitmap);
+		DeleteObject(cachedBitmap);
+		DeleteDC(cachedDC);
+		cachedDC = nullptr;
+	}
+}
 
 void MinimapUI::Render(HDC hdc)
 {
 	if(!isActive)
 		return;
 
-	// 최대 크기를 기준으로 충분히 큰 정사각형 미니맵을 생성
 	int maxSize = static_cast<int>(ceilf(max(size.x,size.y)));
 	int squareSize = static_cast<int>(ceilf(maxSize * 1.4142f)); // 회전을 고려한 대각선 길이
 
+	// 방향 각도 계산
+	auto dir = Player::GetInstance()->GetCameraVerDir();
+	float angle = atan2f(dir.y,dir.x) + DEG_TO_RAD(-90);
+
+	// 캐싱 시스템 활용
 	HDC memDC = CreateCompatibleDC(hdc);
 	HBITMAP memBmp = CreateCompatibleBitmap(hdc,squareSize,squareSize);
 	HBITMAP oldBmp = (HBITMAP)SelectObject(memDC,memBmp);
@@ -29,12 +85,23 @@ void MinimapUI::Render(HDC hdc)
 	FillRect(memDC,&fillRect,bgBrush);
 	DeleteObject(bgBrush);
 
-	// 회전 각도 계산
-	auto dir = Player::GetInstance()->GetCameraVerDir();
-	float angle = atan2f(dir.y,dir.x) + DEG_TO_RAD(-90);
+	// frameCounter가 0이거나 캐시가 없으면 새로 계산, 아니면 캐시된 결과 사용
+	if(frameCounter == 0 || !cachedDC) {
+		// 캐시된 DC 생성 및 초기화
+		cachedDC = CreateCompatibleDC(hdc);
+		cachedBitmap = CreateCompatibleBitmap(hdc,squareSize,squareSize);
+		oldCachedBitmap = (HBITMAP)SelectObject(cachedDC,cachedBitmap);
 
-	// 기존 함수를 그대로 사용하여 정사각형 미니맵을 그림
-	DrawMiniMapWithRotation(memDC,squareSize,angle);
+		// 배경 초기화
+		RECT cacheRect = {0,0,squareSize,squareSize};
+		FillRect(cachedDC,&cacheRect,bgBrush);
+
+		// 회전된 미니맵 계산하여 캐시에 저장
+		DrawMiniMapWithRotation(cachedDC,squareSize,angle);
+	}
+
+	// 캐시된 결과를 memDC에 복사
+	BitBlt(memDC,0,0,squareSize,squareSize,cachedDC,0,0,SRCCOPY);
 
 	// 위치 계산 후 원하는 사이즈로 출력 (직사각형으로 클리핑)
 	int drawX = static_cast<int>(pos.x);
@@ -105,8 +172,11 @@ void MinimapUI::DrawMiniMapToDC(HDC hdc,int drawSize)
 		}
 	}
 
+	SelectObject(hdc,oldPen);
+	DeleteObject(floorBrush);
+
 	// 아이템(키) 그리기
-	HBRUSH keyBrush = CreateSolidBrush(RGB(238,130,238)); // 키 표시용 보라색
+	HBRUSH keyBrush = CreateSolidBrush(RGB(238,130,238));
 	HPEN oldKeyPen = (HPEN)SelectObject(hdc,GetStockObject(NULL_PEN));
 	SelectObject(hdc,keyBrush);
 
@@ -139,7 +209,7 @@ void MinimapUI::DrawMiniMapToDC(HDC hdc,int drawSize)
 	DeleteObject(keyBrush);
 
 	// 플레이어 아이콘
-	HBRUSH playerBrush = CreateSolidBrush(RGB(255,50,50)); // 눈에 띄는 색상
+	HBRUSH playerBrush = CreateSolidBrush(RGB(255,50,50));
 	SelectObject(hdc,playerBrush);
 
 	Ellipse(hdc,
@@ -173,7 +243,7 @@ void MinimapUI::DrawMiniMapWithRotation(HDC hdc,int drawSize,float angle)
 	HBITMAP oldMiniBmp = (HBITMAP)SelectObject(miniDC,miniBmp);
 
 	RECT miniRect = {0,0,drawSize,drawSize};
-	FillRect(miniDC,&miniRect,bgBrush); // 재사용
+	FillRect(miniDC,&miniRect,bgBrush);
 	DrawMiniMapToDC(miniDC,drawSize);
 
 	BitBlt(baseDC,offset,offset,drawSize,drawSize,miniDC,0,0,SRCCOPY);
@@ -183,7 +253,7 @@ void MinimapUI::DrawMiniMapWithRotation(HDC hdc,int drawSize,float angle)
 	HBITMAP rotBmp = CreateCompatibleBitmap(hdc,fullSize,fullSize);
 	HBITMAP oldRotBmp = (HBITMAP)SelectObject(rotDC,rotBmp);
 
-	FillRect(rotDC,&fullRect,bgBrush); // 회전용 배경
+	FillRect(rotDC,&fullRect,bgBrush);
 
 	SetGraphicsMode(rotDC,GM_ADVANCED);
 
@@ -203,9 +273,7 @@ void MinimapUI::DrawMiniMapWithRotation(HDC hdc,int drawSize,float angle)
 
 	// 출력
 	int cutOffset = (fullSize - drawSize) / 2;
-	TransparentBlt(hdc,0,0,drawSize,drawSize,
-				   rotDC,cutOffset,cutOffset,drawSize,drawSize,
-				   kMaskColor);
+	BitBlt(hdc,0,0,drawSize,drawSize,rotDC,cutOffset,cutOffset,SRCCOPY);
 
 	// 정리
 	DeleteObject(bgBrush);
