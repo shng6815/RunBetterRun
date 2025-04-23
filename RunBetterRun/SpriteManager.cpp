@@ -27,17 +27,24 @@ void SpriteManager::SortSpritesByDistance()
     float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
     for (auto& sprite : sprites)
     {
-        sprite->aniInfo.currentTime -= deltaTime;
-        if (sprite->aniInfo.currentTime < 0)
-        {
-            sprite->aniInfo.currentTime = sprite->aniInfo.frameTime;
-            sprite->aniInfo.currentFrame.x = (sprite->aniInfo.currentFrame.x + 1) % sprite->aniInfo.maxFrame.x;
-        }
+		float distance = sqrtf(
+			powf(playerPos.x - sprite->pos.x,2) +
+			powf(playerPos.y - sprite->pos.y,2)
+		);
 
-        sprite->distance = sqrtf(
-            powf(playerPos.x - sprite->pos.x, 2) +
-            powf(playerPos.y - sprite->pos.y, 2)
-        );
+		if(sprite->type != SpriteType::MONSTER
+			|| fabs(sprite->distance - distance) > 1e-3f)
+		{
+			sprite->aniInfo.currentTime -= deltaTime;
+			if(sprite->aniInfo.currentTime < 0)
+			{
+				sprite->aniInfo.currentTime = sprite->aniInfo.frameTime;
+				sprite->aniInfo.currentFrame.x = (sprite->aniInfo.currentFrame.x + 1) % sprite->aniInfo.maxFrame.x;
+			}
+		} else
+			sprite->aniInfo.currentFrame.x = 0;
+
+		sprite->distance = distance;
     }
 
     sprites.sort([](Sprite* a, Sprite* b) -> BOOL {

@@ -645,7 +645,7 @@ void MapEditor::PlaceStart(int x,int y)
 	for(size_t i = 0; i < tiles.size(); i++) {
 		if(tiles[i].roomType == RoomType::START) {
 			tiles[i].roomType = RoomType::FLOOR;
-			tiles[i].tilePos = 10; // 기본 바닥 타일
+			tiles[i].tilePos = 20; // 기본 바닥 타일
 		}
 	}
 

@@ -29,7 +29,6 @@ void MonsterManager::Update()
 		stunTime -= deltaTime;
 	else
 	{
-		// 플레이어 위치 업데이트
 		playerPos = Player::GetInstance()->GetCameraPos();
 		vector<FPOINT> paths;
 
