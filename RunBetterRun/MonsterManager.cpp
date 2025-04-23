@@ -107,6 +107,23 @@ void MonsterManager::PutMonster(AMonster* monster)
 	monsters.push_back(monster);
 }
 
+FPOINT MonsterManager::GetClosestMonsterPos()
+{
+	FPOINT closestMonsterPos = {-1,-1};
+	float closestDistance = FLT_MAX;
+	for(auto& monster : monsters)
+	{
+		FPOINT monsterPos = monster->GetPostion();
+		float distance = sqrt(pow(playerPos.x - monsterPos.x,2) + pow(playerPos.y - monsterPos.y,2));
+		if(distance < closestDistance)
+		{
+			closestDistance = distance;
+			closestMonsterPos = monsterPos;
+		}
+	}
+	return closestMonsterPos;
+}
+
 vector<FPOINT> MonsterManager::FindPath(FPOINT start, FPOINT end, vector<FPOINT>& paths)
 {
     // 결과 경로 저장

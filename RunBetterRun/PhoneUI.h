@@ -27,6 +27,9 @@ public:
 	// 아이템 획득 흔들림 효과 발동 함수
 	void ShakeOnItemGet(float intensity = 1.0f,float duration = 0.5f);
 
+	// 인사이트 아이템 획득시 몬스터 위치 표시
+	void GetInsight(FLOAT inSightTime);
+
 private:
 	Image* phoneImage;
 	float toggleTime;
@@ -72,6 +75,12 @@ private:
 	float itemShakeIntensity;   // 아이템 흔들림 강도
 	float currentShakeIntensity; // 현재 아이템 흔들림 강도
 
+	// 인사이트 관련 변수
+	bool hasInsight;         // 인사이트 활성화 여부
+	float insightTime;       // 인사이트 지속 시간
+	float insightTimer;      // 현재 인사이트 타이머
+	BOOL isInsight;         // 인사이트 활성화 여부
+
 	// 상태 변화 애니메이션 업데이트
 	void UpdateStateChangeAnimation();
 
@@ -80,4 +89,6 @@ private:
 
 	// 아이템 흔들림 효과 업데이트
 	void UpdateItemShakeEffect();
+
+	void UpdateInsight();
 };

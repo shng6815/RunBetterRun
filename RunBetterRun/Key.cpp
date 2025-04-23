@@ -11,8 +11,6 @@ BOOL Key::Action(void)
 	ItemManager::GetInstance()->PopKey();
 	(static_cast<PhoneUI*>(UIManager::GetInstance()->GetUIUnit("PhoneUI")))->ShakeOnItemGet();
 
-	SoundManager::GetInstance()->PlaySoundW("CollectKey");
-
 	return TRUE;
 }
 

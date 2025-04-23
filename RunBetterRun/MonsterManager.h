@@ -47,5 +47,7 @@ public:
 	void PutMonster(AMonster* monster);
 
 	void Stun(FLOAT time) {	stunTime += time; }
+
+	FPOINT GetClosestMonsterPos();
 };
 

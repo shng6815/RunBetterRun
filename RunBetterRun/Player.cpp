@@ -51,17 +51,9 @@ HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 
 	this->shakeFunc = shakeFunc;
 
-	if(FAILED(SoundManager::GetInstance()->LoadSound("Step","Sounds/SFX_Step.wav")))
-	{
-		MessageBox(g_hWnd,TEXT("SFX Load Failed"),TEXT("Error"),MB_OK);
-		return E_FAIL;
-	}
+	SoundManager::GetInstance()->LoadSound("Step","Sounds/SFX_Step.wav");
 
-	if(FAILED(SoundManager::GetInstance()->LoadSound("Heart","Sounds/SFX_Heart.wav")))
-	{
-		MessageBox(g_hWnd,TEXT("SFX Load Failed"),TEXT("Error"),MB_OK);
-		return E_FAIL;
-	}
+	SoundManager::GetInstance()->LoadSound("Heart","Sounds/SFX_Heart.wav");
 
 	return S_OK;
 }
