@@ -150,7 +150,7 @@ void GameStartScene::HandleButtonClick(Button & button)
 	{
 	case ButtonType::START:
 	    //SceneManager::GetInstance()->ChangeScene("LoadingScene");
-		SceneManager::GetInstance()->ChangeScene("OpeningScene");
+		SceneManager::GetInstance()->ChangeScene("MainGameScene");
 		break;
 	
 	case ButtonType::MAP_EDITOR:

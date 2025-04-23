@@ -48,7 +48,7 @@ void Tentacle::Action(void)
 
 void Tentacle::Catch(void)
 {
-	Player*player = Player::GetInstance();
+	/*Player*player = Player::GetInstance();
 	player->LossPlayerLife();
 
 	if(player->GetPlayerLife() == 0)
@@ -58,7 +58,7 @@ void Tentacle::Catch(void)
 
 	else {
 		SceneManager::GetInstance()->ChangeScene("JumpscareScene");
-	}
+	}*/
 
 }
 

@@ -19,7 +19,7 @@ void NumberUI::Update()
 {
 	UIUnit::Update();
 
-	auto num = ItemManager::GetInstance()->Size();
+	auto num = ItemManager::GetInstance()->Key();
 
 	if(num > 0)
 	{
@@ -40,7 +40,7 @@ void NumberUI::Render(HDC hdc)
 {
 	if(!isActive)
 		return;
-	// 숫자 UI를 그리는 코드 추가
+	// ?レ옄 UI瑜?洹몃━??肄붾뱶 異붽?
 	if(numberImage)
 	{
 		for(size_t i = 0; i < numbers.size(); ++i)
