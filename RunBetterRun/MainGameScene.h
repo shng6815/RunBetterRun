@@ -83,7 +83,6 @@ private:
 
 	SceneStatus status;
 	RayCast* rayCasting;
-	void LoadFile(LPCWCH path);
 
 	HDC backBufferDC = nullptr;
 	HBITMAP backBufferBitmap = nullptr;

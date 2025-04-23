@@ -75,6 +75,7 @@ public:
 	void Render(HDC hdc, int destX, int destY, int frameIndex, bool isFlip = false);
 	void RenderResized(HDC hdc,int destX,int destY,int width,int height);
 	void RenderResized(HDC hdc,int destX,int destY,int width,int height,int frameIndex);
+	void RenderResized(HDC hdc, int destX, int destY, int width, int height, int srcX, int srcY, int srcWidth, int srcHeight);
 	void FrameRender(HDC hdc, int destX, int destY,
 		int frameX, int frameY, bool isFlip = false, bool isCenter = true);
 

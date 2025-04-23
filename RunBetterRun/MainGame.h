@@ -4,7 +4,7 @@
 class Timer;
 class Image;
 class EnemyManager;
-class Editor;
+class MapEditor;
 class MainGame : public GameObject
 {
 private:
@@ -13,7 +13,7 @@ private:
 	wchar_t szText[128];
 
 	Image* backBuffer;
-	Editor* tilemapTool;
+	MapEditor* tilemapTool;
 
 	Timer* timer;
 
