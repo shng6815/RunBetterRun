@@ -52,6 +52,6 @@ private:
 	void CheckButtonHover();               // 마우스 오버 체크
 	void HandleButtonClick(Button& button); // 버튼 클릭 처리
 	void DrawTitle(HDC hdc);               // 제목 그리기
-	void DrawButton(HDC hdc,Button& button); // 버튼 그리기
+	void DrawButton(HDC hdc, Button& button); // 버튼 그리기
 };
 
