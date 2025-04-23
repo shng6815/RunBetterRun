@@ -205,6 +205,7 @@ void MapEditor::Render(HDC hdc)
 	RenderObstacles(hdc);
 	RenderSampleTiles(hdc);
 	RenderSampleSprites(hdc);
+	RenderRightDragArea(hdc);
 	RenderUI(hdc);
 }
 
