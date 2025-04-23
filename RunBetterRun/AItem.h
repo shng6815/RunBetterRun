@@ -16,8 +16,7 @@ public:
 	virtual HRESULT Init(FPOINT pos) = 0;
 	BOOL Update(void);
 
-	FPOINT GetPos(void) {
-		return sprite.pos;
-	}
+	FPOINT GetPos(void) { return sprite.pos; }
+	void SetAnimInfo(AnimationInfo info) { sprite.aniInfo = info; }
 };
 

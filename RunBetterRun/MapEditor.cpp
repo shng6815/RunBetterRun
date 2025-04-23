@@ -1332,14 +1332,14 @@ void MapEditor::SaveMap(const wchar_t* filePath)
 		{
 			ItemData item;
 			item.pos = sprite.pos;
-			item.aniInfo = {0.1f,0.1f,{456,488},{10,1},{0,0}}; // 기본 애니메이션 정보
+			item.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}}; // 기본 애니메이션 정보
 			item.itemType = 0; // Key
 			DataManager::GetInstance()->AddItemData(item);
 		} else if(sprite.type == SpriteType::MONSTER)
 		{
 			MonsterData monster;
 			monster.pos = sprite.pos;
-			monster.aniInfo = {0.1f,0.1f,{423,437},{1,1},{0,0}}; // 기본 애니메이션 정보
+			monster.aniInfo = {0.18f,0.18f,{215,246},{10,36},{0,0}}; // 기본 애니메이션 정보
 			monster.monsterType = 0; // Tentacle
 			DataManager::GetInstance()->AddMonsterData(monster);
 		}
