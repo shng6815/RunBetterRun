@@ -13,7 +13,7 @@
 #define INT(n) static_cast<int>(n)
 
 #define EPSILON 1e-6f
-#define THREAD_NUM 5
+#define THREAD_NUM 12
 #define SCALE 4
 
 class RayCast : public GameObject

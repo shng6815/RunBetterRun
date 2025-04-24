@@ -7,7 +7,7 @@ HRESULT NumberUI::Init(UIType type,FPOINT relPos,FPOINT relSize,UIUnit * parent,
 	UIUnit::Init(type,relPos,relSize,parent,layer);
 
 	numberImage = ImageManager::GetInstance()->AddImage("NumberUI",
-		L"Image/NumberUI.bmp",size.x,size.y,10,1,true,RGB(255,0,255));
+		L"Image/number80x16.bmp",size.x,size.y,10,1,true,RGB(255,0,255));
 
 	return S_OK;
 }
