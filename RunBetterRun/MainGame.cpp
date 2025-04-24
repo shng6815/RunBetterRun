@@ -32,7 +32,7 @@ HRESULT MainGame::Init()
 		return E_FAIL;
 	}
 
-	SoundManager::GetInstance()->PlayMusic("BGM",true,0.8f);
+	SoundManager::GetInstance()->PlayMusic("BGM",true,0.5f);
 
 	VideoManager::Init();
 	DataManager::GetInstance()->Init();	
