@@ -147,16 +147,14 @@ typedef struct tagItemSaveData
 {
 	DWORD id;
 	FPOINT pos;             // ��ġ
-	AnimationInfo aniInfo;  // �ִϸ��̼� ����
-	int itemId;           // ������ Ÿ�� - 0: Key
+	AnimationInfo aniInfo;  // �ִϸ��̼� ����        // ������ Ÿ�� - 0: Key
 }ItemData;
 
 typedef struct tagMonsterSaveData
 {
 	DWORD id;
 	FPOINT pos;             // ��ġ
-	AnimationInfo aniInfo;  // �ִϸ��̼� ����
-	int monsterId;        // ���� Ÿ�� - 0: Tentacle
+	AnimationInfo aniInfo;  // �ִϸ��̼� ����      // ���� Ÿ�� - 0: Tentacle
 }MonsterData;
 
 typedef struct tagObstacleSaveData
