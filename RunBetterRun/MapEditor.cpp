@@ -68,8 +68,8 @@ HRESULT MapEditor::Init()
 		true,RGB(255,0,255));
 
 	sampleSpriteImage = ImageManager::GetInstance()->AddImage(
-						"EditorSpriteSheet",L"Image/horrorMapTiles2.bmp",
-						11 * TILE_SIZE,11 * TILE_SIZE,11,11,true,RGB(255,0,255)
+						"EditorSpriteSheet",L"Image/pallet64x160.bmp",
+						5 * TILE_SIZE,2 * TILE_SIZE,5,2,true,RGB(255,0,255)
 	);
 
 	if(!sampleTileImage || !sampleSpriteImage)
@@ -1143,7 +1143,7 @@ void MapEditor::PlaceObstacle(int x,int y)
 		}
 	}
 
-	Texture* obstacleTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/jewel.bmp"));
+	Texture* obstacleTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/pile.bmp"));
 	if(obstacleTexture) {
 		Obstacle newObstacle;
 		newObstacle.pos = {x,y};

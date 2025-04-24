@@ -38,8 +38,8 @@ HRESULT PhoneUI::Init(UIType type,FPOINT pos,FPOINT size,INT layer)
 	
 	// 남은 아이템 수의 UI를 위한 상대적 위치와 크기 설정
 
-	relPos = {0.5f,0.07f};
-	relSize = {0.8f,0.2f};
+	relPos = {0.5f,0.11f};
+	relSize = {0.8f,0.1f};
 	// 상대적 위치와 크기를 사용하여 UIUnit 초기화
 	NumberUI* numberUI = new NumberUI();
 	numberUI->Init(type,relPos,relSize,this,1);
