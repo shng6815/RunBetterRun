@@ -55,6 +55,8 @@ HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 
 	SoundManager::GetInstance()->LoadSound("Heart","Sounds/SFX_Heart.wav");
 
+	SoundManager::GetInstance()->LoadSound("Chase","Sounds/SFX_ComeMonster.wav");
+
 	return S_OK;
 }
 

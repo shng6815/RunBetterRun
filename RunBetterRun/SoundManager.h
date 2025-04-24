@@ -49,6 +49,7 @@ public:
 	// 볼륨 제어
 	void SetMasterVolume(float volume);
 	void SetCategoryVolume(SoundType type,float volume);
+	void UpdateSoundVolume(const std::string& soundID, float volume); // 특정 사운드의 볼륨 업데이트
 	// 특수 제어
 	void SetMute(bool mute);
 	void ToggleMute();

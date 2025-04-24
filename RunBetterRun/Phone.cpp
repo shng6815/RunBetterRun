@@ -1,15 +1,18 @@
 #include "Phone.h"
 #include "TextureManager.h"
 #include "SpriteManager.h"
-#include "UIManager.h"
-#include "PhoneUI.h"
+#include "MainGameScene.h"
 
 BOOL Phone::Action(void)
 {
-	PhoneUI* uiUnit = new PhoneUI();
-	uiUnit->Init(UIType::PLAYING,FPOINT{100,WINSIZE_Y - 500},FPOINT{300,400},0);
-	UIManager::GetInstance()->AddUIUnit("PhoneUI",uiUnit);
-	return TRUE;
+	// 메인 게임 씬의 상태를 가이드 상태로 변경
+	MainGameScene* mainScene = dynamic_cast<MainGameScene*>(SceneManager::GetInstance()->currentScene);
+	if(mainScene) {
+		mainScene->ShowPhoneGuide(); // 이 메소드를 추가해야 함
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 HRESULT Phone::Init(FPOINT pos)

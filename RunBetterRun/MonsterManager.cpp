@@ -12,6 +12,9 @@ HRESULT MonsterManager::Init()
 	playerPos = Player::GetInstance()->GetCameraPos();
 	mapData = MapManager::GetInstance()->GetMapData();
 	stunTime = 0;
+
+	heartbeatPlaying = false;
+	chasePlaying = false;
 	return S_OK;
 }
 
@@ -70,34 +73,48 @@ void MonsterManager::UpdateHeartbeatSound(float distance)
 	const float MAX_HEARTBEAT_DISTANCE = 8.0f;
 	const float MIN_HEARTBEAT_DISTANCE = 2.0f;
 
+	// 거리에 따른 볼륨 계산
+	float volume = 0.0f;
+
+	if(distance <= MAX_HEARTBEAT_DISTANCE) {
+		float distanceFactor = 1.0f - (distance - MIN_HEARTBEAT_DISTANCE) / (MAX_HEARTBEAT_DISTANCE - MIN_HEARTBEAT_DISTANCE);
+		distanceFactor = max(0.0f,min(1.0f,distanceFactor));
+
+		// 볼륨 설정 (0.2 ~ 1.0)
+		volume = 0.2f + (distanceFactor * 0.8f);
+	}
+
+	// 소리가 전혀 들리지 않아야 하는 경우
 	if(distance > MAX_HEARTBEAT_DISTANCE) {
 		// 심장 소리가 재생 중이면 중지
 		if(SoundManager::GetInstance()->IsSoundPlaying("Heart")) {
 			SoundManager::GetInstance()->StopSound("Heart");
 			heartbeatPlaying = false;
 		}
+
+		if(SoundManager::GetInstance()->IsSoundPlaying("Chase")) {
+			SoundManager::GetInstance()->StopSound("Chase");
+			chasePlaying = false;
+		}
 		return;
 	}
 
-	// 거리에 따른 볼륨 계산
-	float distanceFactor = 1.0f - (distance - MIN_HEARTBEAT_DISTANCE) / (MAX_HEARTBEAT_DISTANCE - MIN_HEARTBEAT_DISTANCE);
-	distanceFactor = max(0.0f,min(1.0f,distanceFactor));
-
-	// 볼륨 설정 (0.2 ~ 1.0)
-	float volume = 0.2f + (distanceFactor * 0.8f);
-
-	// 소리가 재생 중이 아니거나 볼륨이 크게 변했을 때만 갱신
-	static float lastVolume = -1.0f;
-	if(!heartbeatPlaying || abs(volume - lastVolume) > 0.1f) {
-		// 기존 심장 소리 중지
-		if(heartbeatPlaying) {
-			SoundManager::GetInstance()->StopSound("Heart");
-		}
-
-		// 새 볼륨으로 재생
+	// 심장 소리가 아직 재생되고 있지 않으면 시작
+	if(!heartbeatPlaying) {
 		SoundManager::GetInstance()->PlaySound("Heart",true,volume);
 		heartbeatPlaying = true;
-		lastVolume = volume;
+	} else {
+		// 이미 재생 중이면 볼륨만 업데이트
+		// 여기서 기존 채널의 볼륨을 변경하는 새로운 함수가 필요합니다
+		SoundManager::GetInstance()->UpdateSoundVolume("Heart",volume);
+	}
+
+	if(!chasePlaying) {
+		SoundManager::GetInstance()->PlaySound("Chase",true,1);
+		chasePlaying = true;
+	} else {
+		// 이미 재생 중이면 볼륨만 업데이트
+		SoundManager::GetInstance()->UpdateSoundVolume("Chase",volume);
 	}
 }
 
