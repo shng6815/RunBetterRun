@@ -2,26 +2,26 @@
 #include "TextureManager.h"
 #include "SpriteManager.h"
 
-map<LPCWCH,DWORD> Display::ids;
+map<DWORD,LPCWCH> Display::ids;
 
 BOOL Display::Action(void)
 {
 	return FALSE;
 }
 
-Display::Display(FPOINT pos,LPCWCH texturePath)
+Display::Display(FPOINT pos,DWORD id)
 {
 	if(ids.empty())
 	{
-		ids[TEXT("Image/drumtong.bmp")] = 7;
-		ids[TEXT("Image/pipe.bmp")] = 6;
-		ids[TEXT("Image/trash.bmp")] = 11;
-		ids[TEXT("Image/poo.bmp")] = 4;
-		ids[TEXT("Image/sohwa.bmp")] = 5;
+		ids[7] = TEXT("Image/drumtong.bmp");
+		ids[6] = TEXT("Image/pipe.bmp");
+		ids[11] = TEXT("Image/trash.bmp");
+		ids[4] = TEXT("Image/poo.bmp");
+		ids[5] = TEXT("Image/sohwa.bmp");
 	}
-	sprite.id = ids[texturePath];
-	sprite.texture = TextureManager::GetInstance()->GetTexture(texturePath);
-	sprite.type = SpriteType::NONE;
+
+	sprite.id = id;
+	sprite.texture = TextureManager::GetInstance()->GetTexture(ids[id]);
 	Init(pos);
 }
 
@@ -30,7 +30,7 @@ HRESULT Display::Init(FPOINT pos)
 	if(!sprite.texture)	
 	{
 		sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/drumtong.bmp"));
-		sprite.id = ids[TEXT("Image/drumtong.bmp")];
+		sprite.id = 7;
 		if(!sprite.texture)
 			return E_FAIL;
 	}
