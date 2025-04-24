@@ -84,17 +84,6 @@ HRESULT MainGameScene::Init()
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,20},Direction::NORTH));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,18},Direction::SOUTH));*/
 
-	ObstacleManager::GetInstance()->PutObstacle(new Pile({19,23},Direction::EAST));
-	ObstacleManager::GetInstance()->PutObstacle(new Elevator({20, 23}, Direction::EAST));
-	ItemManager::GetInstance()->PutItem(new Display({21.5f,23.5f},TEXT("Image/drumtong.bmp")));
-	ItemManager::GetInstance()->PutItem(new Display({22.5f,23.5f},TEXT("Image/pipe.bmp")));
-	ItemManager::GetInstance()->PutItem(new Display({23.5f,23.5f},TEXT("Image/trash.bmp")));
-	ItemManager::GetInstance()->PutItem(new Display({24.5f,23.5f},TEXT("Image/poo.bmp")));
-	ItemManager::GetInstance()->PutItem(new Display({25.5f,23.5f},TEXT("Image/sohwa.bmp")));
-	ItemManager::GetInstance()->PutItem(new Stun({26.5f,23.5f}));
-	ItemManager::GetInstance()->PutItem(new Insight({27.5f,23.5f}));
-	ItemManager::GetInstance()->PutItem(new Phone({28.5f,23.5f}));
-
 	return S_OK;
 }
 
@@ -274,7 +263,7 @@ void MainGameScene::RenderPauseMenu(HDC hdc,PauseButton& button)
 
 	if(button.state == PauseButtonState::HOVER)
 	{
-		textColor = RGB(255,0,0);
+		textColor = RGB(141,0,0);
 	}
 
 	SetTextColor(hdc,textColor);
@@ -289,7 +278,7 @@ void MainGameScene::RenderPauseMenu(HDC hdc,PauseButton& button)
 	DrawText(hdc,button.text,-1,&button.rect,DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
 
-	if(button.state == PauseButtonState::HOVER || button.state == PauseButtonState::CLICKED) {
+	/*if(button.state == PauseButtonState::HOVER || button.state == PauseButtonState::CLICKED) {
 		SIZE textSize;
 		GetTextExtentPoint32(hdc,button.text,wcslen(button.text),&textSize);
 
@@ -305,7 +294,7 @@ void MainGameScene::RenderPauseMenu(HDC hdc,PauseButton& button)
 
 		SelectObject(hdc,oldPen);
 		DeleteObject(underlinePen);
-	}
+	}*/
 
 	SelectObject(hdc,oldFont);
 	DeleteObject(hFont);

@@ -1,19 +1,6 @@
 #include "Elevator.h"
 #include "TextureManager.h"
 
-Elevator::Elevator(POINT pos,Direction dir)
-{
-	obstacle.id = 9;
-	obstacle.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/elevator.bmp"));
-	obstacle.aniInfo = {0.2f,0.2f,{128,128},{8,1},{0,0}};
-	obstacle.pos = pos;
-	obstacle.dir = dir;
-	obstacle.block = TRUE;
-	obstacle.distance = 0;
-	status = DoorStatus::Init;
-	waitTime = 3.5f;
-}
-
 Elevator::Elevator(POINT pos,Direction dir, DWORD id)
 {
 	obstacle.id = id;
@@ -23,8 +10,16 @@ Elevator::Elevator(POINT pos,Direction dir, DWORD id)
 	obstacle.dir = dir;
 	obstacle.block = TRUE;
 	obstacle.distance = 0;
-	status = DoorStatus::Lock;
-	waitTime = 0;
+	if(id == 12)
+	{
+		status = DoorStatus::Lock;
+		waitTime = 0;
+	}
+	else
+	{
+		status = DoorStatus::Init;
+		waitTime = 3.5f;
+	}
 }
 
 BOOL Elevator::Action(void)
