@@ -6,7 +6,7 @@ HRESULT JumpscareScene::Init()
 	// 비디오 재생 시작
 	if(!VideoManager::PlayVideo(L"SceneAnimation/jumpscare.mp4",4.0f)) {
 		// 실패 시 바로 다음 씬으로
-		SceneManager::GetInstance()->ChangeScene("LossLifeScene");
+		SceneManager::GetInstance()->ChangeScene("DeadScene");
 	}
 
 	return S_OK;
@@ -22,7 +22,8 @@ void JumpscareScene::Update()
 
 	// 비디오 종료 확인
 	if(VideoManager::IsFinished()) {
-		SceneManager::GetInstance()->ChangeScene("LossLifeScene");
+		SceneManager::GetInstance()->ChangeScene("DeadScene");
+		//SceneManager::GetInstance()->ChangeScene("EndingScene");
 	}
 }
 

@@ -21,9 +21,6 @@ public:
 	FPOINT GetCameraPos() { return cameraPos; }
 	FPOINT GetCameraVerDir() { return cameraVerDir; }
 	FPOINT GetPlane() { return plane; }
-	void InitPlayerLife() { playerLife = 3; }
-	int GetPlayerLife(){ return playerLife; }
-	void LossPlayerLife();
 
 	void SetCameraDirection(FPOINT newDirection) {
 		cameraVerDir = newDirection;
@@ -63,8 +60,6 @@ private:
 	void Save();
 	void Load();
 
-	// 플레이어 목숨
-	int playerLife;
 } Camera;
 
 

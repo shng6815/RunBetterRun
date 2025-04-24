@@ -12,26 +12,24 @@ HRESULT LossLifeScene::Init()
 	bg = ImageManager::GetInstance()->AddImage("LossLifeImage",
 	   L"horrorloading/horror_loading.bmp",WINSIZE_X,WINSIZE_Y);
 
-	int playerLife = Player::GetInstance()->GetPlayerLife();
-
 	const wchar_t* videoPath = nullptr;
 	float videoLength = 0.0f;
 
-	switch(playerLife)
-	{
-	case 2:
-		videoPath = L"SceneAnimation/3Life2_new.mp4";
-		videoLength = 8.0f;
-		break;
-	case 1:
-		videoPath = L"SceneAnimation/2Life1_new.mp4";
-		videoLength = 7.0f;
-		break;
-	default:
-		// 기본 비디오 설정
-		videoPath = L"SceneAnimation/loss_life.mp4";
-		videoLength = 7.0f;
-	}
+	//switch(playerLife)
+	//{
+	//case 2:
+	//	videoPath = L"SceneAnimation/3Life2_new.mp4";
+	//	videoLength = 8.0f;
+	//	break;
+	//case 1:
+	//	videoPath = L"SceneAnimation/2Life1_new.mp4";
+	//	videoLength = 7.0f;
+	//	break;
+	//default:
+	//	// 기본 비디오 설정
+	//	videoPath = L"SceneAnimation/loss_life.mp4";
+	//	videoLength = 7.0f;
+	//}
 
 	// 비디오 재생 시작
 	if(!VideoManager::PlayVideo(videoPath,videoLength)) {

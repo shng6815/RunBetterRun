@@ -28,7 +28,7 @@ HRESULT MainGameScene::Init()
 		return E_FAIL;
 	}
 
-	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
+	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
 	SpriteManager::GetInstance()->Init();
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	MonsterManager::GetInstance()->Init();
@@ -389,14 +389,15 @@ void MainGameScene::HandleButtonClick(PauseButton & button)
 	switch(button.type)
 	{
 	case PauseButtonType::STARTSCREEN:
-		SceneManager::GetInstance()->ChangeScene("GameStartScene");
+	    status = MainGameScene::SceneStatus::IN_GAME;
+		button.state = PauseButtonState::NORMAL;
 		break;
 
 	case PauseButtonType::MAP_EDITOR:
 		SceneManager::GetInstance()->ChangeScene("MapEditorScene");
 		break;
 	case PauseButtonType::EXIT:
-		DestroyWindow(g_hWnd);
+	    SceneManager::GetInstance()->ChangeScene("GameStartScene");
 		break;
 	}
 }

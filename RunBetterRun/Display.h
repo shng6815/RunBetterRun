@@ -1,15 +1,13 @@
 #pragma once
 #include "AItem.h"
-#include <map>
 
 class Display: public AItem
 {
-	static map<LPCWCH,DWORD> ids;
 	virtual BOOL Action(void) override;
 
 public:
-	Display(FPOINT pos) { Init(pos); }
-	Display(FPOINT pos, LPCWCH texturePath);
+	Display(FPOINT pos) {Init(pos);}
+	Display(FPOINT pos,LPCWCH texturePath);
 
 	virtual HRESULT Init(FPOINT pos) override;
 };

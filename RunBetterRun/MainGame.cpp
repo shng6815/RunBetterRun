@@ -12,6 +12,7 @@
 #include "JumpscareScene.h"
 #include "LossLifeScene.h"
 #include "DeadScene.h"
+#include "EndingScene.h"
 #include "VideoManager.h"
 #include "DataManager.h"
 #include "MapEditor.h"
@@ -32,7 +33,13 @@ HRESULT MainGame::Init()
 		return E_FAIL;
 	}
 
+
 	SoundManager::GetInstance()->PlayMusic("BGM",true,0.5f);
+	if(!AddFontResourceFromFile(L"Fonts/ChainsawCarnage.ttf"))
+	{
+		MessageBox(g_hWnd,TEXT("Font Load Failed"),TEXT("Error"),MB_OK);
+		return E_FAIL;
+	}
 
 	VideoManager::Init();
 	DataManager::GetInstance()->Init();	
@@ -44,6 +51,7 @@ HRESULT MainGame::Init()
 	SceneManager::GetInstance()->AddScene("LossLifeScene",new LossLifeScene());
 	SceneManager::GetInstance()->AddScene("JumpscareScene",new JumpscareScene());
 	SceneManager::GetInstance()->AddScene("DeadScene",new DeadScene());
+	SceneManager::GetInstance()->AddScene("EndingScene",new EndingScene());
 	SceneManager::GetInstance()->AddLoadingScene("LoadingScene",new LoadingScene());
 	SceneManager::GetInstance()->ChangeScene("GameStartScene");
 
@@ -68,6 +76,8 @@ void MainGame::Release()
 		delete backBuffer;
 		backBuffer = nullptr;
 	}
+
+	RemoveFontResourceEx(L"Fonts/ChainsawCarnage.ttf",FR_PRIVATE,0);
 
 	ReleaseDC(g_hWnd, hdc);
 	MapManager::GetInstance()->Release();
@@ -136,6 +146,18 @@ LRESULT MainGame::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lPara
 	}
 
 	return DefWindowProc(hWnd, iMessage, wParam, lParam);
+}
+
+BOOL MainGame::AddFontResourceFromFile(LPCWSTR fontPath)
+{
+	if(AddFontResourceEx(fontPath,FR_PRIVATE,0) == 0)
+	{
+		MessageBox(g_hWnd,L"글꼴을 로드할 수 없습니다.",L"경고",MB_OK);
+		return FALSE;
+	}
+
+	PostMessage(HWND_BROADCAST,WM_FONTCHANGE, 0, 0);
+	return true;
 }
 
 MainGame::MainGame()
