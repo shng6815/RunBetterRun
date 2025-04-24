@@ -54,6 +54,7 @@ HRESULT MainGameScene::Init()
 	PhoneUI* uiUnit = new PhoneUI();
 	uiUnit->Init(UIType::PLAYING, FPOINT{ 100, WINSIZE_Y - 500 }, FPOINT{ 300, 400 }, 0);
 	UIManager::GetInstance()->AddUIUnit("PhoneUI", uiUnit);
+	InitButtons();
 
 	status = SceneStatus::IN_GAME;
 	while(ShowCursor(FALSE) >= 0);
@@ -106,12 +107,18 @@ void MainGameScene::Release()
 
 void MainGameScene::Update()
 {
+	POINT cursor;
+	GetCursorPos(&cursor);
+	ScreenToClient(g_hWnd,&cursor);
+	mousePos = cursor;
+
 	switch (status)
 	{
 	case MainGameScene::SceneStatus::IN_GAME:
 		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) 
 		{
 			while(ShowCursor(TRUE) < 0);
+
 			status = SceneStatus::PAUSE;
 		}
 
@@ -129,9 +136,24 @@ void MainGameScene::Update()
 		UIManager::GetInstance()->Update();
 		ObstacleManager::GetInstance()->Update();
 		break;
+
 	case MainGameScene::SceneStatus::PAUSE:
-		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)
-			) {
+		CheckButtonHover();
+
+		if(KeyManager::GetInstance()->IsOnceKeyDown(VK_LBUTTON))
+		{
+			for(auto& button: buttons)
+			{
+				if(button.state==PauseButtonState::HOVER)
+				{
+					HandleButtonClick(button);
+					break;
+				}
+			}
+		}
+
+		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) 
+		{
 			while(ShowCursor(FALSE) >= 0);
 			status = SceneStatus::IN_GAME;
 		}
@@ -142,8 +164,10 @@ void MainGameScene::Update()
 		}
 
 		break;
+
 	case MainGameScene::SceneStatus::QUIT:
 		break;
+
 	default:
 		break;
 	}
@@ -158,6 +182,16 @@ void MainGameScene::Render(HDC hdc)
 	ApplyShake(hdc);
 
 	UIManager::GetInstance()->Render(hdc);
+
+	if(status == SceneStatus::PAUSE)
+	{
+		RenderPauseOverlay(hdc);
+		
+		for(auto & button : buttons)
+		{
+			RenderPauseMenu(hdc, button);
+		}
+	}
 }
 
 void MainGameScene::ShakeScreen(float shakePower, float time, bool isStepShake)
@@ -172,4 +206,166 @@ void MainGameScene::ApplyShake(HDC hdc)
 	POINT offset = screenShake.GetOffset();
 
 	BitBlt(hdc, offset.x, offset.y, WINSIZE_X, WINSIZE_Y, backBufferDC, 0, 0, SRCCOPY);
+}
+
+void MainGameScene::RenderPauseOverlay(HDC hdc)
+{
+	RECT rc;
+	GetClientRect(g_hWnd,&rc);
+
+	BLENDFUNCTION bf;
+	bf.BlendOp = AC_SRC_OVER; 
+	bf.BlendFlags = 0;
+	bf.SourceConstantAlpha = 150;
+	bf.AlphaFormat = 0;
+
+	HDC tempDC = CreateCompatibleDC(hdc);
+	HBITMAP tempBitmap = CreateCompatibleBitmap(hdc,rc.right,rc.bottom);
+	HBITMAP oldBitmap = (HBITMAP)SelectObject(tempDC,tempBitmap);
+	
+	HBRUSH blackBrush = CreateSolidBrush(RGB(0,0,0));
+	FillRect(tempDC,&rc,blackBrush);
+	DeleteObject(blackBrush);
+
+	AlphaBlend(hdc, 0, 0, rc.right, rc.bottom,tempDC,0,0,rc.right,rc.bottom,bf);
+
+	SelectObject(tempDC,oldBitmap);
+	DeleteObject(tempBitmap);
+	DeleteDC(tempDC);
+}
+
+void MainGameScene::RenderPauseMenu(HDC hdc,PauseButton& button)
+{
+	COLORREF textColor = RGB(220,220,220);
+
+	if(button.state == PauseButtonState::HOVER)
+	{
+		textColor = RGB(255,0,0);
+	}
+
+	SetTextColor(hdc,textColor);
+	SetBkMode(hdc,TRANSPARENT);
+
+	// 버튼 텍스트용 폰트
+	HFONT hFont = CreateFont(40,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,
+							 DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
+							 DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Chainsaw Carnage"));
+	HFONT oldFont = (HFONT)SelectObject(hdc,hFont);
+
+
+	DrawText(hdc,button.text,-1,&button.rect,DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+
+	if(button.state == PauseButtonState::HOVER || button.state == PauseButtonState::CLICKED) {
+		SIZE textSize;
+		GetTextExtentPoint32(hdc,button.text,wcslen(button.text),&textSize);
+
+		int lineX1 = button.rect.left + (button.rect.right - button.rect.left - textSize.cx) / 2;
+		int lineX2 = lineX1 + textSize.cx;
+		int lineY = button.rect.bottom - 5;  
+
+		HPEN underlinePen = CreatePen(PS_SOLID,2,textColor);
+		HPEN oldPen = (HPEN)SelectObject(hdc,underlinePen);
+
+		MoveToEx(hdc,lineX1,lineY,NULL);
+		LineTo(hdc,lineX2,lineY);
+
+		SelectObject(hdc,oldPen);
+		DeleteObject(underlinePen);
+	}
+
+	SelectObject(hdc,oldFont);
+	DeleteObject(hFont);
+}
+
+void MainGameScene::InitButtons()
+{
+	RECT rc;
+	GetClientRect(g_hWnd,&rc);
+
+	// 메뉴 배경 영역
+	int menuWidth = 400;
+	int menuHeight = 300;
+	int menuX = (rc.right - menuWidth) / 2;
+	int menuY = (rc.bottom - menuHeight) / 2;
+
+	int buttonWidth = 300; 
+	int buttonHeight = 40;
+	int buttonSpacing = 50;
+
+	// 버튼의 시작 Y 위치
+	int startY = menuY + 90;
+
+	buttons.resize(3);
+
+	// 버튼 중앙 정렬
+	int buttonX = menuX + (menuWidth - buttonWidth) / 2;
+
+	buttons[0].Init(
+		buttonX,
+		startY,
+		buttonWidth,
+		buttonHeight,
+		PauseButtonType::STARTSCREEN,
+		L"REPLAY"
+	);
+
+
+	buttons[1].Init(
+		buttonX,
+		startY + buttonHeight + buttonSpacing,
+		buttonWidth,
+		buttonHeight,
+		PauseButtonType::MAP_EDITOR,
+		L"Map Editer"
+	);
+
+
+	buttons[2].Init(
+		buttonX,
+		startY + (buttonHeight + buttonSpacing) * 2,
+		buttonWidth,
+		buttonHeight,
+		PauseButtonType::EXIT,
+		L"EXIT GAME"
+	);
+}
+
+void MainGameScene::CheckButtonHover()
+{
+	for(auto& button : buttons)
+	{
+		if(PtInRect(&button.rect,mousePos))
+		{
+			if(button.state!=PauseButtonState::CLICKED)
+			{
+				button.state=PauseButtonState::HOVER;
+			}
+		} else
+		{
+			if(button.state!=PauseButtonState::CLICKED)
+			{
+				button.state=PauseButtonState::NORMAL;
+			}
+		}
+	}
+}
+
+void MainGameScene::HandleButtonClick(PauseButton & button)
+{
+	button.state = PauseButtonState::CLICKED;
+
+	switch(button.type)
+	{
+	case PauseButtonType::STARTSCREEN:
+		SceneManager::GetInstance()->ChangeScene("GameStartScene");
+		break;
+
+	case PauseButtonType::MAP_EDITOR:
+		SceneManager::GetInstance()->ChangeScene("MapEditorScene");
+		break;
+	case PauseButtonType::EXIT:
+		DestroyWindow(g_hWnd);
+		break;
+	}
 }

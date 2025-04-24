@@ -149,8 +149,8 @@ void GameStartScene::HandleButtonClick(Button & button)
 	switch(button.type)
 	{
 	case ButtonType::START:
-	    //SceneManager::GetInstance()->ChangeScene("LoadingScene");
-		SceneManager::GetInstance()->ChangeScene("MainGameScene");
+	    SceneManager::GetInstance()->ChangeScene("OpeningScene");
+		//SceneManager::GetInstance()->ChangeScene("MainGameScene");
 		break;
 	
 	case ButtonType::MAP_EDITOR:
@@ -164,8 +164,7 @@ void GameStartScene::HandleButtonClick(Button & button)
 
 void GameStartScene::DrawTitle(HDC hdc)
 {
-	// 텍스트 색상을 빨간색으로 변경
-	SetTextColor(hdc,RGB(180,0,0));  // 진한 빨간색  
+	SetTextColor(hdc,RGB(180,0,0));   
 	SetBkMode(hdc,TRANSPARENT);
 
 	RECT rc;
@@ -193,7 +192,7 @@ void GameStartScene::DrawTitle(HDC hdc)
 	DeleteObject(hFont);
 }
 
-void GameStartScene::DrawButton(HDC hdc,Button & button)
+void GameStartScene::DrawButton(HDC hdc, Button & button)
 {
 
 	COLORREF textColor = RGB(220, 220, 220);
