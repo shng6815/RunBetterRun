@@ -30,63 +30,21 @@ bool MapManager::LoadMap(const LPCWCH filePath)
 {
 	if(DataManager::GetInstance()->LoadMapFile(filePath))
 	{
-		if(DataManager::GetInstance()->GetMapData(mapData))
-		{
-			return true;
-		}
+		return DataManager::GetInstance()->GetMapData(mapData);
 	}
-
-	// 윗부분 실패하면 직접 파일 읽기
-	HANDLE file = CreateFile(filePath,GENERIC_READ,0,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
-	if(file == INVALID_HANDLE_VALUE)
-	{
-		return false;
-	}
-
-	DWORD bytesRead = 0;
-
-	// 맵 크기 읽기
-	int width = 0,height = 0;
-	if(!ReadFile(file,&width,sizeof(int),&bytesRead,NULL) || bytesRead != sizeof(int) ||
-		!ReadFile(file,&height,sizeof(int),&bytesRead,NULL) || bytesRead != sizeof(int))
-	{
-		CloseHandle(file);
-		return false;
-	}
-
-	mapData.width = width;
-	mapData.height = height;
-	mapData.tiles.resize(width * height);
-
-	// 타일 데이터 읽기
-	for(int y = 0; y < height; y++)
-	{
-		for(int x = 0; x < width; x++)
-		{
-			Room tile;
-			if(!ReadFile(file,&tile,sizeof(Room),&bytesRead,NULL) || bytesRead != sizeof(Room))
-			{
-				CloseHandle(file);
-				return false;
-			}
-			mapData.tiles[y * width + x] = tile;
-		}
-	}
-
-	CloseHandle(file);
-
-	return InitializeTexture() == S_OK;
+	return false;
 }
 
-bool MapManager::SaveMap(const LPCWCH filePath)
-{
+bool MapManager::SaveMap(const LPCWCH filePath) {
+	// 현재 맵 데이터를 DataManager에 설정 후 저장
 	DataManager::GetInstance()->ClearAllData();
 	DataManager::GetInstance()->SetMapData(mapData.tiles,mapData.width,mapData.height);
-	DataManager::GetInstance()->SetTextureInfo(L"Image/tiles.bmp",
-											 mapData.textureTileSize,
-											 mapData.textureTileRowSize,
-											 mapData.textureTileColumnSize);
 
+	// 텍스처 정보 설정
+	DataManager::GetInstance()->SetTextureInfo(L"Image/tiles.bmp",
+										   mapData.textureTileSize,
+										   mapData.textureTileRowSize,
+										   mapData.textureTileColumnSize);
 	return DataManager::GetInstance()->SaveMapFile(filePath);
 }
 

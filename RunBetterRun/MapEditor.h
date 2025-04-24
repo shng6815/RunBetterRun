@@ -6,8 +6,8 @@
 #define TILEMAPTOOL_X   1600
 #define TILEMAPTOOL_Y   900
 
-#define VISIBLE_MAP_WIDTH  40       
-#define VISIBLE_MAP_HEIGHT 40
+#define VISIBLE_MAP_WIDTH  50       
+#define VISIBLE_MAP_HEIGHT 50
 #define TILE_SIZE 32
 #define SAMPLE_TILE_X 7          
 #define SAMPLE_TILE_Y 4
@@ -23,6 +23,8 @@ private:
 	RoomType selectedTileType;
 	Direction selectedObstacleDir;
 	POINT selectedTile;
+	POINT selectedSprite;
+	SpriteType selectedSpriteType;
 
 	// 맵 데이터
 	vector<Room> tiles;
@@ -34,20 +36,33 @@ private:
 	// UI 요소
 	RECT mapArea;
 	RECT sampleArea;
+	RECT sampleSpriteArea;
 	Image* sampleTileImage;
+	Image* sampleSpriteImage;
 
 	// 확대/축소 및 스크롤
-	float zoomLevel;
 	FPOINT viewportOffset;
-	bool isDragging;
 	POINT lastMousePos;
-
+	float zoomLevel;
+	bool isDragging;
+	
 	// 마우스 입력
 	POINT mousePos;
+	POINT dragStart;        
+	POINT dragEnd;  
+	POINT rightDragStart;
+	POINT rightDragEnd;
+
+	bool isDraggingArea;   
 	bool mouseInMapArea;
 	bool mouseInSampleArea;
+	bool mouseInSpriteArea;
+	bool isSpriteSelected;
+	bool useCenter;
+	bool enableDragMode;
+	bool isRightDraggingArea;  
 
-	// 편집 함수
+	// 편집 
 	void HandleInput();
 	void PlaceTile(int x,int y);
 	void PlaceStart(int x,int y);
@@ -55,21 +70,30 @@ private:
 	void PlaceMonster(int x,int y);
 	void PlaceItem(int x,int y);
 	void RemoveObject(int x,int y);
+	void RemoveTilesInDragArea();
 
 	// 좌표 변환
 	POINT ScreenToTile(POINT screenPos);
 	POINT TileToScreen(POINT tilePos);
-
+	FPOINT CalculateSpritePosition(int x,int y);
+	
 	// 파일 처리
 	void SaveMap(const wchar_t* filePath);
+	void SaveMapAs();
 	void LoadMap(const wchar_t* filePath);
 	void ClearMap();
 
-	// 렌더링 헬퍼
+	void ConvertToDataManager();
+	void ConvertFromDataManager();
+
+	// 렌더
 	void RenderMapTiles(HDC hdc);
 	void RenderSampleTiles(HDC hdc);
+	void RenderSampleSprites(HDC hdc);
 	void RenderSprites(HDC hdc);
 	void RenderObstacles(HDC hdc);
+	void RenderDragArea(HDC hdc);
+	void RenderRightDragArea(HDC hdc);
 	void RenderUI(HDC hdc);
 
 public:
@@ -86,6 +110,7 @@ public:
 	void ResizeMap(int newWidth,int newHeight);
 	void Zoom(float delta);
 	void Scroll(float deltaX,float deltaY);
+	void ApplyTilesToDragArea();
 	void ChangeObstacleDirection(Direction dir);
 
 	// 마우스 휠 이벤트 처리

@@ -5,42 +5,103 @@
 #include "Image.h";
 #include "Player.h"
 #include "VideoManager.h"
+#include <random>
 #include <mfapi.h>
+#include <ctime>
 
+#define DEAD_IMAGE_COUNT 6
 
 HRESULT DeadScene::Init()
 {
-	bg = ImageManager::GetInstance()->AddImage("DeadImage",
-	L"horrorloading/horror_loading2.bmp",WINSIZE_X,WINSIZE_Y);
+	// 현재 시간 기반 시드 생성
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
 
-	// 비디오 재생 시작
-	if(!VideoManager::PlayVideo(L"SceneAnimation/Dead.mp4",10.0f)) {
-		// 실패 시 바로 다음 씬으로
-		Player::GetInstance()->InitPlayerLife();
-		SceneManager::GetInstance()->ChangeScene("GameStartScene");
-	}
+	std::uniform_int_distribution<> dist(1,DEAD_IMAGE_COUNT);
+	int randomImage = dist(gen);
+
+	char keyBuffer[100];
+	sprintf_s(keyBuffer,"DeadImage%d",randomImage);
+	string imageKey = keyBuffer;
+
+	wchar_t imagePath[100];
+	swprintf_s(imagePath,L"Image/DeadMent%d.bmp",randomImage);
+
+	bg = ImageManager::GetInstance()->AddImage(imageKey,
+	imagePath,WINSIZE_X,WINSIZE_Y);
+
+	displayDeadTime = 0.0f;
+	minDeadTime = 3.0f;
+
+	fadeAlpha = 255;
+	fadeState = FADESTATE::FADE_IN;
 
 	return S_OK;
 }
 
 void DeadScene::Release()
 {
-	
+
 }
 
 void DeadScene::Update()
 {
-	VideoManager::GetInstance()->Update();
+	if(fadeState == FADESTATE::FADE_IN)
+	{
+		fadeAlpha -=200.0f * TimerManager::GetInstance()->GetDeltaTime();
+		if(fadeAlpha < 0)
+		{
+			fadeAlpha = 0;
+			fadeState = FADESTATE::DISPLAY;
+		}
+	}
 
-	// 비디오 종료 확인
-	if(VideoManager::IsFinished()) {
-		Player::GetInstance()->InitPlayerLife();
-		SceneManager::GetInstance()->ChangeScene("GameStartScene","LoadingScene");
+	else if(fadeState == FADESTATE::DISPLAY)
+	{
+		displayDeadTime += TimerManager::GetInstance()->GetDeltaTime();
+
+		if(displayDeadTime > minDeadTime)
+		{
+			fadeState = FADESTATE::FADE_OUT;
+		}
+	}
+
+	else if(fadeState == FADESTATE::FADE_OUT)
+	{
+		fadeAlpha +=200.0f * TimerManager::GetInstance()->GetDeltaTime();
+
+		if(fadeAlpha > 255)
+		{
+			fadeAlpha = 255;
+
+			Player::GetInstance()->InitPlayerLife();
+			SceneManager::GetInstance()->ChangeScene("GameStartScene", "LoadingScene");
+			while(ShowCursor(TRUE) < 0);
+		}
 	}
 }
 
 
 void DeadScene::Render(HDC hdc)
 {
+	HDC memDC = bg->GetMemDC();
+
+	BLENDFUNCTION bf; // 알파 블렌딩 구조체
+	bf.BlendOp = AC_SRC_OVER; // 블렌딩 연산 방식, 원본 파일 블렌딩
+	bf.BlendFlags = 0;
+
+	if(fadeState == FADESTATE::FADE_IN)
+	{
+		bf.SourceConstantAlpha = (BYTE)(255 - fadeAlpha);
+	} 
+	else // DISPLAY
+	{
+		bf.SourceConstantAlpha = 255; // 완전 불투명
+	}
+
+	bf.AlphaFormat = 0;
+
+	AlphaBlend(hdc,0,0,WINSIZE_X,WINSIZE_Y,
+			   memDC,0,0,WINSIZE_X,WINSIZE_Y,bf);
 
 }

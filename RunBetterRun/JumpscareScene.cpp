@@ -4,7 +4,7 @@
 HRESULT JumpscareScene::Init()
 {
 	// 비디오 재생 시작
-	if(!VideoManager::PlayVideo(L"SceneAnimation/jumpscare.mp4",2.0f)) {
+	if(!VideoManager::PlayVideo(L"SceneAnimation/jumpscare.mp4",4.0f)) {
 		// 실패 시 바로 다음 씬으로
 		SceneManager::GetInstance()->ChangeScene("LossLifeScene");
 	}
