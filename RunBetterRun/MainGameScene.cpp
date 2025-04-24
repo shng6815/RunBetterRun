@@ -32,14 +32,12 @@ HRESULT MainGameScene::Init()
 	for(const auto& itemData : items)
 	{
 		Key* key = new Key(itemData.pos);
-		key->SetAnimInfo(itemData.aniInfo);
 		ItemManager::GetInstance()->PutItem(key);
 	}
 	const auto& monsters = DataManager::GetInstance()->GetMonsters();
 	for(const auto& monsterData : monsters)
 	{
 		Tentacle* tentacle = new Tentacle(monsterData.pos);
-		tentacle->SetAnimInfo(monsterData.aniInfo);
 		MonsterManager::GetInstance()->PutMonster(tentacle);
 	}
 	const auto& obstacles = DataManager::GetInstance()->GetObstacles();
