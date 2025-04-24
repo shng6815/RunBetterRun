@@ -10,7 +10,7 @@ enum class Direction: BYTE
 };
 
 enum class SpriteType: BYTE
-{ NONE, KEY, ITEM, MONSTER };
+{ NONE, KEY, ITEM, MONSTER, OBSTACLE };
 
 enum class UIType: BYTE
 {
