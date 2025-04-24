@@ -24,7 +24,7 @@ public:
 	void Render();
 
 	LRESULT MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
-
+	BOOL AddFontResourceFromFile(LPCWSTR fontPath);
 	MainGame();
 	~MainGame();
 };

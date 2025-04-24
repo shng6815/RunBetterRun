@@ -43,12 +43,6 @@ HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 
 	static bool isFirstInit = true;
 
-	if(isFirstInit)
-	{
-		playerLife = 3;
-		isFirstInit = false;
-	}
-
 	this->shakeFunc = shakeFunc;
 
 	SoundManager::GetInstance()->LoadSound("Step","Sounds/SFX_Step.wav");
@@ -267,11 +261,6 @@ void Player::UpdateFOV()
 {
 	plane.x = cameraVerDir.y * this->fov;
 	plane.y = -cameraVerDir.x * this->fov;
-}
-
-void Player::LossPlayerLife()
-{
-	if(playerLife > 0) playerLife -= 1;
 }
 
 void Player::Save()
