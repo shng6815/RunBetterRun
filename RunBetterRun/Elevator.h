@@ -12,7 +12,6 @@ class Elevator: public AObstacle
 	BOOL Close(FLOAT deltaTime);
 
 public:
-	Elevator(POINT pos,Direction dir);
 	Elevator(POINT pos,Direction dir,DWORD id);
 	virtual BOOL Action(void) override;
 	virtual void Update(void) override;
