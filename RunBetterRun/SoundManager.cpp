@@ -272,6 +272,33 @@ void SoundManager::SetCategoryVolume(SoundType type,float volume)
 	}
 }
 
+void SoundManager::UpdateSoundVolume(const std::string& soundID, float volume)
+{
+	// 효과음이 존재하는지 확인
+	auto it = soundLibrary.find(soundID);
+	if (it == soundLibrary.end()) {
+		return; // 효과음이 없으면 종료
+	}
+
+	// 현재 활성화된 채널이 있는지 확인
+	auto channelIt = activeChannels.find(soundID);
+	if (channelIt == activeChannels.end() || channelIt->second.empty()) {
+		return; // 활성화된 채널이 없으면 종료
+	}
+
+	// 볼륨 계산 (마스터 볼륨 × 카테고리 볼륨 × 개별 볼륨)
+	float calculatedVolume = masterVolume * categoryVolume[SoundType::SFX] * volume;
+	if (isMuted) calculatedVolume = 0.0f;
+
+	// MIX_MAX_VOLUME은 128이므로 0.0~1.0 범위를 0~128로 변환
+	int sdlVolume = static_cast<int>(calculatedVolume * MIX_MAX_VOLUME);
+
+	// 해당 사운드의 모든 활성 채널의 볼륨을 업데이트
+	for (int channel : channelIt->second) {
+		Mix_Volume(channel, sdlVolume);
+	}
+}
+
 void SoundManager::SetMute(bool mute)
 {
 	isMuted = mute;

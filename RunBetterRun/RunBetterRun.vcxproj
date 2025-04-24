@@ -144,6 +144,7 @@
     <ClCompile Include="DeadScene.cpp" />
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="Elevator.cpp" />
+    <ClCompile Include="EndingScene.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameStartScene.cpp" />
     <ClCompile Include="Image.cpp" />
@@ -180,6 +181,7 @@
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerManager.cpp" />
+    <ClCompile Include="TutorialUI.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="UIUnit.cpp" />
     <ClCompile Include="VideoManager.cpp" />
@@ -193,6 +195,7 @@
     <ClInclude Include="DeadScene.h" />
     <ClInclude Include="Display.h" />
     <ClInclude Include="Elevator.h" />
+    <ClInclude Include="EndingScene.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameStartScene.h" />
     <ClInclude Include="Image.h" />
@@ -230,6 +233,7 @@
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerManager.h" />
+    <ClInclude Include="TutorialUI.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="UIUnit.h" />
     <ClInclude Include="VideoManager.h" />

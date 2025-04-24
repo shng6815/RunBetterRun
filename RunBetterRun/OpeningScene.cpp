@@ -30,7 +30,6 @@ void OpeningScene::Render(HDC hdc)
 {
 	VideoManager::GetInstance()->Update();
 
-	// 비디오 종료 확인
 	if(VideoManager::GetInstance()->IsFinished()) {
 		SceneManager::GetInstance()->ChangeScene("MainGameScene","LoadingScene");
 	}

@@ -7,7 +7,7 @@
 HRESULT LoadingScene::Init()
 {
 	loadingTime = 0.0f;
-	minLoadingTime = 3.0f;
+	minLoadingTime = 1.0f;
 	isLoadingComplete = false;
 
 	loadingImage = ImageManager::GetInstance()->AddImage("LoadingAnim",

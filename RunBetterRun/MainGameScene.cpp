@@ -14,8 +14,10 @@
 #include "Display.h"
 #include "Elevator.h"
 #include "Phone.h"
+#include "PhoneUI.h"
 #include "Stun.h"
 #include "Insight.h"
+#include "TutorialUI.h"
 
 HRESULT MainGameScene::Init()
 {
@@ -26,7 +28,7 @@ HRESULT MainGameScene::Init()
 		return E_FAIL;
 	}
 
-	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
+	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
 	SpriteManager::GetInstance()->Init();
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	MonsterManager::GetInstance()->Init();
@@ -60,7 +62,6 @@ HRESULT MainGameScene::Init()
 	InitButtons();
 
 	status = SceneStatus::IN_GAME;
-	while(ShowCursor(FALSE) >= 0);
 
 	RECT rc;
 	GetClientRect(g_hWnd, &rc);
@@ -71,9 +72,9 @@ HRESULT MainGameScene::Init()
 	oldBitmap = (HBITMAP)SelectObject(backBufferDC, backBufferBitmap);
 	ReleaseDC(g_hWnd, screenDC);
 
-	SoundManager::GetInstance()->LoadMusic("GameSceneBGM","Sounds/BGM_InGame.wav");
+	SoundManager::GetInstance()->LoadMusic("GameSceneBGM","Sounds/BGM_InGame2.wav");
 
-	SoundManager::GetInstance()->PlayMusic("GameSceneBGM",true,0.5f);
+	SoundManager::GetInstance()->PlayMusic("GameSceneBGM",true,0.3f);
 
 	/*ItemManager::GetInstance()->PutItem(new Key({ 21.5, 10.5 }));
 	MonsterManager::GetInstance()->PutMonster(new Tentacle({ 21.5, 8.5 }));
@@ -106,6 +107,7 @@ void MainGameScene::Release()
 	MapManager::GetInstance()->Release();
 
 	UIManager::GetInstance()->Release();
+	SoundManager::GetInstance()->StopAllSounds();
 
 	SelectObject(backBufferDC, oldBitmap);
 	DeleteObject(backBufferBitmap);
@@ -114,37 +116,45 @@ void MainGameScene::Release()
 
 void MainGameScene::Update()
 {
+	// Get mouse position
 	POINT cursor;
 	GetCursorPos(&cursor);
 	ScreenToClient(g_hWnd,&cursor);
 	mousePos = cursor;
 
-	switch (status)
+	switch(status)
 	{
 	case MainGameScene::SceneStatus::IN_GAME:
-		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) 
-		{
-			while(ShowCursor(TRUE) < 0);
+		if(ShowCursor(FALSE) >= 0)
+			ShowCursor(FALSE);
 
+		if(KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE))
+		{
+			ShowCursor(TRUE);
+			SoundManager::GetInstance()->StopAllSounds();
+			MonsterManager::GetInstance()->StopSound();
 			status = SceneStatus::PAUSE;
+			break;
 		}
 
-		if (KeyManager::GetInstance()->IsOnceKeyDown('M'))
+		if(KeyManager::GetInstance()->IsOnceKeyDown('M'))
 		{
 			UIManager::GetInstance()->ToggleActiveUIUnit("PhoneUI");
 		}
-		
+
 		Player::GetInstance()->Update();
-		if (rayCasting)
+		if(rayCasting)
 			rayCasting->Update();
 		SpriteManager::GetInstance()->SortSpritesByDistance();
 		MonsterManager::GetInstance()->Update();
 		ItemManager::GetInstance()->Update();
-		UIManager::GetInstance()->Update();
 		ObstacleManager::GetInstance()->Update();
 		break;
 
 	case MainGameScene::SceneStatus::PAUSE:
+		if(ShowCursor(TRUE) < 0)
+			ShowCursor(TRUE);
+
 		CheckButtonHover();
 
 		if(KeyManager::GetInstance()->IsOnceKeyDown(VK_LBUTTON))
@@ -159,9 +169,9 @@ void MainGameScene::Update()
 			}
 		}
 
-		if (KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE)) 
+		if(KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE))
 		{
-			while(ShowCursor(FALSE) >= 0);
+			ShowCursor(FALSE);
 			status = SceneStatus::IN_GAME;
 		}
 
@@ -169,12 +179,19 @@ void MainGameScene::Update()
 		{
 			SceneManager::GetInstance()->ChangeScene("MapEditorScene");
 		}
-
 		break;
 
 	case MainGameScene::SceneStatus::QUIT:
 		break;
 
+	case SceneStatus::MONSTER_CATCH:
+		// 몬스터에게 잡혔을 때의 회전 애니메이션 처리
+		UpdateMonsterCatchAnimation();
+		break;
+
+	case SceneStatus::PHONE_GUIDE:
+		// 폰 가이드 표시 및 입력 대기
+		break;
 	default:
 		break;
 	}
@@ -253,7 +270,6 @@ void MainGameScene::RenderPauseMenu(HDC hdc,PauseButton& button)
 	SetTextColor(hdc,textColor);
 	SetBkMode(hdc,TRANSPARENT);
 
-	// ��ư �ؽ�Ʈ�� ��Ʈ
 	HFONT hFont = CreateFont(40,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,
 							 DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
 							 DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Chainsaw Carnage"));
@@ -290,7 +306,6 @@ void MainGameScene::InitButtons()
 	RECT rc;
 	GetClientRect(g_hWnd,&rc);
 
-	// �޴� ��� ����
 	int menuWidth = 400;
 	int menuHeight = 300;
 	int menuX = (rc.right - menuWidth) / 2;
@@ -300,12 +315,10 @@ void MainGameScene::InitButtons()
 	int buttonHeight = 40;
 	int buttonSpacing = 50;
 
-	// ��ư�� ���� Y ��ġ
 	int startY = menuY + 90;
 
 	buttons.resize(3);
 
-	// ��ư �߾� ����
 	int buttonX = menuX + (menuWidth - buttonWidth) / 2;
 
 	buttons[0].Init(
@@ -365,14 +378,89 @@ void MainGameScene::HandleButtonClick(PauseButton & button)
 	switch(button.type)
 	{
 	case PauseButtonType::STARTSCREEN:
-		SceneManager::GetInstance()->ChangeScene("GameStartScene");
+	    status = MainGameScene::SceneStatus::IN_GAME;
+		button.state = PauseButtonState::NORMAL;
 		break;
 
 	case PauseButtonType::MAP_EDITOR:
 		SceneManager::GetInstance()->ChangeScene("MapEditorScene");
 		break;
 	case PauseButtonType::EXIT:
-		DestroyWindow(g_hWnd);
+	    SceneManager::GetInstance()->ChangeScene("GameStartScene");
 		break;
 	}
+}
+
+void MainGameScene::StartMonsterCatchAnimation(FPOINT monsterPos) {
+	// 현재 게임 상태 저장
+	status = SceneStatus::MONSTER_CATCH;
+	isCaught = true;
+	catchRotationTime = 0.0f;
+
+	// 현재 방향 저장
+	originalDirection = Player::GetInstance()->GetCameraVerDir();
+
+	// 몬스터 방향으로의 방향 계산
+	FPOINT playerPos = Player::GetInstance()->GetCameraPos();
+	targetDirection = {
+		monsterPos.x - playerPos.x,
+		monsterPos.y - playerPos.y
+	};
+
+	// 방향 벡터 정규화
+	float length = sqrt(targetDirection.x * targetDirection.x + targetDirection.y * targetDirection.y);
+	if(length > 0.0001f) {
+		targetDirection.x /= length;
+		targetDirection.y /= length;
+	}
+}
+
+void MainGameScene::UpdateMonsterCatchAnimation() {
+	float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
+	catchRotationTime += deltaTime;
+
+	// 보간 계수 (0.0 ~ 1.0)
+	float t = min(catchRotationTime / catchRotationDuration,1.0f);
+
+	// ease-in-out 보간 적용
+	t = t < 0.5f ? 2.0f * t * t : 1.0f - pow(-2.0f * t + 2.0f,2.0f) / 2.0f;
+
+	// 방향 선형 보간
+	FPOINT newDir = {
+		originalDirection.x + t * (targetDirection.x - originalDirection.x),
+		originalDirection.y + t * (targetDirection.y - originalDirection.y)
+	};
+
+	// 방향 벡터 정규화
+	float length = sqrt(newDir.x * newDir.x + newDir.y * newDir.y);
+	if(length > 0.0001f) {
+		newDir.x /= length;
+		newDir.y /= length;
+	}
+
+	// 플레이어의 방향 직접 변경 (Player 클래스에 SetCameraDirection 메소드 필요)
+	Player::GetInstance()->SetCameraDirection(newDir);
+
+	// 애니메이션 완료 시
+	if(catchRotationTime >= catchRotationDuration) {
+		isCaught = false;
+		// JumpscareScene으로 전환
+		SceneManager::GetInstance()->ChangeScene("JumpscareScene");
+	}
+}
+
+void MainGameScene::ShowPhoneGuide()
+{
+	UIManager::GetInstance()->ChangeUIType(UIType::PAUSE);
+	status = SceneStatus::PHONE_GUIDE;
+
+	TutorialUI* tutorialUI = new TutorialUI();
+	tutorialUI->Init(UIType::PAUSE,{WINSIZE_X/2,WINSIZE_Y/2},{676,900},0);
+	UIManager::GetInstance()->AddUIUnit("PhoneGuide", tutorialUI);
+}
+
+void MainGameScene::SetInGameStatus()
+{
+	status = SceneStatus::IN_GAME;
+	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
 }

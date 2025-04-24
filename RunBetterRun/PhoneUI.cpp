@@ -20,7 +20,7 @@ HRESULT PhoneUI::Init(UIType type,FPOINT pos,FPOINT size,INT layer)
 	phoneImage = ImageManager::GetInstance()->AddImage("PhoneUI",
 		L"Image/PhoneUI.bmp",size.x,size.y,true,RGB(255,0,255));
 
-	isActive = true;
+	isActive = false;
 
 	const float REL_X = 20.f / 200;
 	const float REL_Y = 77.f / 300;
@@ -88,6 +88,8 @@ HRESULT PhoneUI::Init(UIType type,FPOINT pos,FPOINT size,INT layer)
 	hasInsight = false;
 	insightTime = 0.0f;
 	insightTimer = 0.0f;
+
+	ToggleActive();
 
 	return S_OK;
 }

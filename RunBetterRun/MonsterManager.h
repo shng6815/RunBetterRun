@@ -30,6 +30,8 @@ private:
 	FLOAT	stunTime;
 
 	bool heartbeatPlaying = false;
+	bool chasePlaying = false;
+
 	void UpdateHeartbeatSound(float distance);
 
 	vector<FPOINT> FindPath(FPOINT start,FPOINT end, vector<FPOINT>& paths);
@@ -49,5 +51,9 @@ public:
 	void Stun(FLOAT time) {	stunTime += time; }
 
 	FPOINT GetClosestMonsterPos();
+
+	void StopSound(){
+		heartbeatPlaying = chasePlaying = false;
+	};
 };
 

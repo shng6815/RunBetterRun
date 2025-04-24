@@ -115,8 +115,13 @@ public:
 	void CheckButtonHover();               // 마우스 오버 체크
 	void HandleButtonClick(PauseButton& button); // 버튼 클릭 처리
 
+	void StartMonsterCatchAnimation(FPOINT monsterPos);
+	void UpdateMonsterCatchAnimation();
+	void ShowPhoneGuide();
+
+	void SetInGameStatus();
 private:
-	enum class SceneStatus { IN_GAME, PAUSE, QUIT };
+	enum class SceneStatus { IN_GAME, PAUSE, QUIT, MONSTER_CATCH, PHONE_GUIDE };
 
 	SceneStatus status;
 	RayCast* rayCasting;
@@ -129,5 +134,11 @@ private:
 
 	// 일시정지 메뉴
 	vector<PauseButton> buttons;   
-	POINT mousePos;           
+	POINT mousePos;
+
+	bool isCaught = false;
+    float catchRotationTime = 0.0f;
+    float catchRotationDuration = 0.2f; // 회전에 걸리는 시간(초)
+    FPOINT originalDirection;
+    FPOINT targetDirection;
 };

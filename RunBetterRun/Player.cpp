@@ -43,17 +43,13 @@ HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 
 	static bool isFirstInit = true;
 
-	if(isFirstInit)
-	{
-		playerLife = 3;
-		isFirstInit = false;
-	}
-
 	this->shakeFunc = shakeFunc;
 
 	SoundManager::GetInstance()->LoadSound("Step","Sounds/SFX_Step.wav");
 
 	SoundManager::GetInstance()->LoadSound("Heart","Sounds/SFX_Heart.wav");
+
+	SoundManager::GetInstance()->LoadSound("Chase","Sounds/SFX_ComeMonster.wav");
 
 	return S_OK;
 }
@@ -171,10 +167,10 @@ void Player::MoveCamera(float deltaTime)
 		// 발소리 재생 - 걷기/뛰기에 따라 다른 볼륨으로 재생
 		if(moveSpeed == runSpeed) {
 			// 뛰는 소리 (더 큰 볼륨)
-			SoundManager::GetInstance()->PlaySound("Step",false,1.0f);
+			SoundManager::GetInstance()->PlaySound("Step",false,0.5f);
 		} else {
 			// 걷는 소리 (약간 작은 볼륨)
-			SoundManager::GetInstance()->PlaySound("Step",false,0.7f);
+			SoundManager::GetInstance()->PlaySound("Step",false,0.3f);
 		}
 
 		stepElapsedTime = 0;
@@ -267,11 +263,6 @@ void Player::UpdateFOV()
 {
 	plane.x = cameraVerDir.y * this->fov;
 	plane.y = -cameraVerDir.x * this->fov;
-}
-
-void Player::LossPlayerLife()
-{
-	if(playerLife > 0) playerLife -= 1;
 }
 
 void Player::Save()

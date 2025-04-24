@@ -43,7 +43,9 @@ void ItemManager::Update(void)
     {
 		if ((*iter)->Update())
 		{
-			SoundManager::GetInstance()->PlaySoundW("CollectKey");
+			SoundManager::GetInstance()->StopSound("CollectKey");
+
+			SoundManager::GetInstance()->PlaySound("CollectKey",false , 0.2f);
 			delete *iter;
 			iter = items.erase(iter);
 		}
