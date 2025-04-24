@@ -180,6 +180,7 @@
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerManager.cpp" />
+    <ClCompile Include="TutorialUI.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="UIUnit.cpp" />
     <ClCompile Include="VideoManager.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerManager.h" />
+    <ClInclude Include="TutorialUI.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="UIUnit.h" />
     <ClInclude Include="VideoManager.h" />

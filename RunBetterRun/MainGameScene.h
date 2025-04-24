@@ -118,6 +118,8 @@ public:
 	void StartMonsterCatchAnimation(FPOINT monsterPos);
 	void UpdateMonsterCatchAnimation();
 	void ShowPhoneGuide();
+
+	void SetInGameStatus();
 private:
 	enum class SceneStatus { IN_GAME, PAUSE, QUIT, MONSTER_CATCH, PHONE_GUIDE };
 

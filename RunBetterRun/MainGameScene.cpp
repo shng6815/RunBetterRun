@@ -17,6 +17,7 @@
 #include "PhoneUI.h"
 #include "Stun.h"
 #include "Insight.h"
+#include "TutorialUI.h"
 
 HRESULT MainGameScene::Init()
 {
@@ -158,7 +159,6 @@ void MainGameScene::Update()
 		SpriteManager::GetInstance()->SortSpritesByDistance();
 		MonsterManager::GetInstance()->Update();
 		ItemManager::GetInstance()->Update();
-		UIManager::GetInstance()->Update();
 		ObstacleManager::GetInstance()->Update();
 		break;
 
@@ -202,15 +202,6 @@ void MainGameScene::Update()
 
 	case SceneStatus::PHONE_GUIDE:
 		// 폰 가이드 표시 및 입력 대기
-		if(KeyManager::GetInstance()->IsOnceKeyDown(VK_SPACE)) {
-			// 폰 UI 등록
-			PhoneUI* uiUnit = new PhoneUI();
-			uiUnit->Init(UIType::PLAYING,FPOINT{100,WINSIZE_Y - 500},FPOINT{300,400},0);
-			UIManager::GetInstance()->AddUIUnit("PhoneUI",uiUnit);
-
-			// 게임 상태 복원
-			status = SceneStatus::IN_GAME;
-		}
 		break;
 	default:
 		break;
@@ -470,5 +461,16 @@ void MainGameScene::UpdateMonsterCatchAnimation() {
 
 void MainGameScene::ShowPhoneGuide()
 {
+	UIManager::GetInstance()->ChangeUIType(UIType::PAUSE);
 	status = SceneStatus::PHONE_GUIDE;
+
+	TutorialUI* tutorialUI = new TutorialUI();
+	tutorialUI->Init(UIType::PAUSE,{WINSIZE_X/2,WINSIZE_Y/2},{676,900},0);
+	UIManager::GetInstance()->AddUIUnit("PhoneGuide", tutorialUI);
+}
+
+void MainGameScene::SetInGameStatus()
+{
+	status = SceneStatus::IN_GAME;
+	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
 }

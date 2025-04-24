@@ -210,14 +210,22 @@ void Image::RenderResized(HDC hdc,int destX,int destY,int width,int height)
 	}
 }
 
-void Image::RenderResized(HDC hdc,int destX,int destY,int width,int height,int frameIndex)
+void Image::RenderResized(HDC hdc,int destX,int destY,int width,int height,int frameIndex,bool isCenter)
 {
 	imageInfo->currFrameX = frameIndex;
+
+	int x = destX,y = destY;
+
+	if(isCenter)
+	{
+		x = destX - (imageInfo->frameWidth / 2);
+		y = destY - (imageInfo->frameHeight / 2);
+	}
 
 	if(isTransparent)
 	{
 		GdiTransparentBlt(hdc,
-			destX,destY,
+			x,y,
 			width,height,  // 원하는 크기로 렌더링
 			imageInfo->hMemDC,
 			imageInfo->frameWidth * imageInfo->currFrameX,
@@ -228,7 +236,7 @@ void Image::RenderResized(HDC hdc,int destX,int destY,int width,int height,int f
 	{
 		StretchBlt(
 			hdc,                // 복사 목적지 DC
-			destX,destY,       // 복사 목적지 위치
+			x,y,       // 복사 목적지 위치
 			width,height,      // 원하는 크기로 렌더링
 			imageInfo->hMemDC,  // 원본 DC
 			imageInfo->frameWidth * imageInfo->currFrameX,  // 프레임 X 위치
