@@ -1,6 +1,36 @@
 #pragma once
 #include "GameObject.h"
 
+// 버튼 종류 정의
+enum class PauseButtonType {
+	STARTSCREEN,
+	MAP_EDITOR,
+	EXIT
+};
+
+// 버튼 상태 정의
+enum class PauseButtonState {
+	NORMAL,
+	HOVER,
+	CLICKED
+};
+
+// 버튼 구조체
+struct PauseButton {
+	RECT rect;             // 버튼 영역
+	PauseButtonType type;       // 버튼 종류
+	PauseButtonState state;     // 현재 상태
+	LPCWSTR text;          // 버튼 텍스트
+
+	// 버튼 초기화
+	void Init(int x,int y,int width,int height,PauseButtonType buttonType,LPCWSTR buttonText) {
+		rect = {x,y,x + width,y + height};
+		type = buttonType;
+		state = PauseButtonState::NORMAL;
+		text = buttonText;
+	}
+};
+
 class RayCast;
 class MainGameScene : public GameObject
 {
@@ -77,6 +107,13 @@ public:
 
 	void ShakeScreen(float shakePower, float time, bool isStepShake);
 	void ApplyShake(HDC hdc);
+	void RenderPauseOverlay(HDC hdc);
+	void RenderPauseMenu(HDC hdc, PauseButton& button);
+
+	// 일시 정지 메뉴 메소드
+	void InitButtons();                    // 버튼 초기화
+	void CheckButtonHover();               // 마우스 오버 체크
+	void HandleButtonClick(PauseButton& button); // 버튼 클릭 처리
 
 private:
 	enum class SceneStatus { IN_GAME, PAUSE, QUIT };
@@ -89,4 +126,8 @@ private:
 	HBITMAP oldBitmap = nullptr;
 
     ShakeInfo screenShake;
+
+	// 일시정지 메뉴
+	vector<PauseButton> buttons;   
+	POINT mousePos;           
 };

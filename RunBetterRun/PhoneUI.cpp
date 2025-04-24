@@ -85,6 +85,10 @@ HRESULT PhoneUI::Init(UIType type,FPOINT pos,FPOINT size,INT layer)
 	// 기본 화면 밖 위치는 아래쪽으로 설정 (나중에 변경 가능)
 	screenOutPos = {defaultPos.x - 100,WINSIZE_Y + size.y};
 
+	hasInsight = false;
+	insightTime = 0.0f;
+	insightTimer = 0.0f;
+
 	return S_OK;
 }
 
@@ -110,6 +114,8 @@ void PhoneUI::Update()
 	{
 		UpdateWobbleEffect();
 	}
+
+	UpdateInsight();
 
 	// UI 유닛 업데이트
 	for(auto& uiUnit : uiUnits)
@@ -442,5 +448,44 @@ void PhoneUI::UpdateItemShakeEffect()
 		itemShakeTimer = 0.0f;
 		currentShakeIntensity = 0.0f;
 		pos = basePos; // 원래 위치로 복귀
+	}
+}
+
+void PhoneUI::GetInsight(float duration) {
+	hasInsight = true;
+	insightTime = duration;
+	insightTimer = 0.0f;
+
+	// MinimapUI를 찾아 몬스터 표시 활성화
+	for (auto& uiUnit : uiUnits) {
+		MinimapUI* minimapUI = dynamic_cast<MinimapUI*>(uiUnit);
+		if (minimapUI) {
+			minimapUI->SetShowMonsters(true);
+			break;
+		}
+	}
+
+	// 인사이트 활성화 시각적 피드백
+	ShakeOnItemGet(1.5f, 0.7f);
+}
+
+void PhoneUI::UpdateInsight() {
+	if (hasInsight) {
+		float deltaTime = TimerManager::GetInstance()->GetDeltaTime();
+		insightTimer += deltaTime;
+
+		if (insightTimer >= insightTime) {
+			hasInsight = false;
+			insightTimer = 0.0f;
+
+			// MinimapUI를 찾아 몬스터 표시 비활성화
+			for (auto& uiUnit : uiUnits) {
+				MinimapUI* minimapUI = dynamic_cast<MinimapUI*>(uiUnit);
+				if (minimapUI) {
+					minimapUI->SetShowMonsters(false);
+					break;
+				}
+			}
+		}
 	}
 }

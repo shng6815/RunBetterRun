@@ -25,10 +25,8 @@ void AMonster::Update(void)
 			sprite.pos.y + dirY * timePerSpeed
 		};
 
-		if(CanMoveToPosition(newPos)){
-			UpdateDirection(newPos);
+		if(CanMoveToPosition(newPos))
 			sprite.pos = newPos;
-		}
 	}
 
 	Action();
@@ -66,52 +64,4 @@ BOOL AMonster::CanMoveToPosition(FPOINT pos)
 	FLOAT distance = sqrt(powf(dx,2)+ powf(dy,2));
 
 	if(distance == 0.0f) return false;
-}
-
-void AMonster::UpdateDirection(FPOINT newPos)
-{
-	float dx,dy;
-
-	dx = newPos.x - sprite.pos.x;
-	dy = newPos.y - sprite.pos.y;
-
-	if(abs(dx) > abs(dy))
-	{
-		if(dx>0) 
-		{
-			direction = Direction::EAST;
-		}
-		else 
-		{
-			direction = Direction::WEST;
-		}
-	}
-	else
-	{
-		if(dy>0)
-		{
-			direction=Direction::SOUTH;
-		}
-
-		else
-		{
-			direction=Direction::NORTH;
-		}
-	}
-
-	switch(direction)
-	{
-		case Direction::NORTH:
-			// 여기다가 스프라이트 업데이트?
-			break;
-		case Direction::EAST:
-			//
-			break;
-		case Direction::SOUTH:
-			//
-			break;
-		case Direction::WEST:
-			//
-			break;
-	}
 }

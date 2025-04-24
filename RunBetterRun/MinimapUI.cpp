@@ -6,6 +6,8 @@
 #include "ItemManager.h"
 #include "Key.h"
 #include "TimerManager.h"
+#include "MonsterManager.h"
+#include "ObstacleManager.h"
 
 HRESULT MinimapUI::Init(UIType type,FPOINT relPos,FPOINT relSize,UIUnit* parent,INT layer)
 {
@@ -18,6 +20,8 @@ HRESULT MinimapUI::Init(UIType type,FPOINT relPos,FPOINT relSize,UIUnit* parent,
 	cachedBitmap = nullptr;
 	oldCachedBitmap = nullptr;
 	needsUpdate = true;
+
+	showMonsters = false;
 
 	return S_OK;
 }
@@ -139,7 +143,7 @@ void MinimapUI::DrawMiniMapToDC(HDC hdc,int drawSize)
 	const int radiusX = static_cast<int>(ceilf(tilesVisibleX * 0.75f));
 	const int radiusY = static_cast<int>(ceilf(tilesVisibleY * 0.75f));
 
-	HBRUSH floorBrush = CreateSolidBrush(RGB(100,100,100)); // 더 밝은 색상
+	HBRUSH floorBrush = CreateSolidBrush(RGB(30,30,30)); // 더 밝은 색상
 	HPEN oldPen = (HPEN)SelectObject(hdc,GetStockObject(NULL_PEN));
 	SelectObject(hdc,floorBrush);
 
@@ -182,6 +186,7 @@ void MinimapUI::DrawMiniMapToDC(HDC hdc,int drawSize)
 
 	for(const auto& item : ItemManager::GetInstance()->GetItems())
 	{
+		
 		Key* key = dynamic_cast<Key*>(item);
 		if(key)
 		{
@@ -210,6 +215,8 @@ void MinimapUI::DrawMiniMapToDC(HDC hdc,int drawSize)
 
 	// 플레이어 아이콘
 	HBRUSH playerBrush = CreateSolidBrush(RGB(255,50,50));
+	HPEN nullPen = (HPEN)GetStockObject(NULL_PEN);
+	oldPen = (HPEN)SelectObject(hdc,nullPen);
 	SelectObject(hdc,playerBrush);
 
 	Ellipse(hdc,
@@ -218,7 +225,35 @@ void MinimapUI::DrawMiniMapToDC(HDC hdc,int drawSize)
 		static_cast<int>(drawSize / 2.0f + halfTile/1.5f),
 		static_cast<int>(drawSize / 2.0f + halfTile/1.5f));
 
+	SelectObject(hdc,oldPen);
 	DeleteObject(playerBrush);
+
+	// 인사이트가 활성화되어 있으면 몬스터 표시
+	if(showMonsters) {
+		FPOINT monsterPos = MonsterManager::GetInstance()->GetClosestMonsterPos();
+
+		if(monsterPos.x != -1 && monsterPos.y != -1) {
+			float dx = monsterPos.x - pPos.x;
+			float dy = monsterPos.y - pPos.y;
+			float angle = atan2f(dy,dx);
+
+			// 빨간색 방향 표시기
+			DrawDirectionTriangle(hdc,angle,drawSize,halfTile,RGB(255,0,0));
+		}
+	}
+
+	if(ItemManager::GetInstance()->Key() == 0) {
+		auto exitPos = ObstacleManager::GetInstance()->GetElevatorPosition();
+
+		if(exitPos.x != -1 && exitPos.y != -1) {
+			float dx = exitPos.x - pPos.x;
+			float dy = exitPos.y - pPos.y;
+			float angle = atan2f(dy,dx);
+
+			// 노란색 방향 표시기
+			DrawDirectionTriangle(hdc,angle,drawSize,halfTile,RGB(255,255,0));
+		}
+	}
 }
 
 void MinimapUI::DrawMiniMapWithRotation(HDC hdc,int drawSize,float angle)
@@ -288,4 +323,35 @@ void MinimapUI::DrawMiniMapWithRotation(HDC hdc,int drawSize,float angle)
 	SelectObject(rotDC,oldRotBmp);
 	DeleteObject(rotBmp);
 	DeleteDC(rotDC);
+}
+
+void MinimapUI::DrawDirectionTriangle(HDC hdc,float angle,int drawSize,int halfTile,COLORREF color)
+{
+	float playerCenterX = drawSize / 2.0f;
+	float playerCenterY = drawSize / 2.0f;
+
+	HBRUSH directionBrush = CreateSolidBrush(color);
+	HPEN nullPen = (HPEN)GetStockObject(NULL_PEN);
+	HPEN oldPen = (HPEN)SelectObject(hdc,nullPen);
+	SelectObject(hdc,directionBrush);
+
+	int distance = halfTile + 5; // 플레이어 아이콘보다 약간 바깥에 표시
+	int dirSize = 8; // 방향 표시기 크기
+
+	POINT dirPoints[3];
+	// 방향을 가리키는 삼각형의 꼭짓점 계산
+	dirPoints[0].x = static_cast<int>(playerCenterX + distance * cosf(angle));
+	dirPoints[0].y = static_cast<int>(playerCenterY - distance * sinf(angle));
+
+	dirPoints[1].x = static_cast<int>(playerCenterX + (distance - dirSize/2) * cosf(angle + 0.5f));
+	dirPoints[1].y = static_cast<int>(playerCenterY - (distance - dirSize/2) * sinf(angle + 0.5f));
+
+	dirPoints[2].x = static_cast<int>(playerCenterX + (distance - dirSize/2) * cosf(angle - 0.5f));
+	dirPoints[2].y = static_cast<int>(playerCenterY - (distance - dirSize/2) * sinf(angle - 0.5f));
+
+	// 삼각형 그리기
+	Polygon(hdc,dirPoints,3);
+
+	SelectObject(hdc,oldPen);
+	DeleteObject(directionBrush);
 }

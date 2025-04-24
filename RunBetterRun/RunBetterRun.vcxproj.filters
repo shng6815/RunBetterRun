@@ -186,6 +186,9 @@
     <ClCompile Include="NumberUI.cpp">
       <Filter>InGame\UI</Filter>
     </ClCompile>
+    <ClCompile Include="Display.cpp">
+      <Filter>InGame\Item</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h">
@@ -331,6 +334,9 @@
     </ClInclude>
     <ClInclude Include="NumberUI.h">
       <Filter>InGame\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Display.h">
+      <Filter>InGame\Item</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

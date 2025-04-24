@@ -20,11 +20,11 @@ HRESULT LossLifeScene::Init()
 	switch(playerLife)
 	{
 	case 2:
-		videoPath = L"SceneAnimation/3Life2_sound_ver3.mp4";
+		videoPath = L"SceneAnimation/3Life2_new.mp4";
 		videoLength = 8.0f;
 		break;
 	case 1:
-		videoPath = L"SceneAnimation/2Life1_sound_ver3.mp4";
+		videoPath = L"SceneAnimation/2Life1_new.mp4";
 		videoLength = 7.0f;
 		break;
 	default:

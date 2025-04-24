@@ -192,7 +192,7 @@ void GameStartScene::DrawTitle(HDC hdc)
 	DeleteObject(hFont);
 }
 
-void GameStartScene::DrawButton(HDC hdc,Button & button)
+void GameStartScene::DrawButton(HDC hdc, Button & button)
 {
 
 	COLORREF textColor = RGB(220, 220, 220);

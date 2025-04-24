@@ -7,7 +7,7 @@
 
 HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 {
-    fov = 0.67f;
+    fov = 0.66f;
     targetFOV = fov;
 
 	FPOINT startPos = DataManager::GetInstance()->GetStartPosition();
@@ -43,14 +43,17 @@ HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 
 	static bool isFirstInit = true;
 
-	/*if(isFirstInit)
+	if(isFirstInit)
 	{
 		playerLife = 3;
 		isFirstInit = false;
-	}*/
+	}
 
-	// ī�޶� ����
 	this->shakeFunc = shakeFunc;
+
+	SoundManager::GetInstance()->LoadSound("Step","Sounds/SFX_Step.wav");
+
+	SoundManager::GetInstance()->LoadSound("Heart","Sounds/SFX_Heart.wav");
 
 	return S_OK;
 }
@@ -71,7 +74,6 @@ void Player::Update()
 
     fov += (targetFOV - fov) * deltaTime * fovLerpSpeed;
     UpdateFOV();
-
 }
 
 void Player::Render(HDC hdc)

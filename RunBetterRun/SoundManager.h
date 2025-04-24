@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <Windows.h>
+#include <vector>
 
 // SDL_mixer를 위한 전방 선언
 struct Mix_Music;  // 올바른 전방 선언
@@ -21,10 +22,15 @@ class SoundManager: public Singleton<SoundManager>
 private:
 	std::map<std::string,Mix_Music*> musicLibrary;    // 배경음악 라이브러리
 	std::map<std::string,Mix_Chunk*> soundLibrary;    // 효과음 라이브러리
+	std::map<std::string,std::vector<int>> activeChannels;
+	std::map<int,std::string> channelToSoundMap;
+
 	float masterVolume;                                // 마스터 볼륨
 	std::map<SoundType,float> categoryVolume;         // 카테고리별 볼륨
 	bool isMuted;                                      // 음소거 상태
 	int currentMusicID;                                // 현재 재생 중인 음악 ID
+
+	static void ChannelFinished(int channel);
 public:
 	// 초기화 및 해제
 	HRESULT Init();
@@ -37,6 +43,7 @@ public:
 	HRESULT PlaySound(const std::string& soundID,bool loop = false,float volume = 1.0f);
 	void StopMusic();
 	void StopSound(int channel = -1);  // -1은 모든 채널
+	void StopSound(std::string soundID);
 	void PauseMusic();
 	void ResumeMusic();
 	// 볼륨 제어
@@ -47,6 +54,7 @@ public:
 	void ToggleMute();
 	// 상태 확인
 	bool IsMusicPlaying();
+	bool IsSoundPlaying(std::string soundID);
 	// 정리
 	void StopAllSounds();
 	void Update();  // 필요하다면 매 프레임 업데이트

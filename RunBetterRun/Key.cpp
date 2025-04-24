@@ -9,9 +9,9 @@
 BOOL Key::Action(void)
 {
 	ItemManager::GetInstance()->PopKey();
-	(static_cast<PhoneUI*>(UIManager::GetInstance()->GetUIUnit("PhoneUI")))->ShakeOnItemGet();
-
-	SoundManager::GetInstance()->PlaySoundW("CollectKey");
+	PhoneUI* phone = (static_cast<PhoneUI*>(UIManager::GetInstance()->GetUIUnit("PhoneUI")));
+	if (phone)
+		phone->ShakeOnItemGet();
 
 	return TRUE;
 }
