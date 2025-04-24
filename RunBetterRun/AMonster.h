@@ -15,7 +15,6 @@ protected:
 	virtual void Action(void);
 	virtual void Catch(void);
 	BOOL CanMoveToPosition(FPOINT pos);
-	void UpdateDirection(FPOINT newPos); 
 
 public:
 	virtual ~AMonster(void) {};

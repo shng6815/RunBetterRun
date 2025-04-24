@@ -11,6 +11,11 @@
 #include "ObstacleManager.h"
 #include "Pile.h"
 #include "DataManager.h"
+#include "Display.h"
+#include "Elevator.h"
+#include "Phone.h"
+#include "Stun.h"
+#include "Insight.h"
 
 HRESULT MainGameScene::Init()
 {
@@ -75,6 +80,17 @@ HRESULT MainGameScene::Init()
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,19},Direction::EAST));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,20},Direction::NORTH));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,18},Direction::SOUTH));*/
+
+	ObstacleManager::GetInstance()->PutObstacle(new Pile({19,23},Direction::EAST));
+	ObstacleManager::GetInstance()->PutObstacle(new Elevator({20, 23}, Direction::EAST));
+	ItemManager::GetInstance()->PutItem(new Display({21.5f,23.5f},TEXT("Image/drumtong.bmp")));
+	ItemManager::GetInstance()->PutItem(new Display({22.5f,23.5f},TEXT("Image/pipe.bmp")));
+	ItemManager::GetInstance()->PutItem(new Display({23.5f,23.5f},TEXT("Image/trash.bmp")));
+	ItemManager::GetInstance()->PutItem(new Display({24.5f,23.5f},TEXT("Image/poo.bmp")));
+	ItemManager::GetInstance()->PutItem(new Display({25.5f,23.5f},TEXT("Image/sohwa.bmp")));
+	ItemManager::GetInstance()->PutItem(new Stun({26.5f,23.5f}));
+	ItemManager::GetInstance()->PutItem(new Insight({27.5f,23.5f}));
+	ItemManager::GetInstance()->PutItem(new Phone({28.5f,23.5f}));
 
 	return S_OK;
 }
