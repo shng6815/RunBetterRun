@@ -9,15 +9,15 @@ BOOL Display::Action(void)
 	return FALSE;
 }
 
-Display::Display(DWORD id,FPOINT pos)
+Display::Display(FPOINT pos, DWORD id)
 {
 	if(ids.empty())
 	{
+		ids[4] = TEXT("Image/poo.bmp");
+		ids[5] = TEXT("Image/sohwa.bmp");
+		ids[6] = TEXT("Image/pipe.bmp");
 		ids[7] = TEXT("Image/drumtong.bmp");
-        ids[6] = TEXT("Image/pipe.bmp");
-        ids[11] = TEXT("Image/trash.bmp");
-        ids[4] = TEXT("Image/poo.bmp");
-        ids[5] = TEXT("Image/sohwa.bmp");
+        ids[8] = TEXT("Image/trash.bmp");
 	}
 	sprite.id = id;
 	sprite.texture = TextureManager::GetInstance()->GetTexture(ids[id]);

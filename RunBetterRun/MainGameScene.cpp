@@ -50,8 +50,8 @@ HRESULT MainGameScene::Init()
 		case(3):
 		ItemManager::GetInstance()->PutItem(new Stun(itemData.pos));
 		break;
-		case(4): case(5): case(6): case(7): case(11):
-		ItemManager::GetInstance()->PutItem(new Display(itemData.pos));
+		case(4): case(5): case(6): case(7): case(8):
+		ItemManager::GetInstance()->PutItem(new Display(itemData.pos,itemData.id));
 		break;
 		}
 		
@@ -59,22 +59,28 @@ HRESULT MainGameScene::Init()
 	const auto& monsters = DataManager::GetInstance()->GetMonsters();
 	for(const auto& monsterData : monsters)
 	{
-		Tentacle* tentacle = new Tentacle(monsterData.pos);
-		MonsterManager::GetInstance()->PutMonster(tentacle);
+		switch(monsterData.id)
+		{
+		case(100):
+			MonsterManager::GetInstance()->PutMonster(new Tentacle(monsterData.pos));
+			break;
+		default:
+			break;
+		}
 	}
 	const auto& obstacles = DataManager::GetInstance()->GetObstacles();
 	for(const auto& obstacleData : obstacles)
 	{ 
 		switch(obstacleData.id)
 		{
-		case(8):
-		ObstacleManager::GetInstance()->PutObstacle(new Pile(obstacleData.pos,obstacleData.dir));
-		break;
-		case(9): case(12):
-		ObstacleManager::GetInstance()->PutObstacle(new Elevator(obstacleData.pos,obstacleData.dir,obstacleData.id));
-		break;
+		case(1001):
+			ObstacleManager::GetInstance()->PutObstacle(new Pile(obstacleData.pos,obstacleData.dir));
+			break;
+		case(1000): case(1002):
+			ObstacleManager::GetInstance()->PutObstacle(new Elevator(obstacleData.pos,obstacleData.dir,obstacleData.id));
+			break;
 		default:
-		break;
+			break;
 		}
 	}
 
@@ -98,24 +104,6 @@ HRESULT MainGameScene::Init()
 	SoundManager::GetInstance()->LoadMusic("GameSceneBGM","Sounds/BGM_InGame.wav");
 
 	SoundManager::GetInstance()->PlayMusic("GameSceneBGM",true,0.5f);
-
-	/*ItemManager::GetInstance()->PutItem(new Key({ 21.5, 10.5 }));
-	MonsterManager::GetInstance()->PutMonster(new Tentacle({ 21.5, 8.5 }));
-	MonsterManager::GetInstance()->PutMonster(new Tentacle({21.5,7.5}));
-	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,21},Direction::WEST));
-	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,19},Direction::EAST));
-	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,20},Direction::NORTH));
-	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,18},Direction::SOUTH));*/
-
-
-	/*ItemManager::GetInstance()->PutItem(new Display({21.5f,23.5f},TEXT("Image/drumtong.bmp")));
-	ItemManager::GetInstance()->PutItem(new Display({22.5f,23.5f},TEXT("Image/pipe.bmp")));
-	ItemManager::GetInstance()->PutItem(new Display({23.5f,23.5f},TEXT("Image/trash.bmp")));
-	ItemManager::GetInstance()->PutItem(new Display({24.5f,23.5f},TEXT("Image/poo.bmp")));
-	ItemManager::GetInstance()->PutItem(new Display({25.5f,23.5f},TEXT("Image/sohwa.bmp")));
-	ItemManager::GetInstance()->PutItem(new Stun({26.5f,23.5f}));
-	ItemManager::GetInstance()->PutItem(new Insight({27.5f,23.5f}));
-	ItemManager::GetInstance()->PutItem(new Phone({28.5f,23.5f}));*/
 
 	return S_OK;
 }

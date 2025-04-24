@@ -10,7 +10,7 @@ Elevator::Elevator(POINT pos,Direction dir,DWORD id)
 	obstacle.dir = dir;
 	obstacle.block = TRUE;
 	obstacle.distance = 0;
-	if(id == 12)
+	if(id == 1002)
 	{
 		status = DoorStatus::Lock;
 		waitTime = 0.0f;

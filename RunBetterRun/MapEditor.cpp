@@ -68,8 +68,8 @@ HRESULT MapEditor::Init()
 		true,RGB(255,0,255));
 
 	sampleSpriteImage = ImageManager::GetInstance()->AddImage(
-						"EditorSpriteSheet",L"Image/horrorMapTiles2.bmp",
-						11 * TILE_SIZE,11 * TILE_SIZE,11,11,true,RGB(255,0,255)
+						"EditorSpriteSheet",L"Image/pallet64x160.bmp",
+						5 * TILE_SIZE,2 * TILE_SIZE,5,2,true,RGB(255,0,255)
 	);
 
 	if(!sampleTileImage || !sampleSpriteImage)
@@ -443,7 +443,7 @@ void MapEditor::RenderSampleSprites(HDC hdc)
 	int spriteHeight = sampleSpriteImage->GetFrameHeight();
 
 	// 카테고리별 Y 오프셋
-	int categoryPadding = 40;
+	int categoryPadding = 0;
 	int currentY = sampleSpriteArea.top;
 
 	// === 아이템 섹션 ===
@@ -456,7 +456,7 @@ void MapEditor::RenderSampleSprites(HDC hdc)
 	const int itemCount = 9;
 
 	// 한 행에 표시할 아이템 수
-	const int itemsPerRow = 2;
+	const int itemsPerRow = 4;
 
 	for(int i = 0; i < itemCount; i++) {
 		int row = i / itemsPerRow;
@@ -470,21 +470,24 @@ void MapEditor::RenderSampleSprites(HDC hdc)
 			hdc,
 			posX,
 			posY,
-			i,0, // x, y는 타일시트 좌표
+			i % 5, i / 5, // x, y는 타일시트 좌표
 			false,true
 		);
 
 		// 레이블 그리기
 		SetTextColor(hdc,RGB(0,0,0));
 		TextOut(hdc,
-			  posX - (wcslen(itemLabels[i]) * 4), // 텍스트 길이에 따라 중앙 정렬
+			  posX - (wcslen(itemLabels[i])) * 2, // 텍스트 길이에 따라 중앙 정렬
 			  posY + spriteHeight/2 + 5,
 			  itemLabels[i],
 			  wcslen(itemLabels[i]));
 
 		// 선택된 스프라이트 표시
-		if(isSpriteSelected && selectedSpriteType == SpriteType::KEY &&
-		   selectedSprite.x == i && selectedSprite.y == 0) {
+		if(isSpriteSelected 
+			&& (selectedSpriteType == SpriteType::KEY 
+				|| selectedSpriteType == SpriteType::ITEM 
+				|| selectedSpriteType == SpriteType::NONE)
+			&& selectedSprite.x == i && selectedSprite.y == 0) {
 			HPEN selectionPen = CreatePen(PS_SOLID,3,RGB(255,50,50));
 			HPEN oldSelPen = (HPEN)SelectObject(hdc,selectionPen);
 			SelectObject(hdc,GetStockObject(NULL_BRUSH));
@@ -508,7 +511,7 @@ void MapEditor::RenderSampleSprites(HDC hdc)
 	currentY += 20;
 
 	// 몬스터 (1개)
-	const LPCWSTR monsterLabels[] = {L"Tentacle"};
+	const LPCWSTR monsterLabels[] = {L"Ball Man"};
 	const int monsterCount = 1;
 
 	for(int i = 0; i < monsterCount; i++) {
@@ -520,14 +523,14 @@ void MapEditor::RenderSampleSprites(HDC hdc)
 			hdc,
 			posX,
 			posY,
-			i,1, // x, y는 타일시트 좌표
+			i,0, // x, y는 타일시트 좌표
 			false,true
 		);
 
 		// 레이블 그리기
 		SetTextColor(hdc,RGB(0,0,0));
 		TextOut(hdc,
-			  posX - (wcslen(monsterLabels[i]) * 4),
+			  posX - (wcslen(monsterLabels[i]) * 2),
 			  posY + spriteHeight/2 + 5,
 			  monsterLabels[i],
 			  wcslen(monsterLabels[i]));
@@ -551,18 +554,18 @@ void MapEditor::RenderSampleSprites(HDC hdc)
 	}
 
 	// 다음 섹션 위치 계산
-	currentY += spriteHeight + 40;
+	currentY += spriteHeight + 36;
 
 	// === 장애물 섹션 ===
 	TextOut(hdc,sampleSpriteArea.left,currentY,L"OBSTACLES:",10);
 	currentY += 20;
 
 	// 장애물 종류 (6개 + 엘레베이터 1개)
-	const LPCWSTR obstacleLabels[] = {L"Elevator",L"Pile",L"Trash",L"Final Elevator"};
-	const int obstacleCount = 4;
+	const LPCWSTR obstacleLabels[] = {L"Elevator",L"Pile",L"Final Elevator"};
+	const int obstacleCount = 3;
 
 	// 한 행에 표시할 장애물 수
-	const int obstaclesPerRow = 2;
+	const int obstaclesPerRow = 4;
 
 	for(int i = 0; i < obstacleCount; i++) {
 		int row = i / obstaclesPerRow;
@@ -584,7 +587,7 @@ void MapEditor::RenderSampleSprites(HDC hdc)
 		// 레이블 그리기
 		SetTextColor(hdc,RGB(0,0,0));
 		TextOut(hdc,
-			  posX - (wcslen(obstacleLabels[i]) * 4),
+			  posX - (wcslen(obstacleLabels[i]) * 2),
 			  posY + spriteHeight/2 + 5,
 			  obstacleLabels[i],
 			  wcslen(obstacleLabels[i]));
@@ -638,12 +641,27 @@ void MapEditor::RenderSprites(HDC hdc)
 
 		// 스프라이트 종류에 따라 다른 색상 + 현재 모드와 일치하면 더 밝게
 		COLORREF color;
-		if(sprite.type == SpriteType::KEY) {
-			color = (currentMode == EditMode::ITEM) ?
-				RGB(100,100,255) : RGB(0,0,200);
-		} else {
-			color = (currentMode == EditMode::MONSTER) ?
-				RGB(255,100,100) : RGB(200,0,0);
+		switch(sprite.type)
+		{
+		case SpriteType::KEY:
+		color = (currentMode == EditMode::ITEM) ?
+			RGB(100,100,255) : RGB(0,0,200);
+		break; 
+
+		case SpriteType::ITEM:
+		color = (currentMode == EditMode::ITEM) ?
+			RGB(0,242,249) : RGB(0,192,199);
+		break;
+
+		case SpriteType::NONE:
+		color = (currentMode == EditMode::ITEM) ?
+			RGB(200,50,250) : RGB(150,50,200);
+		break;
+
+		case SpriteType::MONSTER:
+		color = (currentMode == EditMode::MONSTER) ?
+			RGB(255,100,100) : RGB(200,0,0);
+		break;
 		}
 
 		// 스프라이트 렌더링 (크기는 타일의 1/4)
@@ -977,20 +995,20 @@ void MapEditor::HandleInput()
 
 		// 현재 마우스 Y 위치에 따라 섹션 결정
 		int sectionY = mousePos.y - sampleSpriteArea.top;
-		int itemSectionHeight = 120; // 아이템 섹션 높이 (예상치)
-		int monsterSectionHeight = 90; // 몬스터 섹션 높이 (예상치)
+		int itemSectionHeight = 200; // 아이템 섹션 높이 (예상치)
+		int monsterSectionHeight = 100; // 몬스터 섹션 높이 (예상치)
 
 		if(sectionY < itemSectionHeight) {
 			// 아이템 섹션
-			const int itemsPerRow = 2;
+			const int itemsPerRow = 4;
 			int relX = (mousePos.x - sampleSpriteArea.left) / (spriteWidth + 20);
 			int relY = (sectionY - 20) / (spriteHeight + 30);
 			int itemIndex = relY * itemsPerRow + relX;
 
-			if(itemIndex >= 0 && itemIndex < 4) { // 아이템은 4개
+			if(itemIndex >= 0 && itemIndex < 9) { // 아이템은 4개
 				selectedSprite.x = itemIndex;
 				selectedSprite.y = 0;
-				selectedSpriteType = SpriteType::KEY;
+				selectedSpriteType = SpriteType::ITEM;
 				isSpriteSelected = true;
 				ChangeEditMode(EditMode::ITEM);
 			}
@@ -1007,13 +1025,13 @@ void MapEditor::HandleInput()
 			}
 		} else {
 			// 장애물 섹션
-			const int obstaclesPerRow = 3;
+			const int obstaclesPerRow = 4;
 			int sectionsTopOffset = itemSectionHeight + monsterSectionHeight + 40; // 앞 섹션 높이 + 장애물 제목 공간
 			int relY = (sectionY - sectionsTopOffset) / (spriteHeight + 30);
 			int relX = (mousePos.x - sampleSpriteArea.left) / (spriteWidth + 20);
 			int obstacleIndex = relY * obstaclesPerRow + relX;
 
-			if(obstacleIndex >= 0 && obstacleIndex < 7) { // 장애물 6개 + 엘레베이터 1개
+			if(obstacleIndex >= 0 && obstacleIndex < 4) { // 장애물 6개 + 엘레베이터 1개
 				if(obstacleIndex < 6) {
 					// 일반 장애물
 					selectedSprite.x = obstacleIndex;
@@ -1121,7 +1139,7 @@ void MapEditor::PlaceStart(int x,int y)
 	for(size_t i = 0; i < tiles.size(); i++) {
 		if(tiles[i].roomType == RoomType::START) {
 			tiles[i].roomType = RoomType::FLOOR;
-			tiles[i].tilePos = 20; // 기본 바닥 타일
+			tiles[i].tilePos = 15; // 기본 바닥 타일
 		}
 	}
 
@@ -1130,6 +1148,7 @@ void MapEditor::PlaceStart(int x,int y)
 	if(index >= 0 && index < tiles.size()) {
 		tiles[index].roomType = RoomType::START;
 		startPosition = {x + 0.5f,y + 0.5f};
+		tiles[index].tilePos = 20;
 	}
 }
 
@@ -1144,16 +1163,15 @@ void MapEditor::PlaceObstacle(int x,int y)
 		}
 	}
 
-	Texture* obstacleTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/jewel.bmp"));
-	if(obstacleTexture) {
-		Obstacle newObstacle;
-		newObstacle.pos = {x,y};
-		newObstacle.texture = obstacleTexture;
-		newObstacle.dir = selectedObstacleDir;
-		newObstacle.block = TRUE;
+	// Texture* obstacleTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/jewel.bmp"));
+	Obstacle newObstacle;
+	newObstacle.id = 1000 + selectedSprite.x;
+	newObstacle.pos = {x,y};
+	// newObstacle.texture = obstacleTexture;
+	newObstacle.dir = selectedObstacleDir;
 
-		editorObstacles.push_back(newObstacle);
-	}
+
+	editorObstacles.push_back(newObstacle);
 }
 
 void MapEditor::PlaceMonster(int x,int y)
@@ -1177,19 +1195,18 @@ void MapEditor::PlaceMonster(int x,int y)
 		}
 	}
 
-	Texture* monsterTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/boss.bmp"));
+	/*Texture* monsterTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/boss.bmp"));
 	if(!monsterTexture)
 	{
 		MessageBox(g_hWnd,TEXT("Monster texture not found!"),TEXT("Error"),MB_OK);
 		return;
-	}
+	}*/
 
 	Sprite newSprite;
+	newSprite.id = 100 + selectedSprite.x ;
 	newSprite.pos = spritePos;
 	newSprite.type = SpriteType::MONSTER;
-	newSprite.texture = monsterTexture;
-	newSprite.distance = 0.0f;
-	newSprite.aniInfo = {0.1f,0.1f,{423,437},{1,1},{0,0}};
+	//newSprite.texture = monsterTexture;
 
 	editorSprites.push_back(newSprite);
 }
@@ -1216,17 +1233,28 @@ void MapEditor::PlaceItem(int x,int y)
 		}
 	}
 
-	Texture* keyTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/phone.bmp"));
+	/*Texture* keyTexture = TextureManager::GetInstance()->GetTexture(TEXT("Image/phone.bmp"));
 	if(!keyTexture) {
 		MessageBox(g_hWnd,TEXT("Item texture not found!"),TEXT("Error"),MB_OK);
 		return;
-	}
+	}*/
 
 	//sprite.id 로 정보저장 (아이템,몬스터,장애물) 
 	Sprite newSprite;
 	newSprite.pos = spritePos;
-	newSprite.id = 0;
-	newSprite.type = SpriteType::KEY;
+	newSprite.id = selectedSprite.x;
+	switch(newSprite.id)
+	{
+	case 0:
+		newSprite.type = SpriteType::KEY;
+		break;
+	case 1: case 2: case 3:
+		newSprite.type = SpriteType::ITEM;
+		break;
+	default:
+		newSprite.type = SpriteType::NONE;
+		break;
+	}
 
 	editorSprites.push_back(newSprite);
 }
@@ -1765,20 +1793,21 @@ void MapEditor::ConvertToDataManager()
 
 	// 아이템, 몬스터, 장애물 데이터 추가
 	for(const auto& sprite : editorSprites) {
-		if(sprite.type == SpriteType::KEY || sprite.type == SpriteType::ITEM)
+		ItemData item;
+		MonsterData monster;
+		switch (sprite.type)
 		{
-			ItemData item;
-			item.pos = sprite.pos;
-			item.aniInfo = sprite.aniInfo;
-			item.id = sprite.id;
-			DataManager::GetInstance()->AddItemData(item);
-		} else if(sprite.type == SpriteType::MONSTER)
-		{
-			MonsterData monster;
-			monster.pos = sprite.pos;
-			monster.aniInfo = sprite.aniInfo;
-			monster.id = sprite.id;
-			DataManager::GetInstance()->AddMonsterData(monster);
+			case SpriteType::KEY: case SpriteType::ITEM: case SpriteType::NONE:
+				item.pos = sprite.pos;
+				item.aniInfo = sprite.aniInfo;
+				item.id = sprite.id;
+				DataManager::GetInstance()->AddItemData(item);
+				break;
+			case SpriteType::MONSTER:
+				monster.pos = sprite.pos;
+				monster.aniInfo = sprite.aniInfo;
+				monster.id = sprite.id;
+				DataManager::GetInstance()->AddMonsterData(monster);
 		}
 	}
 
@@ -1786,6 +1815,7 @@ void MapEditor::ConvertToDataManager()
 		ObstacleData obsData;
 		obsData.pos = obstacle.pos;
 		obsData.dir = obstacle.dir;
+		obsData.id = obstacle.id;
 		DataManager::GetInstance()->AddObstacleData(obsData);
 	}
 
@@ -1813,13 +1843,25 @@ void MapEditor::ConvertFromDataManager()
 	const auto& items = DataManager::GetInstance()->GetItems();
 	for(const auto& item : items) {
 		Sprite sprite;
+		sprite.id = item.id;
 		sprite.pos = item.pos;
+		switch(sprite.id)
+		{
+		case 0:
 		sprite.type = SpriteType::KEY;
-		sprite.distance = 0.0f;
+		break;
+		case 1: case 2: case 3:
+		sprite.type = SpriteType::ITEM;
+		break;
+		case 4: case 5: case 6: case 7: case 8:
+		sprite.type = SpriteType::NONE;
+		break;
+		}
+		//sprite.distance = 0.0f;
 
 		// 텍스처와 애니메이션 정보 설정
-		sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/soul.bmp"));
-		sprite.aniInfo = item.aniInfo;
+		/*sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/soul.bmp"));*/
+		//sprite.aniInfo = item.aniInfo;
 
 		// 스프라이트 목록에 추가
 		editorSprites.push_back(sprite);
@@ -1829,13 +1871,14 @@ void MapEditor::ConvertFromDataManager()
 	const auto& monsters = DataManager::GetInstance()->GetMonsters();
 	for(const auto& monster : monsters) {
 		Sprite sprite;
+		sprite.id = monster.id;
 		sprite.pos = monster.pos;
 		sprite.type = SpriteType::MONSTER;
-		sprite.distance = 0.0f;
-		sprite.id = 10;
+		//sprite.distance = 0.0f;
+		//sprite.id = 10;
 		// 텍스처와 애니메이션 정보 설정
-		sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/Ballman.bmp"));
-		sprite.aniInfo = monster.aniInfo;
+		/*sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/Ballman.bmp"));*/
+		/*sprite.aniInfo = monster.aniInfo;*/
 
 		// 스프라이트 목록에 추가
 		editorSprites.push_back(sprite);
@@ -1845,15 +1888,16 @@ void MapEditor::ConvertFromDataManager()
 	const auto& obstacles = DataManager::GetInstance()->GetObstacles();
 	for(const auto& obstacleData : obstacles) {
 		Obstacle obstacle;
+		obstacle.id = obstacleData.id;
 		obstacle.pos = obstacleData.pos;
 		obstacle.dir = obstacleData.dir;
-		obstacle.block = TRUE;
-		obstacle.distance = 0.0f;
+		//obstacle.block = TRUE;
+		//obstacle.distance = 0.0f;
 
 		// 텍스처와 애니메이션 정보 설정
 		// 장애물 종류에 따라 다른 텍스처 적용 가능
-		obstacle.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/pile.bmp"));
-		obstacle.aniInfo = {0.0f,0.0f,{128,128},{8,1},{0,0}};
+		/*obstacle.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/pile.bmp"));
+		obstacle.aniInfo = {0.0f,0.0f,{128,128},{8,1},{0,0}};*/
 
 		// 장애물 목록에 추가
 		editorObstacles.push_back(obstacle);

@@ -9,7 +9,7 @@ class Display: public AItem
 
 public:
 	Display(FPOINT pos) { Init(pos); }
-	Display(DWORD id,FPOINT pos);
+	Display(FPOINT pos,DWORD id);
 
 	virtual HRESULT Init(FPOINT pos) override;
 };
