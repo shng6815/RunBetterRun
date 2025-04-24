@@ -15,9 +15,6 @@ public:
 	HRESULT Init();
 	void Release();
 
-	//id에 따른 animinfo 저장
-	static void InitDefaultAnimations();
-
 	// 맵 파일 저장/로드
 	bool SaveMapFile(LPCWCH filePath);
 	bool LoadMapFile(LPCWCH filePath);

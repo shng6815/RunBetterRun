@@ -67,7 +67,6 @@ typedef struct tagLevel
 	DWORD	monsterCount;
 } Level;
 
-
 typedef struct tagSprite
 {
 	DWORD			id;
@@ -146,6 +145,7 @@ typedef struct tagFileHeader
 
 typedef struct tagItemSaveData
 {
+	DWORD id;
 	FPOINT pos;             // ��ġ
 	AnimationInfo aniInfo;  // �ִϸ��̼� ����
 	int itemId;           // ������ Ÿ�� - 0: Key
@@ -153,6 +153,7 @@ typedef struct tagItemSaveData
 
 typedef struct tagMonsterSaveData
 {
+	DWORD id;
 	FPOINT pos;             // ��ġ
 	AnimationInfo aniInfo;  // �ִϸ��̼� ����
 	int monsterId;        // ���� Ÿ�� - 0: Tentacle
@@ -164,5 +165,4 @@ typedef struct tagObstacleSaveData
 	POINT pos;             // 위치 (타일 좌표)
 	Direction dir;         // 장애물 방향 (NORTH, SOUTH, EAST, WEST)
 	AnimationInfo aniInfo; // 애니메이션 정보
-	int obstacleId;      // 장애물 타입 - 0: Pile, 1: 다른 장애물 타입 등
 }ObstacleData;

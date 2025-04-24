@@ -36,8 +36,25 @@ HRESULT MainGameScene::Init()
 	const auto& items = DataManager::GetInstance()->GetItems();
 	for(const auto& itemData : items)
 	{
-		Key* key = new Key(itemData.pos);
-		ItemManager::GetInstance()->PutItem(key);
+		switch(itemData.id)
+		{
+		case(0):
+		ItemManager::GetInstance()->PutItem(new Key(itemData.pos));
+		break;
+		case(1):
+		ItemManager::GetInstance()->PutItem(new Phone(itemData.pos));
+		break;
+		case(2):
+		ItemManager::GetInstance()->PutItem(new Insight(itemData.pos));
+		break;
+		case(3):
+		ItemManager::GetInstance()->PutItem(new Stun(itemData.pos));
+		break;
+		case(4): case(5): case(6): case(7): case(11):
+		ItemManager::GetInstance()->PutItem(new Display(itemData.pos));
+		break;
+		}
+		
 	}
 	const auto& monsters = DataManager::GetInstance()->GetMonsters();
 	for(const auto& monsterData : monsters)
@@ -47,9 +64,18 @@ HRESULT MainGameScene::Init()
 	}
 	const auto& obstacles = DataManager::GetInstance()->GetObstacles();
 	for(const auto& obstacleData : obstacles)
-	{
-		Pile* pile = new Pile(obstacleData.pos,obstacleData.dir);
-		ObstacleManager::GetInstance()->PutObstacle(pile);
+	{ 
+		switch(obstacleData.id)
+		{
+		case(8):
+		ObstacleManager::GetInstance()->PutObstacle(new Pile(obstacleData.pos,obstacleData.dir));
+		break;
+		case(9): case(12):
+		ObstacleManager::GetInstance()->PutObstacle(new Elevator(obstacleData.pos,obstacleData.dir,obstacleData.id));
+		break;
+		default:
+		break;
+		}
 	}
 
 	UIManager::GetInstance()->Init();
@@ -81,16 +107,15 @@ HRESULT MainGameScene::Init()
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,20},Direction::NORTH));
 	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,18},Direction::SOUTH));*/
 
-	ObstacleManager::GetInstance()->PutObstacle(new Pile({19,23},Direction::EAST));
-	ObstacleManager::GetInstance()->PutObstacle(new Elevator({20, 23}, Direction::EAST));
-	ItemManager::GetInstance()->PutItem(new Display({21.5f,23.5f},TEXT("Image/drumtong.bmp")));
+
+	/*ItemManager::GetInstance()->PutItem(new Display({21.5f,23.5f},TEXT("Image/drumtong.bmp")));
 	ItemManager::GetInstance()->PutItem(new Display({22.5f,23.5f},TEXT("Image/pipe.bmp")));
 	ItemManager::GetInstance()->PutItem(new Display({23.5f,23.5f},TEXT("Image/trash.bmp")));
 	ItemManager::GetInstance()->PutItem(new Display({24.5f,23.5f},TEXT("Image/poo.bmp")));
 	ItemManager::GetInstance()->PutItem(new Display({25.5f,23.5f},TEXT("Image/sohwa.bmp")));
 	ItemManager::GetInstance()->PutItem(new Stun({26.5f,23.5f}));
 	ItemManager::GetInstance()->PutItem(new Insight({27.5f,23.5f}));
-	ItemManager::GetInstance()->PutItem(new Phone({28.5f,23.5f}));
+	ItemManager::GetInstance()->PutItem(new Phone({28.5f,23.5f}));*/
 
 	return S_OK;
 }

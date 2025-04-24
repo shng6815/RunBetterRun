@@ -4,12 +4,12 @@
 
 class Display: public AItem
 {
-	static map<LPCWCH,DWORD> ids;
+	static map<DWORD,LPCWCH> ids;
 	virtual BOOL Action(void) override;
 
 public:
 	Display(FPOINT pos) { Init(pos); }
-	Display(FPOINT pos, LPCWCH texturePath);
+	Display(DWORD id,FPOINT pos);
 
 	virtual HRESULT Init(FPOINT pos) override;
 };

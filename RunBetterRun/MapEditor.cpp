@@ -68,8 +68,8 @@ HRESULT MapEditor::Init()
 		true,RGB(255,0,255));
 
 	sampleSpriteImage = ImageManager::GetInstance()->AddImage(
-						"EditorSpriteSheet",L"Image/horrorMapTiles2.bmp",
-						11 * TILE_SIZE,11 * TILE_SIZE,11,11,true,RGB(255,0,255)
+						"EditorSpriteSheet",L"Image/pallet64x160.bmp",
+						5 * TILE_SIZE,2 * TILE_SIZE,5,2,true,RGB(255,0,255)
 	);
 
 	if(!sampleTileImage || !sampleSpriteImage)
@@ -451,8 +451,9 @@ void MapEditor::RenderSampleSprites(HDC hdc)
 	currentY += 20;
 
 	// 아이템 종류 (4개)
-	const LPCWSTR itemLabels[] = {L"Key",L"Phone",L"Stun",L"Insight"};
-	const int itemCount = 4;
+	const LPCWSTR itemLabels[] = {L"Key",L"Phone",L"Insight",L"Stun",L"Poo",
+								  L"Sowha",L"Pipe",L"Drumtong", L"Trash"};
+	const int itemCount = 9;
 
 	// 한 행에 표시할 아이템 수
 	const int itemsPerRow = 2;
@@ -557,11 +558,11 @@ void MapEditor::RenderSampleSprites(HDC hdc)
 	currentY += 20;
 
 	// 장애물 종류 (6개 + 엘레베이터 1개)
-	const LPCWSTR obstacleLabels[] = {L"Pile",L"Shelf",L"Table",L"Bed",L"Drawer",L"Chair",L"Elevator"};
-	const int obstacleCount = 7;
+	const LPCWSTR obstacleLabels[] = {L"Elevator",L"Pile",L"Trash", L"Final Elevator"};
+	const int obstacleCount = 4;
 
 	// 한 행에 표시할 장애물 수
-	const int obstaclesPerRow = 3;
+	const int obstaclesPerRow = 2;
 
 	for(int i = 0; i < obstacleCount; i++) {
 		int row = i / obstaclesPerRow;
@@ -571,7 +572,7 @@ void MapEditor::RenderSampleSprites(HDC hdc)
 		int posY = currentY + row * (spriteHeight + 30) + spriteHeight/2;
 
 		// 장애물 스프라이트 그리기 (타일시트의 세 번째 행 사용)
-		int spriteY = (i < 6) ? 2 : 3; // 엘레베이터는 별도 행에
+		int spriteY = (i < 4) ? 2 : 3; // 엘레베이터는 별도 행에
 		sampleSpriteImage->FrameRender(
 			hdc,
 			posX,
@@ -1754,127 +1755,6 @@ void MapEditor::ClearMap()
 	MessageBox(g_hWnd,TEXT("Map cleared!"),TEXT("Success"),MB_OK);
 }
 
-void MapEditor::ConvertToDataManager()
-{
-	// DataManager에 데이터 설정
-
-	DataManager::GetInstance()->ClearAllData();
-	DataManager::GetInstance()->SetMapData(tiles,mapWidth,mapHeight);
-	DataManager::GetInstance()->SetTextureInfo(L"Image/tiles.bmp",128,SAMPLE_TILE_X,SAMPLE_TILE_Y);
-	DataManager::GetInstance()->SetStartPosition(startPosition);
-
-	// 아이템, 몬스터, 장애물 데이터 추가
-	for(const auto& sprite : editorSprites) {
-		if(sprite.type == SpriteType::KEY || sprite.type == SpriteType::ITEM)
-		{
-
-			switch(sprite.id)
-			{
-			ItemData item;
-			case(0): //key
-			item.pos = sprite.pos;
-			item.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
-			item.itemId = 0;
-			DataManager::GetInstance()->AddItemData(item);
-			break;
-			case(1): //phone
-			item.pos = sprite.pos;
-			item.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
-			item.itemId = 1;
-			DataManager::GetInstance()->AddItemData(item);
-			break;
-			case(2): //insight
-			item.pos = sprite.pos;
-			item.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
-			item.itemId = 2;
-			DataManager::GetInstance()->AddItemData(item);
-			break;
-			case(3): //stun
-			item.pos = sprite.pos;
-			item.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
-			item.itemId = 3;
-			DataManager::GetInstance()->AddItemData(item);
-			break;
-			case(4): //poo
-			item.pos = sprite.pos;
-			item.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
-			item.itemId = 4;
-			DataManager::GetInstance()->AddItemData(item);
-			break;
-			case(5): //소화기
-			item.pos = sprite.pos;
-			item.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
-			item.itemId = 5;
-			DataManager::GetInstance()->AddItemData(item);
-			break;
-			case(6): //Pipe
-			item.pos = sprite.pos;
-			item.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
-			item.itemId = 6;
-			DataManager::GetInstance()->AddItemData(item);
-			break;
-			case(7): //드럼통
-			item.pos = sprite.pos;
-			item.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
-			item.itemId = 7;
-			DataManager::GetInstance()->AddItemData(item);
-			break;
-			case(11): //trash
-			item.pos = sprite.pos;
-			item.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
-			item.itemId = 11;
-			DataManager::GetInstance()->AddItemData(item);
-			break;
-			default:
-			item.pos = sprite.pos;
-			item.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
-			item.itemId = 0;
-			DataManager::GetInstance()->AddItemData(item);
-			break;
-			}
-		} 
-		else if(sprite.type == SpriteType::MONSTER)
-		{
-			MonsterData monster;
-			monster.pos = sprite.pos;
-			monster.aniInfo = {0.18f,0.18f,{215,246},{10,36},{0,0}};
-			monster.monsterId = 10;
-			DataManager::GetInstance()->AddMonsterData(monster);
-		}
-	}
-
-	for(const auto& obstacle : editorObstacles) {
-		ObstacleData obsData;
-		switch(obstacle.id)
-		{
-		case(8): // Pile
-		obsData.pos = obstacle.pos;
-		obsData.dir = obstacle.dir;
-		obsData.obstacleId = 8;
-		DataManager::GetInstance()->AddObstacleData(obsData);
-		break;
-		case(9): // Elevator
-		obsData.pos = obstacle.pos;
-		obsData.dir = obstacle.dir;
-		obsData.obstacleId = 9;
-		DataManager::GetInstance()->AddObstacleData(obsData);
-		break;
-		case(12): // Final Elevator
-		obsData.pos = obstacle.pos;
-		obsData.dir = obstacle.dir;
-		obsData.obstacleId = 12;
-		DataManager::GetInstance()->AddObstacleData(obsData);
-		break;
-		default:
-		obsData.pos = obstacle.pos;
-		obsData.dir = obstacle.dir;
-		obsData.obstacleId = 8;
-		DataManager::GetInstance()->AddObstacleData(obsData);
-		break;
-		}
-	}
-}
-
 void MapEditor::ConvertFromDataManager()
 {
 	// 맵 데이터 로드
@@ -1899,74 +1779,45 @@ void MapEditor::ConvertFromDataManager()
 	for(const auto& item : items) {
 		Sprite sprite;
 		sprite.pos = item.pos;
+		sprite.id = item.id;
 		sprite.distance = 0.0f;
-		sprite.id = item.itemId;
 
-		switch(item.itemId)
+		// 텍스처
+		switch(item.id)
 		{
-		case 0: // Key
-		{
-			sprite.type = SpriteType::KEY;
-			sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/soul.bmp"));
-			sprite.aniInfo = {0.1f,0.1f,{250,250},{20,1},{rand() % 20,0}};
-			break;
-		}
-		case 1: // Phone
-		{
-			sprite.type = SpriteType::ITEM;
-			sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/phone.bmp"));
-
-			break;
-		}
-		case 2: // Insight
-		{
-			sprite.type = SpriteType::ITEM;
-			sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/dongseonambuk.bmp"));
-			break;
-		}
-		case 3: // Stun
-		{
-			sprite.type = SpriteType::ITEM;
-			sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/amulet.bmp"));
-			break;
-		}
-		case 4: // Poo
-		{
-			sprite.type = SpriteType::ITEM;
-			sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/poo.bmp"));
-			break;
-		}
-		case 5: // 소화기
-		{
-			sprite.type = SpriteType::ITEM;
-			sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/sowha.bmp"));
-			break;
-		}
-		case 6: // Pipe
-		{
-			sprite.type = SpriteType::ITEM;
-			sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/pipe.bmp"));
-			break;
-		}
-		case 7: // 드럼통
-		{
-			sprite.type = SpriteType::ITEM;
-			sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/drumtong.bmp"));
-			break;
-		}
-		case 11: // Trash
-		{
-			sprite.type = SpriteType::ITEM;
-			sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/trash.bmp"));
-			break;
-		}
+		case(0):
+		sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/soul.bmp"));
+		break;
+		case(1):
+		sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/phone.bmp"));
+		break;
+		case(2):
+		sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/dongseonambuk.bmp"));
+		break;
+		case(3):
+		sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/amulet.bmp"));
+		break;
+		case(4):
+		sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/poo.bmp"));
+		break;
+		case(5):
+		sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/sowha.bmp"));
+		break;
+		case(6):
+		sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/pipe.bmp"));
+		break;
+		case(7): 
+		sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/drumtong.bmp"));
+		break;
+		case(11):
+		sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/trash.bmp"));
+		break;
 		default:
-		{
-			sprite.type = SpriteType::ITEM;
-			sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/jewel.bmp"));
-			break;
+		break;
 		}
-		}
+		
+		sprite.aniInfo = item.aniInfo;
+
 		// 스프라이트 목록에 추가
 		editorSprites.push_back(sprite);
 	}
@@ -1996,9 +1847,16 @@ void MapEditor::ConvertFromDataManager()
 		obstacle.block = TRUE;
 		obstacle.distance = 0.0f;
 
+		switch(obstacleData.id)
+		{
+		case(8):
+		obstacle.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/pile.bmp"));
+		break;
+		case(9): case(12):
+		obstacle.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/elevator.bmp"));
+		}
 		// 텍스처와 애니메이션 정보 설정
 		// 장애물 종류에 따라 다른 텍스처 적용 가능
-		obstacle.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/pile.bmp"));
 		obstacle.aniInfo = {0.0f,0.0f,{128,128},{8,1},{0,0}};
 
 		// 장애물 목록에 추가
