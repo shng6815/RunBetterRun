@@ -160,6 +160,7 @@ typedef struct tagMonsterSaveData
 
 typedef struct tagObstacleSaveData
 {
+	DWORD id; 
 	POINT pos;             // 위치 (타일 좌표)
 	Direction dir;         // 장애물 방향 (NORTH, SOUTH, EAST, WEST)
 	AnimationInfo aniInfo; // 애니메이션 정보
