@@ -2,6 +2,7 @@
 #include "TextureManager.h"
 #include "SpriteManager.h"
 #include "MainGameScene.h"
+#include "ObstacleManager.h"
 
 BOOL Phone::Action(void)
 {
