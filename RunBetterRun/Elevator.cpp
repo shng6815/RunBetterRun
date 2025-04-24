@@ -14,6 +14,19 @@ Elevator::Elevator(POINT pos,Direction dir)
 	waitTime = 3.5f;
 }
 
+Elevator::Elevator(POINT pos,Direction dir)
+{
+	obstacle.id = 12;
+	obstacle.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/elevator.bmp"));
+	obstacle.aniInfo = {0.2f,0.2f,{128,128},{8,1},{0,0}};
+	obstacle.pos = pos;
+	obstacle.dir = dir;
+	obstacle.block = TRUE;
+	obstacle.distance = 0;
+	status = DoorStatus::Lock;
+	waitTime = 3.5f;
+}
+
 BOOL Elevator::Action(void)
 {
 	if(obstacle.distance <= OBSTACLE_SIZE && KeyManager::GetInstance()->IsOnceKeyDown('E'))

@@ -109,11 +109,11 @@ typedef struct tagMapData
 // ����� ������
 typedef struct tagFileHeader
 {
-	char signature[4];      // ����Ÿ�Ա���
-	int version;            // ���� ���� ����
+	char signature[4];    
+	int version;            
 	int mapWidth;          
 	int mapHeight;          
-	int tileCount;          // ��ü Ÿ�� ��
+	int tileCount;         
 	int itemCount;         
 	int monsterCount;    
 	int obstacleCount;
@@ -148,14 +148,14 @@ typedef struct tagItemSaveData
 {
 	FPOINT pos;             // ��ġ
 	AnimationInfo aniInfo;  // �ִϸ��̼� ����
-	int itemType;           // ������ Ÿ�� - 0: Key
+	int itemId;           // ������ Ÿ�� - 0: Key
 }ItemData;
 
 typedef struct tagMonsterSaveData
 {
 	FPOINT pos;             // ��ġ
 	AnimationInfo aniInfo;  // �ִϸ��̼� ����
-	int monsterType;        // ���� Ÿ�� - 0: Tentacle
+	int monsterId;        // ���� Ÿ�� - 0: Tentacle
 }MonsterData;
 
 typedef struct tagObstacleSaveData
@@ -164,5 +164,5 @@ typedef struct tagObstacleSaveData
 	POINT pos;             // 위치 (타일 좌표)
 	Direction dir;         // 장애물 방향 (NORTH, SOUTH, EAST, WEST)
 	AnimationInfo aniInfo; // 애니메이션 정보
-	int obstacleType;      // 장애물 타입 - 0: Pile, 1: 다른 장애물 타입 등
+	int obstacleId;      // 장애물 타입 - 0: Pile, 1: 다른 장애물 타입 등
 }ObstacleData;

@@ -7,6 +7,8 @@ HRESULT DataManager::Init()
 	tiles.clear();
 	items.clear();
 	monsters.clear();
+	InitDefaultAnimations();
+
 	return S_OK;
 }
 
@@ -15,6 +17,25 @@ void DataManager::Release()
 	tiles.clear();
 	items.clear();
 	monsters.clear();
+}
+
+void DataManager::InitDefaultAnimations()
+{
+	// 아이템 기본 애니메이션
+	itemDefaultAnims[0] = {0.1f,0.1f,{250,250},{20,1},{0,0}}; // Key
+	itemDefaultAnims[1] = {0.0f,0.0f,{250,250},{1,1},{0,0}};  // Phone
+	itemDefaultAnims[2] = {0.0f,0.0f,{250,250},{1,1},{0,0}};  // Insight
+	itemDefaultAnims[3] = {0.0f,0.0f,{250,250},{1,1},{0,0}};  // Stun
+	itemDefaultAnims[4] = {0.1f,0.1f,{250,250},{20,1},{0,0}}; // Poo
+	itemDefaultAnims[5] = {0.1f,0.1f,{250,250},{20,1},{0,0}}; // 소화기
+	itemDefaultAnims[6] = {0.1f,0.1f,{250,250},{20,1},{0,0}}; // Pipe
+	itemDefaultAnims[7] = {0.1f,0.1f,{250,250},{20,1},{0,0}}; // 드럼통
+	itemDefaultAnims[11] = {0.1f,0.1f,{250,250},{20,1},{0,0}}; // Trash
+
+	// 장애물 기본 애니메이션
+	obstacleDefaultAnims[8] = {0.0f,0.0f,{128,128},{8,1},{0,0}}; // Pile
+	obstacleDefaultAnims[9] = {0.2f,0.2f,{128,128},{8,1},{0,0}}; // Elevator
+	obstacleDefaultAnims[12] = {0.2f,0.2f,{128,128},{8,1},{0,0}}; // Final Elevator
 }
 
 void DataManager::ClearAllData()
