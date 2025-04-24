@@ -142,7 +142,6 @@ void MainGameScene::Update()
 		if(KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE))
 		{
 			ShowCursor(TRUE);
-			SoundManager::GetInstance()->StopAllSounds();
 			MonsterManager::GetInstance()->StopSound();
 			status = SceneStatus::PAUSE;
 			break;
