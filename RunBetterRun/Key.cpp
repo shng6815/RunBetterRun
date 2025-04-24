@@ -18,6 +18,7 @@ BOOL Key::Action(void)
 
 HRESULT Key::Init(FPOINT pos)
 {
+	sprite.id = 0;
 	sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/soul.bmp"));
 	if(!sprite.texture)
 		return E_FAIL;

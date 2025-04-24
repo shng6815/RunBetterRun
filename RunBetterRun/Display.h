@@ -1,8 +1,10 @@
 #pragma once
 #include "AItem.h"
+#include <map>
 
 class Display: public AItem
 {
+	static map<LPCWCH,DWORD> ids;
 	virtual BOOL Action(void) override;
 
 public:

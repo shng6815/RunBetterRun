@@ -69,6 +69,7 @@ void Tentacle::Catch(void)
 
 HRESULT Tentacle::Init(FPOINT pos)
 {
+	sprite.id = 10;
 	sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/Ballman.bmp"));
 	if(!sprite.texture)
 		return E_FAIL;

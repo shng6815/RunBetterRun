@@ -20,6 +20,7 @@ BOOL Pile::Action(void)
 
 Pile::Pile(POINT pos,Direction dir)
 {
+	obstacle.id = 8;
 	obstacle.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/pile.bmp"));
 	obstacle.aniInfo = {0.0f,0.0f,{128,128},{8,1},{0,0}};
 	obstacle.pos = pos;
