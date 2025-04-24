@@ -11,6 +11,7 @@ BOOL Stun::Action(void)
 
 HRESULT Stun::Init(FPOINT pos)
 {
+	sprite.id = 3;
 	sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/amulet.bmp"));
 	if(!sprite.texture)
 		return E_FAIL;

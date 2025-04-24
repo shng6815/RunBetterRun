@@ -43,6 +43,7 @@ void ItemManager::Update(void)
     {
 		if ((*iter)->Update())
 		{
+			SoundManager::GetInstance()->PlaySoundW("CollectKey");
 			delete *iter;
 			iter = items.erase(iter);
 		}
@@ -67,6 +68,5 @@ void ItemManager::PopKey(void)
 	{
 		keyCount;
 		// Escape Event
-		SoundManager::GetInstance()->PlaySoundW("CollectKey");
 	}
 }

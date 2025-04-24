@@ -15,6 +15,7 @@ BOOL Insight::Action(void)
 
 HRESULT Insight::Init(FPOINT pos)
 {
+	sprite.id = 2;
 	sprite.texture = TextureManager::GetInstance()->GetTexture(TEXT("Image/dongseonambuk.bmp"));
 	if (!sprite.texture)
 		return E_FAIL;

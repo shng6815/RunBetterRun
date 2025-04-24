@@ -40,6 +40,7 @@ typedef struct tagAnimationInfo
 
 typedef struct tagObstacle
 {
+	DWORD			id;
 	POINT			pos;
 	BOOL			block;
 	Direction		dir;
@@ -69,6 +70,7 @@ typedef struct tagLevel
 
 typedef struct tagSprite
 {
+	DWORD			id;
 	SpriteType		type;
 	FPOINT			pos;
 	float			distance;
