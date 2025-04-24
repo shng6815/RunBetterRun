@@ -7,6 +7,8 @@
 
 BOOL Phone::Action(void)
 {
+
+
 	PhoneUI* uiUnit = new PhoneUI();
 	uiUnit->Init(UIType::PLAYING,FPOINT{100,WINSIZE_Y - 500},FPOINT{300,400},0);
 	UIManager::GetInstance()->AddUIUnit("PhoneUI",uiUnit);

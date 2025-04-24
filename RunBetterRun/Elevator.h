@@ -2,7 +2,7 @@
 #include "AObstacle.h"
 class Elevator: public AObstacle
 {
-	enum class DoorStatus
+	enum class DoorStatus: BYTE
 	{ Init, Close, Closing, Open, Opening, Lock, UnLock, FinalOpening, FinalOpen, FinalClosing, Exit};
 
 	DoorStatus  status;
@@ -13,6 +13,7 @@ class Elevator: public AObstacle
 
 public:
 	Elevator(POINT pos,Direction dir);
+	Elevator(POINT pos,Direction dir,DWORD id);
 	virtual BOOL Action(void) override;
 	virtual void Update(void) override;
 
