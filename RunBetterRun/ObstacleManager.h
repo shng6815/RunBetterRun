@@ -19,5 +19,9 @@ public:
 
 	void LockElevator(void);
 	void UnlockElevator(void);
+
+	POINT GetElevatorPosition(void) {
+		return elevator->GetPosition();
+	}
 };
 

@@ -5,6 +5,7 @@
 #include "MapManager.h"
 #include "SceneManager.h"
 #include <cmath>
+#include "SoundManager.h"
 
 HRESULT MonsterManager::Init()
 {
@@ -31,11 +32,24 @@ void MonsterManager::Update()
 		playerPos = Player::GetInstance()->GetCameraPos();
 		vector<FPOINT> paths;
 
+		// 가장 가까운 몬스터의 거리를 추적하기 위한 변수
+		float closestMonsterDistance = FLT_MAX;
+
 		for(auto& monster : monsters)
 		{
 			FPOINT monsterPos = monster->GetPostion();
-			vector<FPOINT> path = FindPath(monsterPos,playerPos,paths);
 
+			// 몬스터와 플레이어 사이의 직선 거리 계산
+			float dx = playerPos.x - monsterPos.x;
+			float dy = playerPos.y - monsterPos.y;
+			float distance = sqrt(dx*dx + dy*dy);
+
+			// 가장 가까운 몬스터 거리 업데이트
+			if(distance < closestMonsterDistance) {
+				closestMonsterDistance = distance;
+			}
+
+			vector<FPOINT> path = FindPath(monsterPos,playerPos,paths);
 			if(path.size() >= 2)
 			{
 				monster->SetTargetPosition(path[1]);
@@ -44,6 +58,46 @@ void MonsterManager::Update()
 
 			monster->Update();
 		}
+
+		// 심장 소리 업데이트
+		UpdateHeartbeatSound(closestMonsterDistance);
+	}
+}
+
+void MonsterManager::UpdateHeartbeatSound(float distance)
+{
+	// 심장 소리 시작/중지 기준 거리
+	const float MAX_HEARTBEAT_DISTANCE = 8.0f;
+	const float MIN_HEARTBEAT_DISTANCE = 2.0f;
+
+	if(distance > MAX_HEARTBEAT_DISTANCE) {
+		// 심장 소리가 재생 중이면 중지
+		if(SoundManager::GetInstance()->IsSoundPlaying("Heart")) {
+			SoundManager::GetInstance()->StopSound("Heart");
+			heartbeatPlaying = false;
+		}
+		return;
+	}
+
+	// 거리에 따른 볼륨 계산
+	float distanceFactor = 1.0f - (distance - MIN_HEARTBEAT_DISTANCE) / (MAX_HEARTBEAT_DISTANCE - MIN_HEARTBEAT_DISTANCE);
+	distanceFactor = max(0.0f,min(1.0f,distanceFactor));
+
+	// 볼륨 설정 (0.2 ~ 1.0)
+	float volume = 0.2f + (distanceFactor * 0.8f);
+
+	// 소리가 재생 중이 아니거나 볼륨이 크게 변했을 때만 갱신
+	static float lastVolume = -1.0f;
+	if(!heartbeatPlaying || abs(volume - lastVolume) > 0.1f) {
+		// 기존 심장 소리 중지
+		if(heartbeatPlaying) {
+			SoundManager::GetInstance()->StopSound("Heart");
+		}
+
+		// 새 볼륨으로 재생
+		SoundManager::GetInstance()->PlaySound("Heart",true,volume);
+		heartbeatPlaying = true;
+		lastVolume = volume;
 	}
 }
 
@@ -51,6 +105,23 @@ void MonsterManager::Update()
 void MonsterManager::PutMonster(AMonster* monster)
 {
 	monsters.push_back(monster);
+}
+
+FPOINT MonsterManager::GetClosestMonsterPos()
+{
+	FPOINT closestMonsterPos = {-1,-1};
+	float closestDistance = FLT_MAX;
+	for(auto& monster : monsters)
+	{
+		FPOINT monsterPos = monster->GetPostion();
+		float distance = sqrt(pow(playerPos.x - monsterPos.x,2) + pow(playerPos.y - monsterPos.y,2));
+		if(distance < closestDistance)
+		{
+			closestDistance = distance;
+			closestMonsterPos = monsterPos;
+		}
+	}
+	return closestMonsterPos;
 }
 
 vector<FPOINT> MonsterManager::FindPath(FPOINT start, FPOINT end, vector<FPOINT>& paths)

@@ -1,10 +1,14 @@
 #include "Phone.h"
 #include "TextureManager.h"
 #include "SpriteManager.h"
+#include "UIManager.h"
+#include "PhoneUI.h"
 
 BOOL Phone::Action(void)
 {
-	// Pick Up PhoneUI
+	PhoneUI* uiUnit = new PhoneUI();
+	uiUnit->Init(UIType::PLAYING,FPOINT{100,WINSIZE_Y - 500},FPOINT{300,400},0);
+	UIManager::GetInstance()->AddUIUnit("PhoneUI",uiUnit);
 	return TRUE;
 }
 

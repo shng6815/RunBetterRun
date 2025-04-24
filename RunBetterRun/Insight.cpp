@@ -1,11 +1,16 @@
 #include "Insight.h"
 #include "TextureManager.h"
 #include "SpriteManager.h"
+#include "UIManager.h"
+#include "PhoneUI.h"
 
 BOOL Insight::Action(void)
 {
-	//PhoneUI Display Monsters's pos
-    return TRUE;
+	PhoneUI* phoneUI = static_cast<PhoneUI*>(UIManager::GetInstance()->GetUIUnit("PhoneUI"));
+	if(phoneUI) {
+		phoneUI->GetInsight(10.0f); // 10초 동안 인사이트 기능 활성화
+	}
+	return TRUE;
 }
 
 HRESULT Insight::Init(FPOINT pos)

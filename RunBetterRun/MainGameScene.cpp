@@ -5,12 +5,12 @@
 #include "SpriteManager.h"
 #include "ItemManager.h"
 #include "UIManager.h"
-#include "PhoneUI.h"
 #include "Key.h"
 #include "Tentacle.h"
 #include "ObstacleManager.h"
 #include "Pile.h"
 #include "DataManager.h"
+#include "SoundManager.h"
 #include "Display.h"
 #include "Elevator.h"
 #include "Phone.h"
@@ -56,9 +56,7 @@ HRESULT MainGameScene::Init()
 
 	UIManager::GetInstance()->Init();
 	UIManager::GetInstance()->ChangeUIType(UIType::PLAYING);
-	PhoneUI* uiUnit = new PhoneUI();
-	uiUnit->Init(UIType::PLAYING, FPOINT{ 100, WINSIZE_Y - 500 }, FPOINT{ 300, 400 }, 0);
-	UIManager::GetInstance()->AddUIUnit("PhoneUI", uiUnit);
+
 	InitButtons();
 
 	status = SceneStatus::IN_GAME;
@@ -72,6 +70,10 @@ HRESULT MainGameScene::Init()
 	backBufferBitmap = CreateCompatibleBitmap(screenDC, rc.right, rc.bottom);
 	oldBitmap = (HBITMAP)SelectObject(backBufferDC, backBufferBitmap);
 	ReleaseDC(g_hWnd, screenDC);
+
+	SoundManager::GetInstance()->LoadMusic("GameSceneBGM","Sounds/BGM_InGame.wav");
+
+	SoundManager::GetInstance()->PlayMusic("GameSceneBGM",true,0.5f);
 
 	/*ItemManager::GetInstance()->PutItem(new Key({ 21.5, 10.5 }));
 	MonsterManager::GetInstance()->PutMonster(new Tentacle({ 21.5, 8.5 }));
@@ -262,7 +264,7 @@ void MainGameScene::RenderPauseMenu(HDC hdc,PauseButton& button)
 	SetTextColor(hdc,textColor);
 	SetBkMode(hdc,TRANSPARENT);
 
-	// 버튼 텍스트용 폰트
+	// ��ư �ؽ�Ʈ�� ��Ʈ
 	HFONT hFont = CreateFont(40,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,
 							 DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
 							 DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,TEXT("Chainsaw Carnage"));
@@ -299,7 +301,7 @@ void MainGameScene::InitButtons()
 	RECT rc;
 	GetClientRect(g_hWnd,&rc);
 
-	// 메뉴 배경 영역
+	// �޴� ��� ����
 	int menuWidth = 400;
 	int menuHeight = 300;
 	int menuX = (rc.right - menuWidth) / 2;
@@ -309,12 +311,12 @@ void MainGameScene::InitButtons()
 	int buttonHeight = 40;
 	int buttonSpacing = 50;
 
-	// 버튼의 시작 Y 위치
+	// ��ư�� ���� Y ��ġ
 	int startY = menuY + 90;
 
 	buttons.resize(3);
 
-	// 버튼 중앙 정렬
+	// ��ư �߾� ����
 	int buttonX = menuX + (menuWidth - buttonWidth) / 2;
 
 	buttons[0].Init(

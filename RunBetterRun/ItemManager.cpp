@@ -2,6 +2,7 @@
 #include "SpriteManager.h"
 #include "TextureManager.h"
 #include "AItem.h"
+#include "SoundManager.h"
 
 HRESULT ItemManager::LoadFile(LPCWCH path)
 {
@@ -12,6 +13,9 @@ HRESULT ItemManager::Init(void)
 {
 	keyCount = 0;
 	items.clear();
+
+	SoundManager::GetInstance()->LoadSound("CollectKey","Sounds/SFX_GetItem.wav");
+
     return S_OK;
 }
 
@@ -19,6 +23,9 @@ HRESULT ItemManager::Init(LPCWCH path)
 {
 	keyCount = 0;
 	items.clear();
+
+	SoundManager::GetInstance()->LoadSound("CollectKey","Sounds/SFX_GetItem.wav");
+
     return S_OK;
 }
 
@@ -56,10 +63,10 @@ void ItemManager::PushKey(void)
 
 void ItemManager::PopKey(void)
 {
-
 	if(--keyCount == 0)
 	{
 		keyCount;
 		// Escape Event
+		SoundManager::GetInstance()->PlaySoundW("CollectKey");
 	}
 }

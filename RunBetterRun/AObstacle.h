@@ -16,5 +16,8 @@ public:
 	virtual void Update(void);
 
 	void Distance(FPOINT player);
+	POINT GetPosition(void) {
+		return obstacle.pos;
+	}
 };
 

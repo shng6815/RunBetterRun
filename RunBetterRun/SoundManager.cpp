@@ -5,6 +5,30 @@
 // 싱글톤 인스턴스 초기화
 template<> SoundManager* Singleton<SoundManager>::instance = nullptr;
 
+void SoundManager::ChannelFinished(int channel)
+{
+	// 싱글톤 인스턴스 접근
+	SoundManager* instance = SoundManager::GetInstance();
+
+	// 채널이 매핑되어 있는지 확인
+	auto channelIt = instance->channelToSoundMap.find(channel);
+	if(channelIt != instance->channelToSoundMap.end()) {
+		std::string soundID = channelIt->second;
+
+		// channelToSoundMap에서 제거
+		instance->channelToSoundMap.erase(channelIt);
+
+		// activeChannels에서 해당 채널 제거
+		auto& channels = instance->activeChannels[soundID];
+		channels.erase(std::remove(channels.begin(),channels.end(),channel),channels.end());
+
+		// 해당 사운드의 모든 채널이 종료되었다면 엔트리 제거
+		if(channels.empty()) {
+			instance->activeChannels.erase(soundID);
+		}
+	}
+}
+
 HRESULT SoundManager::Init()
 {
 	if(SDL_Init(SDL_INIT_AUDIO) < 0)
@@ -23,8 +47,8 @@ HRESULT SoundManager::Init()
 	// 카테고리별 볼륨 초기화
 	categoryVolume[SoundType::BGM] = 1.0f;
 	categoryVolume[SoundType::SFX] = 1.0f;
-	categoryVolume[SoundType::VOICE] = 1.0f;
-	categoryVolume[SoundType::AMBIENT] = 1.0f;
+
+	Mix_ChannelFinished(ChannelFinished);  // 채널 종료 시 호출될 콜백 함수 설정
 
 	return S_OK;
 }
@@ -56,6 +80,9 @@ void SoundManager::Release()
 	Mix_CloseAudio();
 	Mix_Quit();
 	SDL_Quit();
+
+	activeChannels.clear();
+	channelToSoundMap.clear();
 }
 
 HRESULT SoundManager::LoadMusic(const std::string& musicID,const std::string& filePath)
@@ -150,6 +177,10 @@ HRESULT SoundManager::PlaySound(const std::string& soundID,bool loop,float volum
 		return E_FAIL;
 	}
 
+	// 채널 추적에 추가
+	activeChannels[soundID].push_back(channel);
+	channelToSoundMap[channel] = soundID;
+
 	return S_OK;
 }
 
@@ -164,6 +195,41 @@ void SoundManager::StopMusic()
 void SoundManager::StopSound(int channel)
 {
 	Mix_HaltChannel(channel);
+
+	// 채널이 매핑되어 있는지 확인
+	auto it = channelToSoundMap.find(channel);
+	if(it != channelToSoundMap.end()) {
+		std::string soundID = it->second;
+		channelToSoundMap.erase(it);
+
+		// activeChannels에서 해당 채널 제거
+		auto& channels = activeChannels[soundID];
+		channels.erase(std::remove(channels.begin(),channels.end(),channel),channels.end());
+
+		// 해당 사운드의 모든 채널이 종료되었다면 엔트리 제거
+		if(channels.empty()) {
+			activeChannels.erase(soundID);
+		}
+	}
+}
+
+void SoundManager::StopSound(std::string soundID)
+{
+	auto it = activeChannels.find(soundID);
+	if(it != activeChannels.end()) {
+		// 임시 벡터에 채널 번호 복사 (iterator 무효화 방지)
+		std::vector<int> channelsToStop = it->second;
+
+		// 모든 채널 중지
+		for(int channel : channelsToStop) {
+			Mix_HaltChannel(channel);
+			// 채널-사운드 매핑에서 제거
+			channelToSoundMap.erase(channel);
+		}
+
+		// 사운드 엔트리 제거
+		activeChannels.erase(soundID);
+	}
 }
 
 void SoundManager::PauseMusic()
@@ -227,10 +293,20 @@ bool SoundManager::IsMusicPlaying()
 	return Mix_PlayingMusic() && !Mix_PausedMusic();
 }
 
+bool SoundManager::IsSoundPlaying(std::string soundID)
+{
+	auto it = activeChannels.find(soundID);
+	return (it != activeChannels.end() && !it->second.empty());
+}
+
 void SoundManager::StopAllSounds()
 {
-	// 모든 효과음 중지
+	// 모든 효과음 채널 중지
 	Mix_HaltChannel(-1);
+
+	// 추적 맵 초기화
+	activeChannels.clear();
+	channelToSoundMap.clear();
 
 	// 음악 중지
 	StopMusic();

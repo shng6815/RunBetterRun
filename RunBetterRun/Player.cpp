@@ -49,8 +49,11 @@ HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 		isFirstInit = false;
 	}
 
-	// ī�޶� ����
 	this->shakeFunc = shakeFunc;
+
+	SoundManager::GetInstance()->LoadSound("Step","Sounds/SFX_Step.wav");
+
+	SoundManager::GetInstance()->LoadSound("Heart","Sounds/SFX_Heart.wav");
 
 	return S_OK;
 }
@@ -71,7 +74,6 @@ void Player::Update()
 
     fov += (targetFOV - fov) * deltaTime * fovLerpSpeed;
     UpdateFOV();
-
 }
 
 void Player::Render(HDC hdc)
