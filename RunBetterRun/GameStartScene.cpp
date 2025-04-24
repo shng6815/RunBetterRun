@@ -186,7 +186,7 @@ void GameStartScene::DrawTitle(HDC hdc)
 		rc.bottom / 3 + titleHeight
 	};
 
-	DrawText(hdc,titleText,-1,&titleRect,DT_CENTER | DT_VCENTER);
+	//DrawText(hdc,titleText,-1,&titleRect,DT_CENTER | DT_VCENTER);
 
 	SelectObject(hdc,oldFont);
 	DeleteObject(hFont);
@@ -199,7 +199,7 @@ void GameStartScene::DrawButton(HDC hdc, Button & button)
 
 	if(button.state == ButtonState::HOVER)
 	{
-		textColor = RGB(255, 0,0 );
+		textColor = RGB(141, 0,0 );
 	}
 	// 버튼 그리기
 
@@ -217,23 +217,23 @@ void GameStartScene::DrawButton(HDC hdc, Button & button)
 	DrawText(hdc,button.text,-1,&button.rect,DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
 	// 호버 상태일 때 밑줄 그리기
-	if(button.state == ButtonState::HOVER || button.state == ButtonState::CLICKED) {
-		SIZE textSize;
-		GetTextExtentPoint32(hdc,button.text,wcslen(button.text),&textSize);
+	//if(button.state == ButtonState::HOVER || button.state == ButtonState::CLICKED) {
+	//	SIZE textSize;
+	//	GetTextExtentPoint32(hdc,button.text,wcslen(button.text),&textSize);
 
-		int lineX1 = button.rect.left + (button.rect.right - button.rect.left - textSize.cx) / 2;
-		int lineX2 = lineX1 + textSize.cx;
-		int lineY = button.rect.bottom - 5;  // 텍스트 아래 위치
+	//	int lineX1 = button.rect.left + (button.rect.right - button.rect.left - textSize.cx) / 2;
+	//	int lineX2 = lineX1 + textSize.cx;
+	//	int lineY = button.rect.bottom - 5;  // 텍스트 아래 위치
 
-		HPEN underlinePen = CreatePen(PS_SOLID,2,textColor);
-		HPEN oldPen = (HPEN)SelectObject(hdc,underlinePen);
+	//	HPEN underlinePen = CreatePen(PS_SOLID,2,textColor);
+	//	HPEN oldPen = (HPEN)SelectObject(hdc,underlinePen);
 
-		MoveToEx(hdc,lineX1,lineY,NULL);
-		LineTo(hdc,lineX2,lineY);
+	//	MoveToEx(hdc,lineX1,lineY,NULL);
+	//	LineTo(hdc,lineX2,lineY);
 
-		SelectObject(hdc,oldPen);
-		DeleteObject(underlinePen);
-	}
+	//	SelectObject(hdc,oldPen);
+	//	DeleteObject(underlinePen);
+	//}
 
 	SelectObject(hdc,oldFont);
 	DeleteObject(hFont);

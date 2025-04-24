@@ -264,7 +264,7 @@ void MainGameScene::RenderPauseMenu(HDC hdc,PauseButton& button)
 
 	if(button.state == PauseButtonState::HOVER)
 	{
-		textColor = RGB(255,0,0);
+		textColor = RGB(141,0,0);
 	}
 
 	SetTextColor(hdc,textColor);
@@ -279,7 +279,7 @@ void MainGameScene::RenderPauseMenu(HDC hdc,PauseButton& button)
 	DrawText(hdc,button.text,-1,&button.rect,DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
 
-	if(button.state == PauseButtonState::HOVER || button.state == PauseButtonState::CLICKED) {
+	/*if(button.state == PauseButtonState::HOVER || button.state == PauseButtonState::CLICKED) {
 		SIZE textSize;
 		GetTextExtentPoint32(hdc,button.text,wcslen(button.text),&textSize);
 
@@ -295,7 +295,7 @@ void MainGameScene::RenderPauseMenu(HDC hdc,PauseButton& button)
 
 		SelectObject(hdc,oldPen);
 		DeleteObject(underlinePen);
-	}
+	}*/
 
 	SelectObject(hdc,oldFont);
 	DeleteObject(hFont);
