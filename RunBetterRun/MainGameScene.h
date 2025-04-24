@@ -138,7 +138,7 @@ private:
 
 	bool isCaught = false;
     float catchRotationTime = 0.0f;
-    float catchRotationDuration = 1.0f; // 회전에 걸리는 시간(초)
+    float catchRotationDuration = 0.2f; // 회전에 걸리는 시간(초)
     FPOINT originalDirection;
     FPOINT targetDirection;
 };
