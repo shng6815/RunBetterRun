@@ -1,5 +1,7 @@
 #include "Elevator.h"
 #include "TextureManager.h"
+#include "Player.h"
+#include "MapManager.h"
 
 Elevator::Elevator(POINT pos,Direction dir,DWORD id)
 {
@@ -94,9 +96,16 @@ void Elevator::Update(void)
 	if(waitTime > 0)
 		waitTime -= deltaTime;
 	else
-		/*SceneManager::GetInstance()->ChangeScene();*/
+	{
+		MapData* md = MapManager::GetInstance()->GetMapData();
+		FPOINT player = Player::GetInstance()->GetCameraPos();
+		if(md->tiles[INT(player.y) * md->width + INT(player.x)].roomType == RoomType::START)
+			SceneManager::GetInstance()->ChangeScene("EndingScene");
+		else
+			SceneManager::GetInstance()->ChangeScene("JumpscareScene");
+		status = DoorStatus::Lock;
 		break;
-
+	}
 	default:
 	break;
 	}
@@ -104,7 +113,7 @@ void Elevator::Update(void)
 
 void Elevator::Lock(void)
 {
-	if(status == DoorStatus::Open || status == DoorStatus::Close)
+	if(status == DoorStatus::Init || status == DoorStatus::Open || status == DoorStatus::Close)
 	{
 		obstacle.id = 12;
 		obstacle.aniInfo.currentFrame.x = 0;

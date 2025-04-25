@@ -28,13 +28,14 @@ HRESULT MainGameScene::Init()
 		return E_FAIL;
 	}
 
-	MapManager::GetInstance()->Init(L"Map/SavedMap.dat");
+	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
 	SpriteManager::GetInstance()->Init();
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	MonsterManager::GetInstance()->Init();
 	ItemManager::GetInstance()->Init();
 	ObstacleManager::GetInstance()->Init();
 
+	BOOL phone = FALSE;
 	const auto& items = DataManager::GetInstance()->GetItems();
 	for(const auto& itemData : items)
 	{
@@ -45,6 +46,7 @@ HRESULT MainGameScene::Init()
 		break;
 		case(1):
 		ItemManager::GetInstance()->PutItem(new Phone(itemData.pos));
+		phone = TRUE;
 		break;
 		case(2):
 		ItemManager::GetInstance()->PutItem(new Insight(itemData.pos));
@@ -84,6 +86,12 @@ HRESULT MainGameScene::Init()
 		default:
 			break;
 		}
+	}
+	if(!phone)
+	{
+		PhoneUI* uiUnit = new PhoneUI();
+		uiUnit->Init(UIType::PLAYING,FPOINT{100,WINSIZE_Y - 500},FPOINT{300,400},0);
+		UIManager::GetInstance()->AddUIUnit("PhoneUI",uiUnit);
 	}
 
 	UIManager::GetInstance()->Init();

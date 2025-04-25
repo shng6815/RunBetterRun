@@ -1139,7 +1139,6 @@ void MapEditor::PlaceStart(int x,int y)
 	for(size_t i = 0; i < tiles.size(); i++) {
 		if(tiles[i].roomType == RoomType::START) {
 			tiles[i].roomType = RoomType::FLOOR;
-			tiles[i].tilePos = 15; // 기본 바닥 타일
 		}
 	}
 
@@ -1148,7 +1147,6 @@ void MapEditor::PlaceStart(int x,int y)
 	if(index >= 0 && index < tiles.size()) {
 		tiles[index].roomType = RoomType::START;
 		startPosition = {x + 0.5f,y + 0.5f};
-		tiles[index].tilePos = 20;
 	}
 }
 
@@ -1799,13 +1797,11 @@ void MapEditor::ConvertToDataManager()
 		{
 			case SpriteType::KEY: case SpriteType::ITEM: case SpriteType::NONE:
 				item.pos = sprite.pos;
-				item.aniInfo = sprite.aniInfo;
 				item.id = sprite.id;
 				DataManager::GetInstance()->AddItemData(item);
 				break;
 			case SpriteType::MONSTER:
 				monster.pos = sprite.pos;
-				monster.aniInfo = sprite.aniInfo;
 				monster.id = sprite.id;
 				DataManager::GetInstance()->AddMonsterData(monster);
 		}

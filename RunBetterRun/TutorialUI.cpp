@@ -44,7 +44,7 @@ void TutorialUI::Update()
 		}
 	}
 
-	if(isDone && KeyManager::GetInstance()->IsOnceKeyDown(VK_SPACE)) {
+	if(isDone && KeyManager::GetInstance()->IsOnceKeyDown('E')) {
 		// 폰 UI 등록
 		PhoneUI* uiUnit = new PhoneUI();
 		uiUnit->Init(UIType::PLAYING,FPOINT{100,WINSIZE_Y - 500},FPOINT{300,400},0);
