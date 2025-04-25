@@ -51,11 +51,14 @@ void Tentacle::Catch(void)
 	// 플레이어의 생명력 감소
 	Player* player = Player::GetInstance();
 
+	this->sprite.aniInfo.currentFrame.y = 0;
+
 	// 회전 애니메이션 시작
 	MainGameScene* mainScene = dynamic_cast<MainGameScene*>(SceneManager::GetInstance()->currentScene);
 	if(mainScene) {
 		mainScene->StartMonsterCatchAnimation(sprite.pos);
-	} 
+	}
+
 }
 
 HRESULT Tentacle::Init(FPOINT pos)
