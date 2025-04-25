@@ -100,11 +100,8 @@ void MainGame::Render()
 {
 	// 백버퍼에 먼저 복사
 	HDC hBackBufferDC = backBuffer->GetMemDC();
-
 	SceneManager::GetInstance()->Render(hBackBufferDC);
-
-	TimerManager::GetInstance()->Render(hBackBufferDC);
-
+	//TimerManager::GetInstance()->Render(hBackBufferDC);
 	backBuffer->Render(hdc);
 }
 
