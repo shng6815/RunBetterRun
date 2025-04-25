@@ -38,22 +38,52 @@ HRESULT MainGameScene::Init()
 	const auto& items = DataManager::GetInstance()->GetItems();
 	for(const auto& itemData : items)
 	{
-		Key* key = new Key(itemData.pos);
-		key->SetAnimInfo(itemData.aniInfo);
-		ItemManager::GetInstance()->PutItem(key);
+		switch(itemData.id)
+		{
+		case(0):
+		ItemManager::GetInstance()->PutItem(new Key(itemData.pos));
+		break;
+		case(1):
+		ItemManager::GetInstance()->PutItem(new Phone(itemData.pos));
+		break;
+		case(2):
+		ItemManager::GetInstance()->PutItem(new Insight(itemData.pos));
+		break;
+		case(3):
+		ItemManager::GetInstance()->PutItem(new Stun(itemData.pos));
+		break;
+		case(4): case(5): case(6): case(7): case(8):
+		ItemManager::GetInstance()->PutItem(new Display(itemData.pos,itemData.id));
+		break;
+		}
+		
 	}
 	const auto& monsters = DataManager::GetInstance()->GetMonsters();
 	for(const auto& monsterData : monsters)
 	{
-		Tentacle* tentacle = new Tentacle(monsterData.pos);
-		tentacle->SetAnimInfo(monsterData.aniInfo);
-		MonsterManager::GetInstance()->PutMonster(tentacle);
+		switch(monsterData.id)
+		{
+		case(100):
+			MonsterManager::GetInstance()->PutMonster(new Tentacle(monsterData.pos));
+			break;
+		default:
+			break;
+		}
 	}
 	const auto& obstacles = DataManager::GetInstance()->GetObstacles();
 	for(const auto& obstacleData : obstacles)
-	{
-		Pile* pile = new Pile(obstacleData.pos,obstacleData.dir);
-		ObstacleManager::GetInstance()->PutObstacle(pile);
+	{ 
+		switch(obstacleData.id)
+		{
+		case(1001):
+			ObstacleManager::GetInstance()->PutObstacle(new Pile(obstacleData.pos,obstacleData.dir));
+			break;
+		case(1000): case(1002):
+			ObstacleManager::GetInstance()->PutObstacle(new Elevator(obstacleData.pos,obstacleData.dir,obstacleData.id));
+			break;
+		default:
+			break;
+		}
 	}
 
 	UIManager::GetInstance()->Init();
@@ -75,14 +105,6 @@ HRESULT MainGameScene::Init()
 	SoundManager::GetInstance()->LoadMusic("GameSceneBGM","Sounds/BGM_InGame2.wav");
 
 	SoundManager::GetInstance()->PlayMusic("GameSceneBGM",true,0.3f);
-
-	/*ItemManager::GetInstance()->PutItem(new Key({ 21.5, 10.5 }));
-	MonsterManager::GetInstance()->PutMonster(new Tentacle({ 21.5, 8.5 }));
-	MonsterManager::GetInstance()->PutMonster(new Tentacle({21.5,7.5}));
-	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,21},Direction::WEST));
-	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,19},Direction::EAST));
-	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,20},Direction::NORTH));
-	ObstacleManager::GetInstance()->PutObstacle(new Pile({21,18},Direction::SOUTH));*/
 
 	return S_OK;
 }
