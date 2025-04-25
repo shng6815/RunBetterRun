@@ -115,7 +115,7 @@ void Elevator::Lock(void)
 {
 	obstacle.id = 12;
 	obstacle.aniInfo.currentFrame.x = 0;
-	obstacle.block == TRUE;
+	obstacle.block = TRUE;
 	status = DoorStatus::Lock;
 }
 
