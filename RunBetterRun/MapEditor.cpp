@@ -45,10 +45,10 @@ HRESULT MapEditor::Init()
 
 			if(x == 0 || y == 0 || x == mapWidth - 1 || y == mapHeight - 1) {
 				tiles[index].roomType = RoomType::WALL;
-				tiles[index].tilePos = 4;
+				tiles[index].tilePos = 8;
 			} else {
 				tiles[index].roomType = RoomType::FLOOR;
-				tiles[index].tilePos = 10;
+				tiles[index].tilePos = 17;
 			}
 		}
 	}

@@ -28,7 +28,7 @@ HRESULT MainGameScene::Init()
 		return E_FAIL;
 	}
 
-	MapManager::GetInstance()->Init(L"Map/EditorMap.dat");
+	MapManager::GetInstance()->Init(filePath);
 	SpriteManager::GetInstance()->Init();
 	Player::GetInstance()->Init([&](float shakePower, float time, bool isStepShake) { ShakeScreen(shakePower, time, isStepShake); });
 	MonsterManager::GetInstance()->Init();
@@ -115,11 +115,6 @@ HRESULT MainGameScene::Init()
 	SoundManager::GetInstance()->PlayMusic("GameSceneBGM",true,0.3f);
 
 	return S_OK;
-}
-
-HRESULT MainGameScene::Init(LPCWCH)
-{
-	return E_NOTIMPL;
 }
 
 void MainGameScene::Release()

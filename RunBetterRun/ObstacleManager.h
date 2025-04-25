@@ -21,7 +21,9 @@ public:
 	void UnlockElevator(void);
 
 	POINT GetElevatorPosition(void) {
-		return elevator->GetPosition();
+		if (elevator)
+			return elevator->GetPosition();
+		return {0,0};
 	}
 };
 

@@ -98,9 +98,13 @@ private:
 
         bool IsShaking() const { return duration > 0.0f; }
     };
+
+	LPCWCH filePath;
+
 public:
+	MainGameScene(void) { filePath = TEXT("Map/EditorMap.dat"); }
+	MainGameScene(LPCWCH path) { filePath = path; }
 	virtual HRESULT Init() override;
-	virtual HRESULT Init(LPCWCH path);
 	virtual void Release() override;
 	virtual void Update() override;
 	virtual void Render(HDC hdc) override;

@@ -10,8 +10,6 @@ DWORD CALLBACK LoadingThread(LPVOID pvParam)
 {
 	if (SUCCEEDED(SceneManager::nextScene->Init()))
 	{
-		//Sleep(3000);
-
 		if(SceneManager::loadingScene) 
 		{
 			((LoadingScene*)SceneManager::loadingScene)->SetLoadingComplete();

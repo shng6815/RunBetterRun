@@ -73,7 +73,7 @@ void DeadScene::Update()
 		if(fadeAlpha > 255)
 		{
 			fadeAlpha = 255;
-			SceneManager::GetInstance()->ChangeScene("GameStartScene", "LoadingScene");
+			SceneManager::GetInstance()->ChangeScene("ReGameScene", "LoadingScene");
 			while(ShowCursor(TRUE) < 0);
 		}
 	}
