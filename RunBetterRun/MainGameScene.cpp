@@ -150,12 +150,11 @@ void MainGameScene::Update()
 	switch(status)
 	{
 	case MainGameScene::SceneStatus::IN_GAME:
-		if(ShowCursor(FALSE) >= 0)
-			ShowCursor(FALSE);
+		while(ShowCursor(FALSE) >= 0);
 
 		if(KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE))
 		{
-			ShowCursor(TRUE);
+			while(ShowCursor(TRUE) < 0);
 			MonsterManager::GetInstance()->StopSound();
 			status = SceneStatus::PAUSE;
 			break;
@@ -176,8 +175,7 @@ void MainGameScene::Update()
 		break;
 
 	case MainGameScene::SceneStatus::PAUSE:
-		if(ShowCursor(TRUE) < 0)
-			ShowCursor(TRUE);
+		while(ShowCursor(TRUE) < 0);
 
 		CheckButtonHover();
 
@@ -195,7 +193,7 @@ void MainGameScene::Update()
 
 		if(KeyManager::GetInstance()->IsOnceKeyDown(VK_ESCAPE))
 		{
-			ShowCursor(FALSE);
+			while(ShowCursor(FALSE) >= 0);
 			status = SceneStatus::IN_GAME;
 		}
 
