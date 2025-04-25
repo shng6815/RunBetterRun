@@ -2,7 +2,7 @@
 #include "structs.h"
 
 #define AMONSTER_SPEED	2.5f
-#define AMONSTER_SIZE	0.6f
+#define AMONSTER_SIZE	0.8f
 
 class AMonster
 {
