@@ -7,8 +7,8 @@
 #define CEILING_COLOR 0x383838
 #define FLOOR_COLOR 0x717171
 
-#define SHADE_VALUE 1.4f
-#define SPRITE_SHADE_VALUE 1.7f
+#define SHADE_VALUE 8.4f
+#define SPRITE_SHADE_VALUE 8.7f
 #define FLOAT(n) static_cast<float>(n)
 #define INT(n) static_cast<int>(n)
 

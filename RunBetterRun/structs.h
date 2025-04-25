@@ -67,7 +67,6 @@ typedef struct tagLevel
 	DWORD	monsterCount;
 } Level;
 
-
 typedef struct tagSprite
 {
 	DWORD			id;
@@ -109,11 +108,11 @@ typedef struct tagMapData
 // ����� ������
 typedef struct tagFileHeader
 {
-	char signature[4];      // ����Ÿ�Ա���
-	int version;            // ���� ���� ����
+	char signature[4];    
+	int version;            
 	int mapWidth;          
 	int mapHeight;          
-	int tileCount;          // ��ü Ÿ�� ��
+	int tileCount;         
 	int itemCount;         
 	int monsterCount;    
 	int obstacleCount;
@@ -146,22 +145,22 @@ typedef struct tagFileHeader
 
 typedef struct tagItemSaveData
 {
+	DWORD id;
 	FPOINT pos;             // ��ġ
-	AnimationInfo aniInfo;  // �ִϸ��̼� ����
-	int itemType;           // ������ Ÿ�� - 0: Key
+	AnimationInfo aniInfo;  // �ִϸ��̼� ����        // ������ Ÿ�� - 0: Key
 }ItemData;
 
 typedef struct tagMonsterSaveData
 {
+	DWORD id;
 	FPOINT pos;             // ��ġ
-	AnimationInfo aniInfo;  // �ִϸ��̼� ����
-	int monsterType;        // ���� Ÿ�� - 0: Tentacle
+	AnimationInfo aniInfo;  // �ִϸ��̼� ����      // ���� Ÿ�� - 0: Tentacle
 }MonsterData;
 
 typedef struct tagObstacleSaveData
 {
+	DWORD id; 
 	POINT pos;             // 위치 (타일 좌표)
 	Direction dir;         // 장애물 방향 (NORTH, SOUTH, EAST, WEST)
 	AnimationInfo aniInfo; // 애니메이션 정보
-	int obstacleType;      // 장애물 타입 - 0: Pile, 1: 다른 장애물 타입 등
 }ObstacleData;

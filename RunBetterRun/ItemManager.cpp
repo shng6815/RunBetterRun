@@ -3,6 +3,7 @@
 #include "TextureManager.h"
 #include "AItem.h"
 #include "SoundManager.h"
+#include "ObstacleManager.h"
 
 HRESULT ItemManager::LoadFile(LPCWCH path)
 {
@@ -69,6 +70,6 @@ void ItemManager::PopKey(void)
 	if(--keyCount == 0)
 	{
 		keyCount;
-		// Escape Event
+		ObstacleManager::GetInstance()->UnlockElevator();
 	}
 }
