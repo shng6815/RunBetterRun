@@ -558,8 +558,13 @@ void RayCast::RenderCeilingFloor(Ray& ray,int column)
         DWORD tileCeilingIndex = md->tiles[mapIndex].tilePos;
 		if(tileCeilingIndex < md->textureTileRowSize * 2)
 			tileCeilingIndex = 17;
-		DWORD tileFloorIndex = min(tileCeilingIndex + md->textureTileRowSize, md->textureTileRowSize * md->textureTileColumnSize - 3);
-        FPOINT texture = { INT(currentFloor.x * md->textureTileSize) % md->textureTileSize,
+		DWORD tileFloorIndex = 0;
+		if(tileCeilingIndex == 20)
+			tileFloorIndex = 27;
+		else
+			tileFloorIndex = min(tileCeilingIndex + md->textureTileRowSize, md->textureTileRowSize * md->textureTileColumnSize - 3);
+
+			FPOINT texture = { INT(currentFloor.x * md->textureTileSize) % md->textureTileSize,
             INT(max(currentFloor.y, 0) * md->textureTileSize) % md->textureTileSize };
         int endY = min(y + renderScale, WINSIZE_Y);
         while (y < endY)

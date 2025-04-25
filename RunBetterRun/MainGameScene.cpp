@@ -197,9 +197,9 @@ void MainGameScene::Update()
 			status = SceneStatus::IN_GAME;
 		}
 
-		if(KeyManager::GetInstance()->IsOnceKeyDown('T'))
+		if(KeyManager::GetInstance()->IsOnceKeyDown(VK_END))
 		{
-			SceneManager::GetInstance()->ChangeScene("MapEditorScene");
+			SceneManager::GetInstance()->ChangeScene("EndingScene");
 		}
 		break;
 

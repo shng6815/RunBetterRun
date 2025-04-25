@@ -180,7 +180,7 @@ void MinimapUI::DrawMiniMapToDC(HDC hdc,int drawSize)
 	DeleteObject(floorBrush);
 
 	// 아이템(키) 그리기
-	HBRUSH keyBrush = CreateSolidBrush(RGB(238,130,238));
+	HBRUSH keyBrush = CreateSolidBrush(RGB(0,63,255));
 	HPEN oldKeyPen = (HPEN)SelectObject(hdc,GetStockObject(NULL_PEN));
 	SelectObject(hdc,keyBrush);
 

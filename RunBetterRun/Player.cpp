@@ -22,8 +22,8 @@ HRESULT Player::Init(function<void(float, float,bool)> shakeFunc)
 	}
 
 
-	cameraVerDir = { -1, 0 };
-	cameraHorDir = { 0, 1.f };
+	cameraVerDir = { 1, 0 };
+	cameraHorDir = { 0, -1.f };
 
     plane = {
         cameraVerDir.y * fov,
