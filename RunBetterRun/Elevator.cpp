@@ -113,13 +113,10 @@ void Elevator::Update(void)
 
 void Elevator::Lock(void)
 {
-	if(status == DoorStatus::Init || status == DoorStatus::Open || status == DoorStatus::Close)
-	{
-		obstacle.id = 12;
-		obstacle.aniInfo.currentFrame.x = 0;
-		obstacle.block == TRUE;
-		status = DoorStatus::Lock;
-	}
+	obstacle.id = 12;
+	obstacle.aniInfo.currentFrame.x = 0;
+	obstacle.block == TRUE;
+	status = DoorStatus::Lock;
 }
 
 void Elevator::UnLock(void)
