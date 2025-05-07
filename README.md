@@ -5,6 +5,9 @@
 * 주인공은 미로와 같은 공간을 돌아다니며 추격해오는 몬스터들을 피해 아이템들을 모아 스테이지를 탈출해야 합니다.
 * [Dark Deception](https://store.steampowered.com/app/332950/Dark_Deception/)을 벤치마킹하여 제작하였습니다.
 
+### Play
+* https://kofeeel.itch.io/transmundus
+  
 ### Used Technologies
 
 ### Made by
@@ -17,3 +20,11 @@
 [![타계시연1](http://img.youtube.com/vi/owF7KMpwQAQ/0.jpg)](https://youtu.be/owF7KMpwQAQ?t=0s)  [![타계시연2](http://img.youtube.com/vi/YLMpeg3B13g/0.jpg)](https://youtu.be/YLMpeg3B13g?t=0s)
 
 ### Screenshots
+![image](https://github.com/user-attachments/assets/7289bd60-2624-4e01-aa38-52122d66cac2)
+
+![image](https://github.com/user-attachments/assets/ac96bb14-6ce2-45c6-bd3d-1185888955d9)
+
+![image](https://github.com/user-attachments/assets/d4a7d8cb-1abf-44a9-b7f1-082acedc955d)
+
+
+### 
