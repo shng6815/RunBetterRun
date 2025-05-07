@@ -6,7 +6,10 @@
 * [Dark Deception](https://store.steampowered.com/app/332950/Dark_Deception/)을 벤치마킹하여 제작하였습니다.
 
 ### Play
-* https://kofeeel.itch.io/transmundus
+
+<a href="https://kofeeel.itch.io/transmundus">
+  <img src="https://static.itch.io/images/logo-white-new.svg" alt="itch.io" width="100"/>
+</a>
   
 ### Used Technologies
 
