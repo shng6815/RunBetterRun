@@ -1,38 +1,19 @@
-#h1 **Wanted PotenUp!** <br/>
+<img src="https://github.com/leebo155/RunBetterRun/blob/main/screenshots/main.png">
 
-**5조: RunBetterRun** <br/>
+## Introduction
+* 타계는 [다른 세계에 가는 방법](https://namu.wiki/w/%EB%8B%A4%EB%A5%B8%20%EC%84%B8%EA%B3%84%EC%97%90%20%EA%B0%80%EB%8A%94%20%EB%B0%A9%EB%B2%95#toc)이란 괴담을 게임으로 표현한 프로젝트입니다.
+* 주인공은 미로와 같은 공간을 돌아다니며 추격해오는 몬스터들을 피해 아이템들을 모아 스테이지를 탈출해야 합니다.
+* [Dark Deception](https://store.steampowered.com/app/332950/Dark_Deception/)을 벤치마킹하여 제작하였습니다.
 
-**👨‍🏫프로젝트 소개(Gestrure Sound)** <br/>
-레이캐스팅을 활용한 2.5D 1인칭 호러 탈출 게임 프로젝트입니다.<br/>
-플레이어는 주인공을 조종하여 미로와 같은 공간을 돌아다니며 추격해오는 몬스터들을 피하면서 탈출 아이템들을 모아 스테이지를 탈출하는 게임입니다.
+### Used Technologies
 
-<aside>
-🎯프로젝트 목표 <br/>
+### Made by
+|<img src="https://github.com/leebo155.png" width=240>|<img src="https://github.com/shng6815.png" width="240">|<img src="https://github.com/kofeeel.png" width=240>|<img src="https://avatars.githubusercontent.com/u/144571194?v=4" width=240>|
+|:--:|:--:|:--:|:--:|
+|[Bohyeong Lee](https://github.com/leebo155)|[SEO HUIYEONG](https://github.com/shng6815)|[Hasimu](https://github.com/kofeeel)|[Baekbanjang](https://github.com/Baekbanjang)|
+|||||
 
-제한된 시야와 공간 안에서 퍼즐과 탐험을 통해 공포를 유도하는 2.5D 탈출 게임 시스템을 구현하는 것을 목표로 합니다.  레이캐스팅에 대한 이해를 바탕으로 2D화면을 3D처럼 보이게 구현하는 것이 목표입니다. 
-또한 **GitHub, Notion, Discord,Figma** 등 협업 도구를 활용하여 팀원 간의 효과적인 소통과 **애자일** 기반 개발 경험을 함께 쌓고자 합니다.
+### Videos
+[![타계시연1](http://img.youtube.com/vi/owF7KMpwQAQ/0.jpg)](https://youtu.be/owF7KMpwQAQ?t=0s)  [![타계시연2](http://img.youtube.com/vi/YLMpeg3B13g/0.jpg)](https://youtu.be/YLMpeg3B13g?t=0s)
 
-</aside>
-⏲️ 개발 기간 <br/>
-2025.04.15(화) ~ 2025.04.25(금) <br/>
-작품계획서 작성 <br/>
-프로젝트 설계서, 요구사항 명세서 작성 및 발표 <br/>
-개발 <br/>
-프로젝트 중간 결과보고서 작성 및 발표 <br/>
-최종 산출물 제작 및 발표 <br/>
-</aside>
-🧑‍🤝‍🧑 담당 파트 <br/>
-고필규 : 맵 에디터 제작, 데이터 매니저 구현, 맵 매니저 구현<br/>
-</aside>
-### 💡 개발환경 / 사용 스택
-
-- **IDE:** Visual Studio 2022
-- **버전 관리:** Git
-- **개발 언어: C++:**
-- **API: Media Foundation, SDL Mixer, Windows API**
-
-**📝 프로젝트 아키텍쳐** <br/>
-프로젝트 시스템 아키텍쳐 <br/>
-
-**📌 주요 기능** <br/>
-맵 에디터:  직관적인 UI와 다양한 편집 기능, 데이터 관리 연동을 통해 실시간 확인가능한 맵 제작을 지원<br/>
+### Screenshots
