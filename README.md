@@ -15,14 +15,12 @@
 * SDL Mixer 2.8.1
 
 ### 담당업무
-* 프로젝트 일정/방향성 설계 및 관리
-* RayCasting (타일/스프라이트) 렌더링 구현
-* SpriteManager 스프라이트 시스템 설계 및 구현
-* AItem, ItemManager 아이템 시스템 설계 및 구현
-* AMonster, MonsterManager 몬스터 시스템 설계 및 구현
-* AObstacle, ObstacleManager 장애물 시스템 설계 및 구현
-* TextureManager BMP 이미지 리소스 관리 시스템 설계 및 구현
-* 타일 및 방해물, 아이템 이미지 리소스 제작
+* 카메라(플레이어) 기본 로직 및 이동, 회전, FOV 구현
+* UI 계층화 및 게임 상태에따른 출력 구현
+* 사운드 구현(SDL을 추상화)
+* 상대 좌표를 이용한 3D 몬스터 구현
+* 프레임 캐싱을 도입한 GDI 미니맵 구현
+* 옵저버 패턴(functional)을 이용한 이펙트 구현
 
 ### 제작자
 |<img src="https://github.com/leebo155.png" width=240>|<img src="https://github.com/shng6815.png" width="240">|<img src="https://github.com/kofeeel.png" width=240>|<img src="https://github.com/Baekbanjang.png" width=240>|
