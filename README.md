@@ -1,9 +1,7 @@
 <img src="https://github.com/leebo155/RunBetterRun/blob/main/screenshots/main.png">
 
 ## Play
-<a href="https://kofeeel.itch.io/transmundus">
-  <img src="https://static.itch.io/images/logo-white-new.svg" alt="itch.io" width="100"/>
-</a>
+"https://kofeeel.itch.io/transmundus"
 
 ## 소개
 * 타계는 [다른 세계에 가는 방법](https://namu.wiki/w/%EB%8B%A4%EB%A5%B8%20%EC%84%B8%EA%B3%84%EC%97%90%20%EA%B0%80%EB%8A%94%20%EB%B0%A9%EB%B2%95#toc)이란 괴담을 게임으로 표현한 프로젝트입니다.
